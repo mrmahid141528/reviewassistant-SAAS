@@ -79,19 +79,38 @@ export function QuestionsClient({ initialQuestions }: { initialQuestions: any[] 
                                     {editingId === q.id ? (
                                         <div className="flex items-center gap-2 mb-1">
                                             <span className="font-semibold text-sm">Q{index + 1}.</span>
-                                            <Input
-                                                className="h-8 max-w-sm"
-                                                value={q.question}
-                                                onChange={(e) => updateQuestion(q.id, 'question', e.target.value)}
-                                                onKeyDown={(e) => e.key === 'Enter' && setEditingId(null)}
-                                            />
+                                            <div className="flex flex-col gap-2 w-full max-w-md">
+                                                <Input
+                                                    className="h-8"
+                                                    value={q.question}
+                                                    onChange={(e) => updateQuestion(q.id, 'question', e.target.value)}
+                                                />
+                                                <Input
+                                                    className="h-8 text-xs text-muted-foreground"
+                                                    placeholder="Options (comma separated, e.g. Staff, Food, Wait time)"
+                                                    value={Array.isArray(q.options) ? q.options.join(', ') : (q.options || '')}
+                                                    onChange={(e) => updateQuestion(q.id, 'options', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
+                                                    onKeyDown={(e) => e.key === 'Enter' && setEditingId(null)}
+                                                />
+                                            </div>
                                         </div>
                                     ) : (
-                                        <CardTitle className="text-base font-semibold">
-                                            Q{index + 1}. {q.question}
-                                        </CardTitle>
+                                        <div className="flex flex-col">
+                                            <CardTitle className="text-base font-semibold">
+                                                Q{index + 1}. {q.question}
+                                            </CardTitle>
+                                            {Array.isArray(q.options) && q.options.length > 0 && (
+                                                <div className="flex flex-wrap gap-1 mt-2">
+                                                    {q.options.map((opt: string, i: number) => (
+                                                        <span key={i} className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-primary/5 text-primary">
+                                                            {opt}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
                                     )}
-                                    <CardDescription className="mt-1 flex items-center gap-2">
+                                    <CardDescription className="mt-2 flex items-center gap-2">
                                         Type: <span className="font-medium text-foreground">{q.type || q.questionType}</span>
                                         {" • "}
                                         <button

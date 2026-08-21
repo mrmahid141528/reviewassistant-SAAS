@@ -106,13 +106,45 @@ export default function ReviewClient({ businessName, initialQuestions = [] }: { 
                         <div className="space-y-6 mb-8 text-left">
                             {initialQuestions.map(q => (
                                 <div key={q.id}>
-                                    <label className="block text-sm font-medium mb-2">{q.question} {q.required && <span className="text-red-500">*</span>}</label>
-                                    <Textarea
-                                        className="resize-none"
-                                        placeholder="Your answer..."
-                                        value={answers[q.id] || ''}
-                                        onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                                    />
+                                    <label className="block text-sm font-medium mb-3">{q.question} {q.required && <span className="text-red-500">*</span>}</label>
+
+                                    {q.options && Array.isArray(q.options) && q.options.length > 0 ? (
+                                        <div className="flex flex-wrap gap-2">
+                                            {q.options.map((opt: string) => {
+                                                const cleanOpt = opt.trim();
+                                                const currentAnswers = (answers[q.id] || '').split(',').map(s => s.trim()).filter(Boolean);
+                                                const isSelected = currentAnswers.includes(cleanOpt);
+
+                                                return (
+                                                    <button
+                                                        key={opt}
+                                                        onClick={() => {
+                                                            let nextArr;
+                                                            if (isSelected) {
+                                                                nextArr = currentAnswers.filter(o => o !== cleanOpt);
+                                                            } else {
+                                                                nextArr = [...currentAnswers, cleanOpt];
+                                                            }
+                                                            setAnswers({ ...answers, [q.id]: nextArr.join(', ') });
+                                                        }}
+                                                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${isSelected
+                                                            ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                                                            : 'bg-background hover:bg-muted text-foreground'
+                                                            }`}
+                                                    >
+                                                        {opt}
+                                                    </button>
+                                                )
+                                            })}
+                                        </div>
+                                    ) : (
+                                        <Textarea
+                                            className="resize-none"
+                                            placeholder="Your answer..."
+                                            value={answers[q.id] || ''}
+                                            onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                                        />
+                                    )}
                                 </div>
                             ))}
                         </div>

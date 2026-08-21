@@ -35,6 +35,7 @@ export async function saveQuestionsLayout(questions: any[]) {
                 campaignId: campaign!.id,
                 question: q.question,
                 questionType: q.type || 'Text',
+                options: Array.isArray(q.options) ? q.options : [],
                 required: q.required || false,
                 sortOrder: index,
             }))
