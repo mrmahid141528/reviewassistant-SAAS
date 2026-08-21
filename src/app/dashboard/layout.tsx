@@ -2,6 +2,7 @@ import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Header } from "@/components/dashboard/Header";
 import { createClient } from "@/lib/supabase/server";
 import prisma from "@/lib/prisma";
+import { redirect } from "next/navigation";
 
 export default async function DashboardLayout({
     children,
@@ -46,18 +47,7 @@ export default async function DashboardLayout({
         }
 
         if (!membership) {
-            await prisma.business.create({
-                data: {
-                    name: "My Digital Business",
-                    slug: `biz-${user.id.substring(0, 8)}`,
-                    members: {
-                        create: {
-                            userId: user.id,
-                            role: "owner"
-                        }
-                    }
-                }
-            })
+            redirect("/onboarding");
         }
     }
 
