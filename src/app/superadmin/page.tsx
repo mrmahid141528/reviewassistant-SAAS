@@ -2,6 +2,8 @@ import prisma from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Users, Building, MessageSquare, Target } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function SuperAdminDashboard() {
     const totalUsers = await prisma.user.count();
     const totalBusinesses = await prisma.business.count();

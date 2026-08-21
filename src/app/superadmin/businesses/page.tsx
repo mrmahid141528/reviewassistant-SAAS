@@ -2,6 +2,8 @@ import prisma from "@/lib/prisma";
 import { toggleBusinessStatus, deleteBusiness } from "../actions";
 import { AdminActionButtons } from "../components/AdminActionButtons";
 
+export const dynamic = "force-dynamic";
+
 export default async function SuperAdminBusinesses() {
     const businesses = await prisma.business.findMany({
         include: {

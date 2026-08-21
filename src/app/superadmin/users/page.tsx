@@ -2,6 +2,8 @@ import prisma from "@/lib/prisma";
 import { toggleUserStatus, deleteUser } from "../actions";
 import { AdminActionButtons } from "../components/AdminActionButtons";
 
+export const dynamic = "force-dynamic";
+
 export default async function SuperAdminUsers() {
     const users = await prisma.user.findMany({
         orderBy: { createdAt: 'desc' }
