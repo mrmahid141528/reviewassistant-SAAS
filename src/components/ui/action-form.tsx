@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export function ActionForm({ action, children, ...props }: any) {
     const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
     const router = useRouter();
+    const [isPending, startTransition] = useTransition();
 
     useEffect(() => {
         if (toast) {
@@ -16,16 +17,18 @@ export function ActionForm({ action, children, ...props }: any) {
     }, [toast]);
 
     return (
-        <form action={async (formData) => {
-            const res = await action(formData);
-            if (res?.error) setToast({ message: res.error, type: 'error' });
-            else if (res?.success) {
-                setToast({ message: res.message || "Saved successfully!", type: 'success' });
-                router.refresh();
-            } else {
-                setToast({ message: "Action completed", type: 'success' }); // Fallback
-                router.refresh();
-            }
+        <form action={(formData) => {
+            startTransition(async () => {
+                const res = await action(formData);
+                if (res?.error) setToast({ message: res.error, type: 'error' });
+                else if (res?.success) {
+                    setToast({ message: res.message || "Saved successfully!", type: 'success' });
+                    router.refresh();
+                } else {
+                    setToast({ message: "Action completed", type: 'success' }); // Fallback
+                    router.refresh();
+                }
+            });
         }} {...props}>
             {children}
 

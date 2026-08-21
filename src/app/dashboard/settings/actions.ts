@@ -9,10 +9,10 @@ export async function updateBusinessGeneral(formData: FormData) {
         const supabase = await createClient()
         const { data: { user } } = await supabase.auth.getUser()
 
-        if (!user) return
+        if (!user) return { error: "Authentication failed. Not logged in." }
 
         const membership = await prisma.businessMember.findFirst({ where: { userId: user.id } })
-        if (!membership) return
+        if (!membership) return { error: "No business membership found for this user." }
 
         const name = formData.get("businessName") as string || "My Business"
         const newSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + "-" + membership.businessId.substring(membership.businessId.length - 4)
