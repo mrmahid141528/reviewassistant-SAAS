@@ -8,27 +8,33 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, GripVertical, Trash2, Edit2, MessageSquare, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { saveQuestionsLayout } from "./actions";
+import { useRouter } from "next/navigation";
 
 export function QuestionsClient({ initialQuestions }: { initialQuestions: any[] }) {
     const [questions, setQuestions] = useState(initialQuestions);
     const [isSaving, setIsSaving] = useState(false);
+    const [isPending, startTransition] = useTransition();
+    const router = useRouter();
 
-    const handleSave = async () => {
+    const handleSave = () => {
         setIsSaving(true);
-        try {
-            const res = await saveQuestionsLayout(questions);
-            if (res.success) {
-                alert("Questions saved successfully!");
-            } else {
-                alert("Error saving: " + res.error);
+        startTransition(async () => {
+            try {
+                const res = await saveQuestionsLayout(questions);
+                if (res.success) {
+                    alert("Questions saved successfully!");
+                    router.refresh();
+                } else {
+                    alert("Error saving: " + res.error);
+                }
+            } catch (e: unknown) {
+                alert("Error: " + (e instanceof Error ? e.message : 'Unknown error'));
+            } finally {
+                setIsSaving(false);
             }
-        } catch (e: unknown) {
-            alert("Error: " + (e instanceof Error ? e.message : 'Unknown error'));
-        } finally {
-            setIsSaving(false);
-        }
+        });
     }
 
     return (

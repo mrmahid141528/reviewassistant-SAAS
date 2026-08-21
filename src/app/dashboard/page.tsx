@@ -17,6 +17,7 @@ export default async function DashboardOverviewPage() {
     let generatedCount = 0
     let avgRating = 0
     let needsAttention: { id: string, rating: number, createdAt: Date }[] = []
+    let recentActivity: any[] = []
 
     if (user) {
         const membership = await prisma.businessMember.findFirst({ where: { userId: user.id } })
@@ -37,6 +38,13 @@ export default async function DashboardOverviewPage() {
                 orderBy: { createdAt: 'desc' },
                 take: 5,
                 select: { id: true, rating: true, createdAt: true }
+            })
+
+            recentActivity = await prisma.feedbackSubmission.findMany({
+                where: { businessId: biz },
+                orderBy: { createdAt: 'desc' },
+                take: 5,
+                include: { reviews: true }
             })
         }
     }
@@ -108,10 +116,26 @@ export default async function DashboardOverviewPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        {submissionsCount > 0 ? (
-                            <div className="flex h-[250px] items-center justify-center rounded-md border border-dashed text-muted-foreground text-sm flex-col gap-2">
-                                <MessageSquare className="h-8 w-8 text-emerald-500/50" />
-                                Monitoring active incoming reviews perfectly...
+                        {recentActivity.length > 0 ? (
+                            <div className="space-y-4">
+                                {recentActivity.map(item => (
+                                    <div key={item.id} className="flex border-b pb-4 last:border-0 rounded-md">
+                                        <div className="mr-4 mt-1 bg-emerald-500/10 p-2 rounded-full h-fit flex-shrink-0">
+                                            <Star className="h-4 w-4 text-emerald-500 fill-emerald-500" />
+                                        </div>
+                                        <div className="w-full">
+                                            <div className="flex justify-between items-center w-full">
+                                                <p className="text-sm font-medium">Customer rated {item.rating} Stars</p>
+                                                <span className="text-xs text-muted-foreground">{item.createdAt.toLocaleDateString()}</span>
+                                            </div>
+                                            {item.reviews && item.reviews.length > 0 && item.reviews[0].reviewText && item.rating >= 4 ? (
+                                                <p className="text-xs text-muted-foreground mt-2 line-clamp-2 border-l-2 border-emerald-500 pl-2">
+                                                    "{item.reviews[0].reviewText}"
+                                                </p>
+                                            ) : null}
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         ) : (
                             <div className="flex h-[250px] items-center justify-center rounded-md border border-dashed text-muted-foreground text-sm">

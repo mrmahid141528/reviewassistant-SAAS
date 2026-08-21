@@ -7,26 +7,33 @@ import { useParams } from "next/navigation";
 import { Textarea } from "@/components/ui/textarea";
 import { submitReviewDraft } from './actions';
 
-type FlowState = "WELCOME" | "QUESTIONS" | "GENERATING" | "RESULT";
+type FlowState = "WELCOME" | "RATING" | "QUESTIONS" | "GENERATING" | "RESULT";
 
-export default function ReviewClient({ businessName }: { businessName: string }) {
+export default function ReviewClient({ businessName, initialQuestions = [] }: { businessName: string, initialQuestions?: any[] }) {
     const params = useParams();
     const slug = params?.businessSlug as string;
 
     const [step, setStep] = useState<FlowState>("WELCOME");
     const [rating, setRating] = useState<number>(0);
+    const [answers, setAnswers] = useState<Record<string, string>>({});
     const [generatedReview, setGeneratedReview] = useState("");
     const [googleUrl, setGoogleUrl] = useState("");
 
     const handleStart = () => {
-        setStep("QUESTIONS");
+        setStep("RATING");
     };
 
-    const handleFinishQuestions = async () => {
+    const handleRatingSelected = (selectedRating: number) => {
+        setRating(selectedRating);
+        if (initialQuestions.length > 0) setStep("QUESTIONS");
+        else handleFinishQuestions(selectedRating);
+    };
+
+    const handleFinishQuestions = async (finalRating = rating) => {
         setStep("GENERATING");
 
         try {
-            const result = await submitReviewDraft(rating, slug);
+            const result = await submitReviewDraft(finalRating, answers, slug);
 
             if (result.success && result.draft) {
                 setGeneratedReview(result.draft);
@@ -72,14 +79,14 @@ export default function ReviewClient({ businessName }: { businessName: string })
                     </div>
                 )}
 
-                {step === "QUESTIONS" && (
+                {step === "RATING" && (
                     <div className="w-full animate-in fade-in slide-in-from-right-8 duration-300">
                         <h2 className="text-lg font-semibold mb-6">How would you rate us?</h2>
                         <div className="flex justify-center gap-2 mb-8">
                             {[1, 2, 3, 4, 5].map((star) => (
                                 <button
                                     key={star}
-                                    onClick={() => setRating(star)}
+                                    onClick={() => handleRatingSelected(star)}
                                     className="transition-transform hover:scale-110 active:scale-95"
                                 >
                                     <Star
@@ -88,21 +95,37 @@ export default function ReviewClient({ businessName }: { businessName: string })
                                 </button>
                             ))}
                         </div>
+                    </div>
+                )}
+
+                {step === "QUESTIONS" && (
+                    <div className="w-full animate-in fade-in slide-in-from-right-8 duration-300">
+                        <h2 className="text-lg font-semibold mb-4 text-left">Help us improve</h2>
+                        <p className="text-sm text-muted-foreground mb-6 text-left">Your answers will help us generate a complete review for you.</p>
+
+                        <div className="space-y-6 mb-8 text-left">
+                            {initialQuestions.map(q => (
+                                <div key={q.id}>
+                                    <label className="block text-sm font-medium mb-2">{q.question} {q.required && <span className="text-red-500">*</span>}</label>
+                                    <Textarea
+                                        className="resize-none"
+                                        placeholder="Your answer..."
+                                        value={answers[q.id] || ''}
+                                        onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                                    />
+                                </div>
+                            ))}
+                        </div>
 
                         <div className="space-y-4">
                             <Button
-                                onClick={handleFinishQuestions}
+                                onClick={() => handleFinishQuestions(rating)}
                                 className="w-full"
                                 size="lg"
-                                disabled={rating === 0}
                             >
                                 Generate Review
                             </Button>
                         </div>
-
-                        <p className="text-xs text-center text-muted-foreground mt-6">
-                            Step 1 of 1
-                        </p>
                     </div>
                 )}
 
@@ -135,7 +158,7 @@ export default function ReviewClient({ businessName }: { businessName: string })
                             <Copy className="h-5 w-5" /> Copy & Continue to Google
                         </Button>
 
-                        <Button variant="ghost" onClick={() => setStep("QUESTIONS")} className="w-full mt-2">
+                        <Button variant="ghost" onClick={() => setStep("RATING")} className="w-full mt-2">
                             Start Over
                         </Button>
                     </div>

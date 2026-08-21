@@ -2,7 +2,7 @@
 
 import prisma from "@/lib/prisma"
 
-export async function submitReviewDraft(rating: number, businessSlug: string) {
+export async function submitReviewDraft(rating: number, answers: object, businessSlug: string) {
     try {
         const business = await prisma.business.findUnique({ where: { slug: businessSlug } });
         if (!business) return { success: false, error: "Business not found." };
@@ -19,7 +19,16 @@ export async function submitReviewDraft(rating: number, businessSlug: string) {
             });
         }
 
-        const draft = generateMockReviewOffline(rating, business.name);
+        const questions = await prisma.campaignQuestion.findMany({ where: { campaignId: campaign.id } });
+        const answersRecord = answers as Record<string, string>;
+        const qnaPairs = questions.map(q => ({
+            question: q.question,
+            answer: answersRecord[q.id] || "Skipped/No answer"
+        }));
+
+        const currentSettings = (campaign.settings as any) || {}
+
+        const draft = await generateGeminiReview(rating, business.name, qnaPairs, currentSettings);
 
         // Record submission in the database
         await prisma.feedbackSubmission.create({
@@ -40,7 +49,6 @@ export async function submitReviewDraft(rating: number, businessSlug: string) {
 
         await new Promise(resolve => setTimeout(resolve, 1500));
 
-        const currentSettings = (campaign.settings as any) || {}
         const googleUrl = currentSettings.googleReviewUrl || ""
 
         return { success: true, draft, googleUrl };
@@ -48,6 +56,45 @@ export async function submitReviewDraft(rating: number, businessSlug: string) {
         console.error(error);
         return { success: false, error: error instanceof Error ? error.message : 'Unknown error occurred' };
     }
+}
+
+async function generateGeminiReview(rating: number, businessName: string, qnaPairs: { question: string, answer: string }[], settings: any) {
+    const aiLanguage = settings?.aiLanguage || "English";
+    const aiTone = settings?.aiTone || "Professional & Friendly";
+
+    const prompt = `
+You are an expert, authentic Google Review writer. Write a Google Review for a business named "${businessName}".
+The customer has given this business a rating of ${rating} out of 5 stars.
+Here are the customer's specific answers to questions about their experience:
+${qnaPairs.map(pair => `Q: ${pair.question}\nA: ${pair.answer}`).join('\n\n')}
+
+Guidelines:
+- Write the review entirely from the perspective of the customer.
+- Tone: ${aiTone}
+- Language: ${aiLanguage}
+- Length: Keep it concise and natural, around 2 to 4 sentences.
+- VERY IMPORTANT: Do NOT include any introductory or concluding text (like "Here is a review" or "Here you go"). Output ONLY the exact text of the review.
+`;
+
+    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+    if (!GEMINI_API_KEY) return generateMockReviewOffline(rating, businessName);
+
+    try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+
+        const data = await res.json();
+        const generatedText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (generatedText) return generatedText.trim();
+    } catch (e) {
+        console.error("Gemini API Error:", e);
+    }
+
+    return generateMockReviewOffline(rating, businessName);
 }
 
 function generateMockReviewOffline(rating: number, businessName: string) {

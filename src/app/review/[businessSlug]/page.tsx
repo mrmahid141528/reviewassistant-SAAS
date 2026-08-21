@@ -9,13 +9,23 @@ export default async function CustomerReviewPage({
 }) {
     const { businessSlug } = await params;
 
-    // The layout has already checked status = suspended
     const business = await prisma.business.findUnique({
         where: { slug: businessSlug },
-        select: { name: true }
+        select: { id: true, name: true }
     });
 
     if (!business) return notFound();
 
-    return <ReviewClient businessName={business.name} />;
+    const campaign = await prisma.campaign.findFirst({ where: { businessId: business.id } });
+    let questions: any[] = [];
+
+    if (campaign) {
+        questions = await prisma.campaignQuestion.findMany({
+            where: { campaignId: campaign.id },
+            orderBy: { sortOrder: 'asc' },
+            select: { id: true, question: true, questionType: true, required: true }
+        });
+    }
+
+    return <ReviewClient businessName={business.name} initialQuestions={questions} />;
 }
