@@ -1,0 +1,23 @@
+
+> saas@0.1.0 lint
+> eslint
+
+
+C:\Users\mrmah\OneDrive\Desktop\Google Review Assistant SaaS\src\app\dashboard\questions\page.tsx
+   5:5   warning  'CardContent' is defined but never used            @typescript-eslint/no-unused-vars
+   9:5   warning  'CardFooter' is defined but never used             @typescript-eslint/no-unused-vars
+  12:10  warning  'Input' is defined but never used                  @typescript-eslint/no-unused-vars
+  13:10  warning  'Label' is defined but never used                  @typescript-eslint/no-unused-vars
+  40:23  warning  'setQuestions' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\mrmah\OneDrive\Desktop\Google Review Assistant SaaS\src\app\review\[businessSlug]\actions.ts
+  43:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mrmah\OneDrive\Desktop\Google Review Assistant SaaS\src\app\review\[businessSlug]\page.tsx
+  37:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mrmah\OneDrive\Desktop\Google Review Assistant SaaS\src\lib\supabase\middleware.ts
+  18:58  warning  'options' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 8 problems (2 errors, 6 warnings)
+
