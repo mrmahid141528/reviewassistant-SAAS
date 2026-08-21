@@ -21,6 +21,7 @@ export default async function QuestionsBuilderPage() {
                     id: q.id,
                     question: q.question,
                     type: q.questionType,
+                    options: q.options,
                     required: q.required
                 }));
             }
@@ -29,7 +30,7 @@ export default async function QuestionsBuilderPage() {
 
     if (savedQuestions.length === 0) {
         savedQuestions = [
-            { id: "1", question: "How was the quality of our service?", type: "Rating (1-5)", required: true },
+            { id: "1", question: "How was the quality of our service?", type: "Rating (1-5)", required: true, options: ["Great Service", "Friendly Staff", "Slow"] },
         ];
     }
 
