@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SubmitButton } from "@/components/ui/submit-button";
+import { ActionForm } from "@/components/ui/action-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -59,7 +60,7 @@ export default async function SettingsPage() {
 
             <div className="grid gap-6">
                 <Card>
-                    <form action={updateBusinessGeneral}>
+                    <ActionForm action={updateBusinessGeneral}>
                         <CardHeader>
                             <CardTitle>General Information</CardTitle>
                             <CardDescription>
@@ -97,11 +98,11 @@ export default async function SettingsPage() {
                         <CardFooter className="border-t px-6 py-4">
                             <SubmitButton>Save General Info</SubmitButton>
                         </CardFooter>
-                    </form>
+                    </ActionForm>
                 </Card>
 
                 <Card>
-                    <form action={updateGoogleConfig}>
+                    <ActionForm action={updateGoogleConfig}>
                         <CardHeader>
                             <CardTitle>Google Review Configuration</CardTitle>
                             <CardDescription>
@@ -120,11 +121,11 @@ export default async function SettingsPage() {
                         <CardFooter className="border-t px-6 py-4">
                             <SubmitButton>Save Google Config</SubmitButton>
                         </CardFooter>
-                    </form>
+                    </ActionForm>
                 </Card>
 
                 <Card>
-                    <form action={updateAIPreferences}>
+                    <ActionForm action={updateAIPreferences}>
                         <CardHeader>
                             <CardTitle>AI Assistant Preferences</CardTitle>
                             <CardDescription>
@@ -166,7 +167,7 @@ export default async function SettingsPage() {
                         <CardFooter className="border-t px-6 py-4">
                             <SubmitButton>Save AI Preferences</SubmitButton>
                         </CardFooter>
-                    </form>
+                    </ActionForm>
                 </Card>
             </div>
         </div>

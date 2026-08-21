@@ -29,9 +29,10 @@ export async function updateBusinessGeneral(formData: FormData) {
         })
 
         revalidatePath("/dashboard/settings")
+        return { success: true, message: "General Settings saved successfully!" }
     } catch (e: any) {
         console.error("Error in updateBusinessGeneral:", e)
-        throw new Error(e.message) // Next.js handles this to show in UI
+        return { error: e.message || "An unexpected error occurred." }
     }
 }
 
@@ -66,9 +67,10 @@ export async function updateGoogleConfig(formData: FormData) {
         })
 
         revalidatePath("/dashboard/settings")
+        return { success: true, message: "Google Configuration saved successfully!" }
     } catch (e: any) {
         console.error("Error in updateGoogleConfig:", e)
-        throw new Error(e.message)
+        return { error: e.message || "An unexpected error occurred." }
     }
 }
 
@@ -103,8 +105,9 @@ export async function updateAIPreferences(formData: FormData) {
         })
 
         revalidatePath("/dashboard/settings")
+        return { success: true, message: "AI Preferences saved successfully!" }
     } catch (e: any) {
         console.error("Error in updateAIPreferences:", e)
-        throw new Error(e.message)
+        return { error: e.message || "An unexpected error occurred." }
     }
 }
