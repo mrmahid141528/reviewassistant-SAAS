@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 
 import prisma from "@/lib/prisma"
 import { createClient } from "@/lib/supabase/server"
-import { updateBusinessSettings } from "./actions"
+import { updateBusinessGeneral, updateGoogleConfig, updateAIPreferences } from "./actions"
 
 export default async function SettingsPage() {
     const supabase = await createClient()
@@ -22,6 +22,9 @@ export default async function SettingsPage() {
     let websiteUrl = ""
     let email = ""
     let phone = ""
+    let googleUrl = ""
+    let aiLanguage = "English"
+    let aiTone = "Professional & Friendly"
 
     if (user) {
         const membership = await prisma.businessMember.findFirst({
@@ -33,6 +36,14 @@ export default async function SettingsPage() {
             websiteUrl = membership.business.websiteUrl || ""
             email = membership.business.email || ""
             phone = membership.business.phone || ""
+
+            const campaign = await prisma.campaign.findFirst({ where: { businessId: membership.businessId } })
+            if (campaign?.settings) {
+                const settings = campaign.settings as any
+                googleUrl = settings.googleReviewUrl || ""
+                aiLanguage = settings.aiLanguage || "English"
+                aiTone = settings.aiTone || "Professional & Friendly"
+            }
         }
     }
 
@@ -47,7 +58,7 @@ export default async function SettingsPage() {
 
             <div className="grid gap-6">
                 <Card>
-                    <form action={updateBusinessSettings}>
+                    <form action={updateBusinessGeneral}>
                         <CardHeader>
                             <CardTitle>General Information</CardTitle>
                             <CardDescription>
@@ -89,66 +100,72 @@ export default async function SettingsPage() {
                 </Card>
 
                 <Card>
-                    <CardHeader>
-                        <CardTitle>Google Review Configuration</CardTitle>
-                        <CardDescription>
-                            Provide the exact URL where customers should be redirected to leave their generated review.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="googleUrl">Google Review URL</Label>
-                            <Input id="googleUrl" placeholder="https://g.page/r/.../review" />
-                            <p className="text-xs text-muted-foreground mt-1">
-                                You can get this from your Google Business Profile dashboard by clicking &quot;Ask for reviews&quot;.
-                            </p>
-                        </div>
-                    </CardContent>
-                    <CardFooter className="border-t px-6 py-4">
-                        <Button>Save Google Config</Button>
-                    </CardFooter>
+                    <form action={updateGoogleConfig}>
+                        <CardHeader>
+                            <CardTitle>Google Review Configuration</CardTitle>
+                            <CardDescription>
+                                Provide the exact URL where customers should be redirected to leave their generated review.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="googleUrl">Google Review URL</Label>
+                                <Input id="googleUrl" name="googleUrl" placeholder="https://g.page/r/.../review" defaultValue={googleUrl} />
+                                <p className="text-xs text-muted-foreground mt-1">
+                                    You can get this from your Google Business Profile dashboard by clicking &quot;Ask for reviews&quot;.
+                                </p>
+                            </div>
+                        </CardContent>
+                        <CardFooter className="border-t px-6 py-4">
+                            <Button type="submit">Save Google Config</Button>
+                        </CardFooter>
+                    </form>
                 </Card>
 
                 <Card>
-                    <CardHeader>
-                        <CardTitle>AI Assistant Preferences</CardTitle>
-                        <CardDescription>
-                            Configure the default tone and language used when generating review texts.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="language">Default Output Language</Label>
-                                <select
-                                    id="language"
-                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                    defaultValue="English"
-                                >
-                                    <option>English</option>
-                                    <option>Hindi</option>
-                                    <option>Hinglish (Hindi written in English)</option>
-                                    <option>Spanish</option>
-                                </select>
+                    <form action={updateAIPreferences}>
+                        <CardHeader>
+                            <CardTitle>AI Assistant Preferences</CardTitle>
+                            <CardDescription>
+                                Configure the default tone and language used when generating review texts.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="language">Default Output Language</Label>
+                                    <select
+                                        id="language"
+                                        name="language"
+                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        defaultValue={aiLanguage}
+                                    >
+                                        <option>English</option>
+                                        <option>Hindi</option>
+                                        <option>Hinglish (Hindi written in English)</option>
+                                        <option>Spanish</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="tone">Default Review Tone</Label>
+                                    <select
+                                        id="tone"
+                                        name="tone"
+                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        defaultValue={aiTone}
+                                    >
+                                        <option>Professional & Friendly</option>
+                                        <option>Casual & Enthusiastic</option>
+                                        <option>Short & Direct</option>
+                                        <option>Detailed & Story-telling</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="tone">Default Review Tone</Label>
-                                <select
-                                    id="tone"
-                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                    defaultValue="Professional & Friendly"
-                                >
-                                    <option>Professional & Friendly</option>
-                                    <option>Casual & Enthusiastic</option>
-                                    <option>Short & Direct</option>
-                                    <option>Detailed & Story-telling</option>
-                                </select>
-                            </div>
-                        </div>
-                    </CardContent>
-                    <CardFooter className="border-t px-6 py-4">
-                        <Button>Save AI Preferences</Button>
-                    </CardFooter>
+                        </CardContent>
+                        <CardFooter className="border-t px-6 py-4">
+                            <Button type="submit">Save AI Preferences</Button>
+                        </CardFooter>
+                    </form>
                 </Card>
             </div>
         </div>
