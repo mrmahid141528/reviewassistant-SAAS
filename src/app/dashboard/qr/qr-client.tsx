@@ -20,21 +20,7 @@ export function QrClient({ publicReviewUrl }: { publicReviewUrl: string }) {
         alert("Link copied to clipboard!");
     }
 
-    const handleDownloadSvg = () => {
-        const svg = document.getElementById("qr-code-svg");
-        if (!svg) return;
-        const svgData = new XMLSerializer().serializeToString(svg);
-        const blob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = "review-qr.svg";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
-
-    const handleDownloadPng = () => {
+    const handleDownloadHighQualityPng = () => {
         const svg = document.getElementById("qr-code-svg");
         if (!svg) return;
         const svgData = new XMLSerializer().serializeToString(svg);
@@ -42,16 +28,17 @@ export function QrClient({ publicReviewUrl }: { publicReviewUrl: string }) {
         const ctx = canvas.getContext("2d");
         const img = new Image();
         img.onload = () => {
-            canvas.width = img.width;
-            canvas.height = img.height;
+            const scale = 5; // 5x scale for print quality (e.g. 1100x1100 px from 220x220)
+            canvas.width = img.width * scale;
+            canvas.height = img.height * scale;
             if (ctx) {
                 ctx.fillStyle = "white";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(img, 0, 0);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             }
-            const pngFile = canvas.toDataURL("image/png");
+            const pngFile = canvas.toDataURL("image/png", 1.0);
             const downloadLink = document.createElement("a");
-            downloadLink.download = "review-qr.png";
+            downloadLink.download = "review-assistant-qr-hq.png";
             downloadLink.href = pngFile;
             downloadLink.click();
         };
@@ -91,11 +78,8 @@ export function QrClient({ publicReviewUrl }: { publicReviewUrl: string }) {
                         </p>
                     </CardContent>
                     <CardFooter className="flex items-center justify-center gap-2 border-t px-6 py-4">
-                        <Button variant="outline" className="w-full gap-2" onClick={handleDownloadSvg}>
-                            <Download className="h-4 w-4" /> Download SVG
-                        </Button>
-                        <Button className="w-full gap-2" onClick={handleDownloadPng}>
-                            <Download className="h-4 w-4" /> Download PNG
+                        <Button className="w-full gap-2" onClick={handleDownloadHighQualityPng}>
+                            <Download className="h-4 w-4" /> Download High-Quality PNG
                         </Button>
                     </CardFooter>
                 </Card>
