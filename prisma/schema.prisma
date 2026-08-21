@@ -135,7 +135,7 @@ model Customer {
   createdAt         DateTime @default(now()) @map("created_at")
   updatedAt         DateTime @updatedAt @map("updated_at")
 
-  business           Business            @relation(fields: [businessId], references: [id])
+  business           Business            @relation(fields: [businessId], references: [id], onDelete: Cascade)
   location           BusinessLocation?   @relation(fields: [locationId], references: [id])
   feedbackSubmissions FeedbackSubmission[]
   reviewRequests     ReviewRequest[]
@@ -192,8 +192,8 @@ model FeedbackSubmission {
   submittedAt DateTime @default(now()) @map("submitted_at")
   createdAt   DateTime @default(now()) @map("created_at")
 
-  business    Business        @relation(fields: [businessId], references: [id])
-  campaign    Campaign        @relation(fields: [campaignId], references: [id])
+  business    Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  campaign    Campaign        @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   customer    Customer?       @relation(fields: [customerId], references: [id], onDelete: SetNull)
   answers     FeedbackAnswer[]
   reviews     GeneratedReview[]
@@ -230,10 +230,10 @@ model ReviewRequest {
   completedAt          DateTime? @map("completed_at")
   createdAt            DateTime  @default(now()) @map("created_at")
 
-  business    Business           @relation(fields: [businessId], references: [id])
-  location    BusinessLocation   @relation(fields: [locationId], references: [id])
+  business    Business           @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  location    BusinessLocation   @relation(fields: [locationId], references: [id], onDelete: Cascade)
   customer    Customer?          @relation(fields: [customerId], references: [id], onDelete: SetNull)
-  submission  FeedbackSubmission @relation(fields: [feedbackSubmissionId], references: [id])
+  submission  FeedbackSubmission @relation(fields: [feedbackSubmissionId], references: [id], onDelete: Cascade)
   submissions ReviewSubmission[]
 
   @@map("review_requests")
@@ -268,8 +268,8 @@ model GeneratedReview {
   tokenUsage           Json?    @map("token_usage")
   createdAt            DateTime @default(now()) @map("created_at")
 
-  business   Business           @relation(fields: [businessId], references: [id])
-  submission FeedbackSubmission @relation(fields: [feedbackSubmissionId], references: [id])
+  business   Business           @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  submission FeedbackSubmission @relation(fields: [feedbackSubmissionId], references: [id], onDelete: Cascade)
   customer   Customer?          @relation(fields: [customerId], references: [id], onDelete: SetNull)
 
   @@map("generated_reviews")
@@ -326,7 +326,7 @@ model Subscription {
   createdAt              DateTime @default(now()) @map("created_at")
   updatedAt              DateTime @updatedAt @map("updated_at")
 
-  business Business @relation(fields: [businessId], references: [id])
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
   plan     Plan     @relation(fields: [planId], references: [id])
   payments Payment[]
 
@@ -346,8 +346,8 @@ model Payment {
   paidAt            DateTime? @map("paid_at")
   createdAt         DateTime  @default(now()) @map("created_at")
 
-  business     Business      @relation(fields: [businessId], references: [id])
-  subscription Subscription? @relation(fields: [subscriptionId], references: [id])
+  business     Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
 
   @@map("payments")
 }
