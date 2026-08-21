@@ -20,6 +20,44 @@ export function QrClient({ publicReviewUrl }: { publicReviewUrl: string }) {
         alert("Link copied to clipboard!");
     }
 
+    const handleDownloadSvg = () => {
+        const svg = document.getElementById("qr-code-svg");
+        if (!svg) return;
+        const svgData = new XMLSerializer().serializeToString(svg);
+        const blob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "review-qr.svg";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const handleDownloadPng = () => {
+        const svg = document.getElementById("qr-code-svg");
+        if (!svg) return;
+        const svgData = new XMLSerializer().serializeToString(svg);
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        const img = new Image();
+        img.onload = () => {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            if (ctx) {
+                ctx.fillStyle = "white";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+            }
+            const pngFile = canvas.toDataURL("image/png");
+            const downloadLink = document.createElement("a");
+            downloadLink.download = "review-qr.png";
+            downloadLink.href = pngFile;
+            downloadLink.click();
+        };
+        img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
+    };
+
     return (
         <div className="space-y-6 max-w-4xl">
             <div>
@@ -40,6 +78,7 @@ export function QrClient({ publicReviewUrl }: { publicReviewUrl: string }) {
                     <CardContent className="flex flex-col items-center justify-center py-6">
                         <div className="rounded-xl border bg-white p-6 shadow-sm">
                             <QRCodeSVG
+                                id="qr-code-svg"
                                 value={publicReviewUrl}
                                 size={220}
                                 level="Q"
@@ -52,10 +91,10 @@ export function QrClient({ publicReviewUrl }: { publicReviewUrl: string }) {
                         </p>
                     </CardContent>
                     <CardFooter className="flex items-center justify-center gap-2 border-t px-6 py-4">
-                        <Button variant="outline" className="w-full gap-2">
+                        <Button variant="outline" className="w-full gap-2" onClick={handleDownloadSvg}>
                             <Download className="h-4 w-4" /> Download SVG
                         </Button>
-                        <Button className="w-full gap-2">
+                        <Button className="w-full gap-2" onClick={handleDownloadPng}>
                             <Download className="h-4 w-4" /> Download PNG
                         </Button>
                     </CardFooter>
