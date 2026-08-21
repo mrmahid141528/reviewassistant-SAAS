@@ -53,13 +53,7 @@ export function Sidebar() {
       </nav>
 
       <div className="mt-auto space-y-2">
-        <Link
-          href="/superadmin"
-          className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-amber-600 transition-colors hover:bg-amber-500/10 dark:text-amber-500 dark:hover:bg-amber-500/20"
-        >
-          <Shield className="h-4 w-4" />
-          Super Admin Panel
-        </Link>
+
         <button
           onClick={handleLogout}
           className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
