@@ -7,6 +7,7 @@ import {
     CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -94,7 +95,7 @@ export default async function SettingsPage() {
                             </div>
                         </CardContent>
                         <CardFooter className="border-t px-6 py-4">
-                            <Button type="submit">Save General Info</Button>
+                            <SubmitButton>Save General Info</SubmitButton>
                         </CardFooter>
                     </form>
                 </Card>
@@ -117,7 +118,7 @@ export default async function SettingsPage() {
                             </div>
                         </CardContent>
                         <CardFooter className="border-t px-6 py-4">
-                            <Button type="submit">Save Google Config</Button>
+                            <SubmitButton>Save Google Config</SubmitButton>
                         </CardFooter>
                     </form>
                 </Card>
@@ -163,7 +164,7 @@ export default async function SettingsPage() {
                             </div>
                         </CardContent>
                         <CardFooter className="border-t px-6 py-4">
-                            <Button type="submit">Save AI Preferences</Button>
+                            <SubmitButton>Save AI Preferences</SubmitButton>
                         </CardFooter>
                     </form>
                 </Card>
