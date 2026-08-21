@@ -12,7 +12,7 @@ const navigation = [
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
-export function Sidebar({ userEmail }: { userEmail?: string }) {
+export function Sidebar() {
   const pathname = usePathname();
 
   return (
@@ -41,17 +41,6 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
             </Link>
           );
         })}
-        {userEmail === "mrmahid141528@gmail.com" && (
-          <Link
-            href="/superadmin"
-            className={cn(
-              "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors mt-8 bg-zinc-950 text-white hover:bg-zinc-800 shadow-sm"
-            )}
-          >
-            <Shield className="h-4 w-4 text-emerald-400" />
-            SaaS Admin Portal
-          </Link>
-        )}
       </nav>
 
       <div className="mt-auto">
