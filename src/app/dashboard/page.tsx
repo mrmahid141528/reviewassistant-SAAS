@@ -8,6 +8,8 @@ import {
 import { ScanFace, MessageSquare, Star, ArrowUpRight, AlertTriangle } from "lucide-react";
 import prisma from "@/lib/prisma"
 import { createClient } from "@/lib/supabase/server"
+import { subDays, format } from "date-fns"
+import { AnalyticsChart } from "@/components/dashboard/AnalyticsChart"
 
 export default async function DashboardOverviewPage() {
     const supabase = await createClient()
@@ -18,6 +20,7 @@ export default async function DashboardOverviewPage() {
     let avgRating = 0
     let needsAttention: { id: string, rating: number, createdAt: Date }[] = []
     let recentActivity: any[] = []
+    let chartData: { date: string, rawDate: string, reviews: number }[] = []
 
     if (user) {
         const membership = await prisma.businessMember.findFirst({ where: { userId: user.id } })
@@ -46,6 +49,32 @@ export default async function DashboardOverviewPage() {
                 take: 5,
                 include: { reviews: true }
             })
+
+            // Generate 30-day chronological array (padding empty days with 0)
+            const today = new Date();
+            chartData = Array.from({ length: 30 }).map((_, i) => {
+                const d = subDays(today, 29 - i);
+                return {
+                    date: format(d, "MMM dd"),
+                    rawDate: format(d, "yyyy-MM-dd"),
+                    reviews: 0
+                }
+            });
+
+            // Map actual database insights onto the padded array
+            const pastReviews = await prisma.generatedReview.findMany({
+                where: {
+                    businessId: biz,
+                    createdAt: { gte: subDays(today, 30) }
+                },
+                select: { createdAt: true }
+            })
+
+            pastReviews.forEach((gr: any) => {
+                const day = format(new Date(gr.createdAt), "yyyy-MM-dd");
+                const bucket = chartData.find(c => c.rawDate === day);
+                if (bucket) bucket.reviews++;
+            });
         }
     }
 
@@ -106,6 +135,18 @@ export default async function DashboardOverviewPage() {
                     </CardContent>
                 </Card>
             </div>
+
+            <Card className="col-span-full">
+                <CardHeader>
+                    <CardTitle>AI Performance Trend</CardTitle>
+                    <CardDescription>
+                        Total reviews generated per day over the last 30 days.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <AnalyticsChart data={chartData} />
+                </CardContent>
+            </Card>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
                 <Card className="col-span-4">
