@@ -102,62 +102,65 @@ export default function LandingPage() {
                 title: "Instant AI Generation",
                 desc: "Google Gemini AI connects their multi-choice clicks into a beautifully written, authentic paragraph in milliseconds."
               }
-            ].map((feature, i) => (
-              <div key={i} className={`flex flex-col items-center text-center p-8 rounded-3xl bg-card border border-border shadow-sm hover:shadow-md transition-shadow animate-in fade-in slide-in-from-bottom-8 duration-700`} style={{ animationDelay: \`\${(i + 1) * 200}ms\` }}>
-            <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6">
-              <feature.icon className="h-8 w-8" />
+            ].map((feature, i) => {
+              const Icon = feature.icon;
+              return (
+                <div key={i} className={`flex flex-col items-center text-center p-8 rounded-3xl bg-card border border-border shadow-sm hover:shadow-md transition-shadow animate-in fade-in slide-in-from-bottom-8 duration-700`} style={{ animationDelay: `${(i + 1) * 200}ms` }}>
+                  <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6">
+                    <Icon className="h-8 w-8" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed">{feature.desc}</p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Action Steps */}
+        <section className="container mx-auto px-4 md:px-6 py-12">
+          <div className="rounded-3xl bg-primary text-primary-foreground p-8 md:p-12 lg:p-16 flex flex-col items-center text-center relative overflow-hidden">
+            {/* Background elements */}
+            <div className="absolute top-0 right-0 w-[50%] h-[150%] bg-white/10 rotate-12 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6 relative z-10">Stop Begging For Reviews.</h2>
+            <p className="text-primary-foreground/80 text-lg md:text-xl max-w-2xl mb-10 relative z-10 leading-relaxed">
+              Join the businesses dominating local SEO by automating their Google My Business reputation through artificial intelligence.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 w-full justify-center relative z-10">
+              <Link href="/login" className="w-full sm:w-auto">
+                <Button size="lg" className="w-full rounded-full h-14 px-8 text-base font-semibold bg-background text-foreground hover:bg-background/90 shadow-xl">
+                  Get Started for Free
+                </Button>
+              </Link>
             </div>
-            <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
-            <p className="text-muted-foreground leading-relaxed">{feature.desc}</p>
+
+            <div className="mt-8 flex items-center gap-6 text-sm font-medium text-primary-foreground/70 relative z-10">
+              <span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4" /> No Credit Card Required</span>
+              <span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4" /> Cancel Anytime</span>
+            </div>
           </div>
-            ))}
-        </div>
-      </section>
+        </section>
 
-      {/* Action Steps */}
-      <section className="container mx-auto px-4 md:px-6 py-12">
-        <div className="rounded-3xl bg-primary text-primary-foreground p-8 md:p-12 lg:p-16 flex flex-col items-center text-center relative overflow-hidden">
-          {/* Background elements */}
-          <div className="absolute top-0 right-0 w-[50%] h-[150%] bg-white/10 rotate-12 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+      </main>
 
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6 relative z-10">Stop Begging For Reviews.</h2>
-          <p className="text-primary-foreground/80 text-lg md:text-xl max-w-2xl mb-10 relative z-10 leading-relaxed">
-            Join the businesses dominating local SEO by automating their Google My Business reputation through artificial intelligence.
+      {/* Footer */}
+      <footer className="border-t border-border/50 bg-muted/50 py-12 relative z-10">
+        <div className="container mx-auto px-4 md:px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-2">
+            <Star className="h-5 w-5 text-primary fill-primary" />
+            <span className="font-semibold">ReviewAssistant</span>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            © {new Date().getFullYear()} ReviewAssistant SaaS. All rights reserved.
           </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 w-full justify-center relative z-10">
-            <Link href="/login" className="w-full sm:w-auto">
-              <Button size="lg" className="w-full rounded-full h-14 px-8 text-base font-semibold bg-background text-foreground hover:bg-background/90 shadow-xl">
-                Get Started for Free
-              </Button>
-            </Link>
-          </div>
-
-          <div className="mt-8 flex items-center gap-6 text-sm font-medium text-primary-foreground/70 relative z-10">
-            <span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4" /> No Credit Card Required</span>
-            <span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4" /> Cancel Anytime</span>
+          <div className="flex gap-4">
+            <Link href="#" className="text-sm font-medium text-muted-foreground hover:text-foreground">Terms</Link>
+            <Link href="#" className="text-sm font-medium text-muted-foreground hover:text-foreground">Privacy</Link>
           </div>
         </div>
-      </section>
-
-    </main>
-
-      {/* Footer */ }
-  <footer className="border-t border-border/50 bg-muted/50 py-12 relative z-10">
-    <div className="container mx-auto px-4 md:px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-      <div className="flex items-center gap-2">
-        <Star className="h-5 w-5 text-primary fill-primary" />
-        <span className="font-semibold">ReviewAssistant</span>
-      </div>
-      <p className="text-sm text-muted-foreground">
-        © {new Date().getFullYear()} ReviewAssistant SaaS. All rights reserved.
-      </p>
-      <div className="flex gap-4">
-        <Link href="#" className="text-sm font-medium text-muted-foreground hover:text-foreground">Terms</Link>
-        <Link href="#" className="text-sm font-medium text-muted-foreground hover:text-foreground">Privacy</Link>
-      </div>
-    </div>
-  </footer>
+      </footer>
     </div >
   );
 }
