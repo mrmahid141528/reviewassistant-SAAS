@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import { toggleBusinessStatus, deleteBusiness } from "../actions";
+import { AdminActionButtons } from "../components/AdminActionButtons";
 
 export default async function SuperAdminBusinesses() {
     const businesses = await prisma.business.findMany({
@@ -47,20 +48,14 @@ export default async function SuperAdminBusinesses() {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-muted-foreground">{b.createdAt.toLocaleDateString()}</td>
-                                    <td className="px-6 py-4 text-right flex justify-end gap-2">
-                                        <form action={toggleBusinessStatus}>
-                                            <input type="hidden" name="businessId" value={b.id} />
-                                            <input type="hidden" name="currentStatus" value={b.status} />
-                                            <button type="submit" className={`text-xs px-3 py-1 rounded border ${b.status === 'active' ? 'text-amber-600 border-amber-600 hover:bg-amber-50' : 'text-emerald-600 border-emerald-600 hover:bg-emerald-50'}`}>
-                                                {b.status === 'active' ? 'Suspend' : 'Activate'}
-                                            </button>
-                                        </form>
-                                        <form action={deleteBusiness}>
-                                            <input type="hidden" name="businessId" value={b.id} />
-                                            <button type="submit" className="text-xs px-3 py-1 rounded border text-red-600 border-red-600 hover:bg-red-50">
-                                                Force Delete
-                                            </button>
-                                        </form>
+                                    <td className="px-6 py-4 text-right">
+                                        <AdminActionButtons
+                                            id={b.id}
+                                            currentStatus={b.status}
+                                            type="business"
+                                            toggleAction={toggleBusinessStatus}
+                                            deleteAction={deleteBusiness}
+                                        />
                                     </td>
                                 </tr>
                             ))}
