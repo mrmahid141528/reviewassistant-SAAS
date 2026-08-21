@@ -23,7 +23,7 @@ export default async function CustomerReviewPage({
         questions = await prisma.campaignQuestion.findMany({
             where: { campaignId: campaign.id },
             orderBy: { sortOrder: 'asc' },
-            select: { id: true, question: true, questionType: true, required: true }
+            select: { id: true, question: true, questionType: true, required: true, options: true }
         });
     }
 
