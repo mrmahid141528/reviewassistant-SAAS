@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { toggleUserStatus, deleteUser } from "../actions";
 
 export default async function SuperAdminUsers() {
     const users = await prisma.user.findMany({
@@ -22,6 +23,7 @@ export default async function SuperAdminUsers() {
                                 <th className="px-6 py-4 font-semibold">Name</th>
                                 <th className="px-6 py-4 font-semibold">Status</th>
                                 <th className="px-6 py-4 font-semibold">Joined at</th>
+                                <th className="px-6 py-4 font-semibold text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y">
@@ -36,11 +38,26 @@ export default async function SuperAdminUsers() {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-muted-foreground">{u.createdAt.toLocaleDateString()}</td>
+                                    <td className="px-6 py-4 text-right flex justify-end gap-2">
+                                        <form action={toggleUserStatus}>
+                                            <input type="hidden" name="userId" value={u.id} />
+                                            <input type="hidden" name="currentStatus" value={u.status} />
+                                            <button type="submit" className={`text-xs px-3 py-1 rounded border ${u.status === 'active' ? 'text-amber-600 border-amber-600 hover:bg-amber-50' : 'text-emerald-600 border-emerald-600 hover:bg-emerald-50'}`}>
+                                                {u.status === 'active' ? 'Suspend' : 'Activate'}
+                                            </button>
+                                        </form>
+                                        <form action={deleteUser}>
+                                            <input type="hidden" name="userId" value={u.id} />
+                                            <button type="submit" className="text-xs px-3 py-1 rounded border text-red-600 border-red-600 hover:bg-red-50">
+                                                Force Delete
+                                            </button>
+                                        </form>
+                                    </td>
                                 </tr>
                             ))}
                             {users.length === 0 && (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">No users found.</td>
+                                    <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">No users found.</td>
                                 </tr>
                             )}
                         </tbody>
