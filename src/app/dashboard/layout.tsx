@@ -13,11 +13,20 @@ export default async function DashboardLayout({
     const { data: { user } } = await supabase.auth.getUser();
 
     if (user) {
-        await prisma.user.upsert({
+        const prismaUser = await prisma.user.upsert({
             where: { id: user.id },
             update: { email: user.email },
             create: { id: user.id, email: user.email, name: user.email?.split('@')[0] }
         })
+
+        if (prismaUser.status === 'suspended') {
+            return (
+                <div className="flex items-center justify-center h-screen bg-gray-50 flex-col gap-4 text-center px-4">
+                    <h1 className="text-3xl font-bold text-red-600">User Banned</h1>
+                    <p className="text-muted-foreground max-w-sm">Your user account has been suspended by the platform administrator.</p>
+                </div>
+            )
+        }
 
         const membership = await prisma.businessMember.findFirst({
             where: { userId: user.id },
