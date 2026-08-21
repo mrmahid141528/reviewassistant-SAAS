@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { toggleUserStatus, deleteUser } from "../actions";
+import { toggleUserStatus, deleteUser, editUser, resetUserPassword } from "../actions";
 import { AdminActionButtons } from "../components/AdminActionButtons";
 
 export const dynamic = "force-dynamic";
@@ -46,8 +46,12 @@ export default async function SuperAdminUsers() {
                                             id={u.id}
                                             currentStatus={u.status}
                                             type="user"
+                                            userEmail={u.email || ""}
+                                            userName={u.name || ""}
                                             toggleAction={toggleUserStatus}
                                             deleteAction={deleteUser}
+                                            editAction={editUser}
+                                            resetPasswordAction={resetUserPassword}
                                         />
                                     </td>
                                 </tr>

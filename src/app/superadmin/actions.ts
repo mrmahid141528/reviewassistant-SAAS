@@ -2,8 +2,15 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 import prisma from '@/lib/prisma'
-import { redirect } from 'next/navigation'
+
+function getAdminClient() {
+    return createAdminClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+}
 
 const SUPER_ADMIN_EMAILS = [
     "mrmahid141528@gmail.com"
@@ -71,4 +78,34 @@ export async function deleteBusiness(formData: FormData) {
     })
 
     revalidatePath('/superadmin/businesses')
+}
+
+export async function editUser(formData: FormData) {
+    await verifySuperAdmin()
+
+    const userId = formData.get('userId') as string
+    const newName = formData.get('name') as string
+    const newEmail = formData.get('email') as string
+
+    await prisma.user.update({
+        where: { id: userId },
+        data: { name: newName, email: newEmail }
+    })
+
+    const adminAuth = getAdminClient().auth.admin
+    await adminAuth.updateUserById(userId, { email: newEmail })
+
+    revalidatePath('/superadmin/users')
+}
+
+export async function resetUserPassword(formData: FormData) {
+    await verifySuperAdmin()
+
+    const userId = formData.get('userId') as string
+    const newPassword = formData.get('password') as string
+
+    const adminAuth = getAdminClient().auth.admin
+    await adminAuth.updateUserById(userId, { password: newPassword })
+
+    revalidatePath('/superadmin/users')
 }
