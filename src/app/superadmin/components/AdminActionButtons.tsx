@@ -1,5 +1,6 @@
 "use client"
-import { useTransition, useState } from 'react'
+import { useTransition, useState, useEffect, useRef } from 'react'
+import { MoreHorizontal, Edit, Key, Power, Trash2 } from 'lucide-react'
 
 export function AdminActionButtons({
     id,
@@ -23,13 +24,24 @@ export function AdminActionButtons({
     resetPasswordAction?: (formData: FormData) => Promise<void>
 }) {
     const [isPending, startTransition] = useTransition()
+    const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [isEditing, setIsEditing] = useState(false)
     const [isResetting, setIsResetting] = useState(false)
 
-    // UI states for new values
+    const menuRef = useRef<HTMLDivElement>(null)
     const [editName, setEditName] = useState(userName || '')
     const [editEmail, setEditEmail] = useState(userEmail || '')
     const [newPassword, setNewPassword] = useState('')
+
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setIsMenuOpen(false)
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside)
+        return () => document.removeEventListener("mousedown", handleClickOutside)
+    }, [])
 
     const handleToggle = () => {
         startTransition(async () => {
@@ -82,39 +94,56 @@ export function AdminActionButtons({
 
     return (
         <div className="flex justify-end gap-2 relative">
-            {type === 'user' && (
-                <>
-                    <button
-                        onClick={() => setIsEditing(true)}
-                        disabled={isPending}
-                        className="text-xs px-3 py-1 rounded border text-blue-600 border-blue-600 hover:bg-blue-50 disabled:opacity-50"
-                    >
-                        Edit
-                    </button>
-                    <button
-                        onClick={() => setIsResetting(true)}
-                        disabled={isPending}
-                        className="text-xs px-3 py-1 rounded border text-purple-600 border-purple-600 hover:bg-purple-50 disabled:opacity-50"
-                    >
-                        Reset Password
-                    </button>
-                </>
-            )}
+            <div className="relative" ref={menuRef}>
+                <button
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    className="p-2 rounded-md hover:bg-gray-100 transition-colors text-muted-foreground"
+                >
+                    <MoreHorizontal className="w-5 h-5" />
+                </button>
 
-            <button
-                onClick={handleToggle}
-                disabled={isPending}
-                className={`text-xs px-3 py-1 rounded border disabled:opacity-50 ${currentStatus === 'active' ? 'text-amber-600 border-amber-600 hover:bg-amber-50' : 'text-emerald-600 border-emerald-600 hover:bg-emerald-50'}`}
-            >
-                {currentStatus === 'active' ? 'Suspend' : 'Activate'}
-            </button>
-            <button
-                onClick={handleDelete}
-                disabled={isPending}
-                className="text-xs px-3 py-1 rounded border text-red-600 border-red-600 hover:bg-red-50 disabled:opacity-50"
-            >
-                Force Delete
-            </button>
+                {isMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-20 py-1 overflow-hidden animate-in fade-in slide-in-from-top-2">
+                        {type === 'user' && (
+                            <>
+                                <button
+                                    onClick={() => { setIsMenuOpen(false); setIsEditing(true); }}
+                                    disabled={isPending}
+                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                                >
+                                    <Edit className="w-4 h-4 text-blue-600" />
+                                    Edit Account
+                                </button>
+                                <button
+                                    onClick={() => { setIsMenuOpen(false); setIsResetting(true); }}
+                                    disabled={isPending}
+                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                                >
+                                    <Key className="w-4 h-4 text-purple-600" />
+                                    Reset Password
+                                </button>
+                            </>
+                        )}
+
+                        <button
+                            onClick={() => { setIsMenuOpen(false); handleToggle(); }}
+                            disabled={isPending}
+                            className={`w-full text-left px-4 py-2 text-sm flex items-center gap-2 ${currentStatus === 'active' ? 'text-amber-600 hover:bg-amber-50' : 'text-emerald-600 hover:bg-emerald-50'}`}
+                        >
+                            <Power className="w-4 h-4" />
+                            {currentStatus === 'active' ? 'Suspend' : 'Activate'}
+                        </button>
+                        <button
+                            onClick={() => { setIsMenuOpen(false); handleDelete(); }}
+                            disabled={isPending}
+                            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                            Force Delete
+                        </button>
+                    </div>
+                )}
+            </div>
 
             {/* Edit Modal Native Equivalent */}
             {isEditing && (

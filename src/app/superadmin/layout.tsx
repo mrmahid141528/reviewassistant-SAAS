@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Users, Building, ArrowLeft } from "lucide-react";
+import { LayoutDashboard, Users, Building, ArrowLeft, FileText, Settings as SettingsIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const SUPER_ADMIN_EMAILS = [
@@ -51,8 +51,19 @@ export default async function SuperAdminLayout({
                             <Users className="h-4 w-4 justify-start shrink-0" /> <span className="truncate">All Users</span>
                         </Button>
                     </Link>
+                    <Link href="/superadmin/pages">
+                        <Button variant="ghost" className="w-full justify-start gap-3 text-purple-700 hover:text-purple-800 hover:bg-purple-50">
+                            <FileText className="h-4 w-4 justify-start shrink-0" /> <span className="truncate">Legal Pages</span>
+                        </Button>
+                    </Link>
                 </div>
-                <div className="p-4 border-t">
+
+                <div className="p-4 border-t space-y-1">
+                    <Link href="/superadmin/settings">
+                        <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground">
+                            <SettingsIcon className="h-4 w-4 justify-start shrink-0" /> <span className="truncate">Profile Settings</span>
+                        </Button>
+                    </Link>
                     <Link href="/dashboard">
                         <Button variant="outline" className="w-full gap-2 text-muted-foreground hover:text-foreground">
                             <ArrowLeft className="h-4 w-4" /> Exit Setup
