@@ -21,7 +21,7 @@ export function QuestionsClient({ initialQuestions }: { initialQuestions: any[] 
     const [editingId, setEditingId] = useState<string | null>(null);
 
     const handleAddQuestion = () => {
-        const newQ = { id: Date.now().toString(), question: "New Question", type: "Text", required: false };
+        const newQ = { id: Date.now().toString(), question: "New Question", type: "Text", required: false, options: [""] };
         setQuestions([...questions, newQ]);
         setEditingId(newQ.id);
     };
@@ -81,17 +81,51 @@ export function QuestionsClient({ initialQuestions }: { initialQuestions: any[] 
                                             <span className="font-semibold text-sm">Q{index + 1}.</span>
                                             <div className="flex flex-col gap-2 w-full max-w-md">
                                                 <Input
-                                                    className="h-8"
+                                                    className="h-8 font-medium"
                                                     value={q.question}
+                                                    placeholder="Enter your question here..."
                                                     onChange={(e) => updateQuestion(q.id, 'question', e.target.value)}
                                                 />
-                                                <Input
-                                                    className="h-8 text-xs text-muted-foreground"
-                                                    placeholder="Options (comma separated, e.g. Staff, Food, Wait time)"
-                                                    value={Array.isArray(q.options) ? q.options.join(', ') : (q.options || '')}
-                                                    onChange={(e) => updateQuestion(q.id, 'options', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
-                                                    onKeyDown={(e) => e.key === 'Enter' && setEditingId(null)}
-                                                />
+                                                <div className="space-y-2 mt-2 bg-muted/30 p-3 rounded-md border">
+                                                    <p className="text-xs font-medium text-muted-foreground mb-2">Options (Tags / Chips)</p>
+                                                    {Array.isArray(q.options) && q.options.map((opt: string, optIndex: number) => (
+                                                        <div key={optIndex} className="flex items-center gap-2">
+                                                            <Input
+                                                                className="h-8 text-xs"
+                                                                placeholder={`Tag ${optIndex + 1}`}
+                                                                value={opt}
+                                                                onChange={(e) => {
+                                                                    const newOptions = [...q.options];
+                                                                    newOptions[optIndex] = e.target.value;
+                                                                    updateQuestion(q.id, 'options', newOptions);
+                                                                }}
+                                                                onKeyDown={(e) => e.key === 'Enter' && setEditingId(null)}
+                                                            />
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 flex-shrink-0"
+                                                                onClick={() => {
+                                                                    const newOptions = q.options.filter((_: any, idx: number) => idx !== optIndex);
+                                                                    updateQuestion(q.id, 'options', newOptions);
+                                                                }}
+                                                            >
+                                                                <Trash2 className="h-3 w-3" />
+                                                            </Button>
+                                                        </div>
+                                                    ))}
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="h-8 text-xs w-full mt-2 border-dashed border-muted-foreground/30 text-muted-foreground hover:text-foreground"
+                                                        onClick={() => {
+                                                            const newOptions = Array.isArray(q.options) ? [...q.options, ""] : [""];
+                                                            updateQuestion(q.id, 'options', newOptions);
+                                                        }}
+                                                    >
+                                                        <Plus className="h-3 w-3 mr-1" /> Add Choice
+                                                    </Button>
+                                                </div>
                                             </div>
                                         </div>
                                     ) : (
