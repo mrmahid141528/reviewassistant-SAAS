@@ -16,6 +16,7 @@ export default function CustomerReviewPage() {
     const [step, setStep] = useState<FlowState>("WELCOME");
     const [rating, setRating] = useState<number>(0);
     const [generatedReview, setGeneratedReview] = useState("");
+    const [googleUrl, setGoogleUrl] = useState("");
 
     const handleStart = () => {
         setStep("QUESTIONS");
@@ -29,6 +30,7 @@ export default function CustomerReviewPage() {
 
             if (result.success && result.draft) {
                 setGeneratedReview(result.draft);
+                setGoogleUrl(result.googleUrl || "");
                 setStep("RESULT");
             } else {
                 alert("AI Error: " + result.error);
@@ -42,8 +44,11 @@ export default function CustomerReviewPage() {
 
     const copyAndContinue = () => {
         navigator.clipboard.writeText(generatedReview);
-        alert("Review copied! Redirecting to Google...");
-        // window.open(business.googleUrl, "_blank")
+        if (googleUrl) {
+            window.location.href = googleUrl;
+        } else {
+            alert("Review copied! (No Google link configured by the business)");
+        }
     };
 
     return (

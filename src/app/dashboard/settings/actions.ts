@@ -14,10 +14,14 @@ export async function updateBusinessGeneral(formData: FormData) {
         const membership = await prisma.businessMember.findFirst({ where: { userId: user.id } })
         if (!membership) return
 
+        const name = formData.get("businessName") as string || "My Business"
+        const newSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + "-" + membership.businessId.substring(membership.businessId.length - 4)
+
         await prisma.business.update({
             where: { id: membership.businessId },
             data: {
-                name: formData.get("businessName") as string || "My Business",
+                name: name,
+                slug: newSlug,
                 websiteUrl: formData.get("websiteUrl") as string || null,
                 phone: formData.get("phone") as string || null,
                 email: formData.get("email") as string || null,

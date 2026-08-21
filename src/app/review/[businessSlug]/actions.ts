@@ -39,7 +39,11 @@ export async function submitReviewDraft(rating: number, businessSlug: string) {
         });
 
         await new Promise(resolve => setTimeout(resolve, 1500));
-        return { success: true, draft };
+
+        const currentSettings = (campaign.settings as any) || {}
+        const googleUrl = currentSettings.googleReviewUrl || ""
+
+        return { success: true, draft, googleUrl };
     } catch (error: unknown) {
         console.error(error);
         return { success: false, error: error instanceof Error ? error.message : 'Unknown error occurred' };
