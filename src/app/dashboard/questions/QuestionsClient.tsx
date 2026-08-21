@@ -7,8 +7,9 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, GripVertical, Trash2, Edit2, MessageSquare, Loader2 } from "lucide-react";
+import { Plus, GripVertical, Trash2, Edit2, MessageSquare, Loader2, Check } from "lucide-react";
 import { useState, useTransition } from "react";
+import { Input } from "@/components/ui/input";
 import { saveQuestionsLayout } from "./actions";
 import { useRouter } from "next/navigation";
 
@@ -17,6 +18,21 @@ export function QuestionsClient({ initialQuestions }: { initialQuestions: any[] 
     const [isSaving, setIsSaving] = useState(false);
     const [isPending, startTransition] = useTransition();
     const router = useRouter();
+    const [editingId, setEditingId] = useState<string | null>(null);
+
+    const handleAddQuestion = () => {
+        const newQ = { id: Date.now().toString(), question: "New Question", type: "Text", required: false };
+        setQuestions([...questions, newQ]);
+        setEditingId(newQ.id);
+    };
+
+    const handleDelete = (id: string) => {
+        setQuestions(questions.filter(q => q.id !== id));
+    };
+
+    const updateQuestion = (id: string, field: string, value: any) => {
+        setQuestions(questions.map(q => q.id === id ? { ...q, [field]: value } : q));
+    };
 
     const handleSave = () => {
         setIsSaving(true);
@@ -46,7 +62,7 @@ export function QuestionsClient({ initialQuestions }: { initialQuestions: any[] 
                         Build and organize the questions asked to your customers when they scan the QR code.
                     </p>
                 </div>
-                <Button className="flex items-center gap-2">
+                <Button className="flex items-center gap-2" onClick={handleAddQuestion}>
                     <Plus className="h-4 w-4" /> Add Question
                 </Button>
             </div>
@@ -60,25 +76,44 @@ export function QuestionsClient({ initialQuestions }: { initialQuestions: any[] 
                                     <GripVertical className="h-5 w-5" />
                                 </div>
                                 <div>
-                                    <CardTitle className="text-base font-semibold">
-                                        Q{index + 1}. {q.question}
-                                    </CardTitle>
-                                    <CardDescription className="mt-1">
+                                    {editingId === q.id ? (
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className="font-semibold text-sm">Q{index + 1}.</span>
+                                            <Input
+                                                className="h-8 max-w-sm"
+                                                value={q.question}
+                                                onChange={(e) => updateQuestion(q.id, 'question', e.target.value)}
+                                                onKeyDown={(e) => e.key === 'Enter' && setEditingId(null)}
+                                            />
+                                        </div>
+                                    ) : (
+                                        <CardTitle className="text-base font-semibold">
+                                            Q{index + 1}. {q.question}
+                                        </CardTitle>
+                                    )}
+                                    <CardDescription className="mt-1 flex items-center gap-2">
                                         Type: <span className="font-medium text-foreground">{q.type || q.questionType}</span>
                                         {" • "}
-                                        {q.required ? (
-                                            <span className="text-emerald-500 font-medium">Required</span>
-                                        ) : (
-                                            <span className="text-muted-foreground">Optional</span>
-                                        )}
+                                        <button
+                                            onClick={() => updateQuestion(q.id, 'required', !q.required)}
+                                            className={q.required ? "text-emerald-500 font-medium hover:underline" : "text-muted-foreground hover:underline"}
+                                        >
+                                            {q.required ? "Required" : "Optional"}
+                                        </button>
                                     </CardDescription>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
-                                <Button variant="ghost" size="icon" aria-label="Edit question">
-                                    <Edit2 className="h-4 w-4 text-muted-foreground" />
-                                </Button>
-                                <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-50 hover:text-red-600" aria-label="Delete question">
+                                {editingId === q.id ? (
+                                    <Button variant="ghost" size="icon" onClick={() => setEditingId(null)} className="text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50">
+                                        <Check className="h-4 w-4" />
+                                    </Button>
+                                ) : (
+                                    <Button variant="ghost" size="icon" onClick={() => setEditingId(q.id)} aria-label="Edit question">
+                                        <Edit2 className="h-4 w-4 text-muted-foreground" />
+                                    </Button>
+                                )}
+                                <Button variant="ghost" size="icon" onClick={() => handleDelete(q.id)} className="text-red-500 hover:bg-red-50 hover:text-red-600" aria-label="Delete question">
                                     <Trash2 className="h-4 w-4" />
                                 </Button>
                             </div>
