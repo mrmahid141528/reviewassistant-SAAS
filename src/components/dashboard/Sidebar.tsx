@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { LayoutDashboard, MessageSquare, QrCode, Settings, LogOut, Store, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +15,14 @@ const navigation = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/login");
+    router.refresh();
+  };
 
   return (
     <div className="flex h-full w-64 flex-col gap-4 border-r bg-muted/40 p-4 shrink-0 hidden md:flex">
@@ -45,6 +54,7 @@ export function Sidebar() {
 
       <div className="mt-auto">
         <button
+          onClick={handleLogout}
           className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <LogOut className="h-4 w-4" />
