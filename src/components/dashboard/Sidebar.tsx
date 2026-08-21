@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, MessageSquare, QrCode, Settings, LogOut, Store } from "lucide-react";
+import { LayoutDashboard, MessageSquare, QrCode, Settings, LogOut, Store, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navigation = [
@@ -12,7 +12,7 @@ const navigation = [
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
-export function Sidebar() {
+export function Sidebar({ userEmail }: { userEmail?: string }) {
   const pathname = usePathname();
 
   return (
@@ -21,7 +21,7 @@ export function Sidebar() {
         <Store className="h-6 w-6 text-primary" />
         <span className="font-bold text-lg">Review Assistant</span>
       </div>
-      
+
       <nav className="flex-1 space-y-1">
         {navigation.map((item) => {
           const isActive = pathname === item.href;
@@ -31,8 +31,8 @@ export function Sidebar() {
               href={item.href}
               className={cn(
                 "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
-                isActive 
-                  ? "bg-primary text-primary-foreground" 
+                isActive
+                  ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:bg-muted"
               )}
             >
@@ -41,6 +41,17 @@ export function Sidebar() {
             </Link>
           );
         })}
+        {userEmail === "mrmahid141528@gmail.com" && (
+          <Link
+            href="/superadmin"
+            className={cn(
+              "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors mt-8 bg-zinc-950 text-white hover:bg-zinc-800 shadow-sm"
+            )}
+          >
+            <Shield className="h-4 w-4 text-emerald-400" />
+            SaaS Admin Portal
+          </Link>
+        )}
       </nav>
 
       <div className="mt-auto">
