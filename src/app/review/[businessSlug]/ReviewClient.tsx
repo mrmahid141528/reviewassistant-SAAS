@@ -16,6 +16,7 @@ export default function ReviewClient({ businessName, initialQuestions = [] }: { 
     const [step, setStep] = useState<FlowState>("WELCOME");
     const [rating, setRating] = useState<number>(0);
     const [answers, setAnswers] = useState<Record<string, string>>({});
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [generatedReview, setGeneratedReview] = useState("");
     const [googleUrl, setGoogleUrl] = useState("");
 
@@ -98,65 +99,93 @@ export default function ReviewClient({ businessName, initialQuestions = [] }: { 
                     </div>
                 )}
 
-                {step === "QUESTIONS" && (
+                {step === "QUESTIONS" && initialQuestions.length > 0 && (
                     <div className="w-full animate-in fade-in slide-in-from-right-8 duration-300">
-                        <h2 className="text-lg font-semibold mb-4 text-left">Help us improve</h2>
+                        <div className="flex justify-between items-center mb-4 text-left">
+                            <h2 className="text-lg font-semibold">Help us improve</h2>
+                            <span className="text-xs font-semibold px-3 py-1 bg-muted rounded-full text-muted-foreground">
+                                {currentQuestionIndex + 1} of {initialQuestions.length}
+                            </span>
+                        </div>
                         <p className="text-sm text-muted-foreground mb-6 text-left">Your answers will help us generate a complete review for you.</p>
 
                         <div className="space-y-6 mb-8 text-left">
-                            {initialQuestions.map(q => (
-                                <div key={q.id}>
-                                    <label className="block text-sm font-medium mb-3">{q.question} {q.required && <span className="text-red-500">*</span>}</label>
+                            {(() => {
+                                const q = initialQuestions[currentQuestionIndex];
+                                return (
+                                    <div key={q.id} className="animate-in fade-in slide-in-from-right-4 duration-300">
+                                        <label className="block text-sm font-medium mb-3">{q.question} {q.required && <span className="text-red-500">*</span>}</label>
 
-                                    {q.options && Array.isArray(q.options) && q.options.length > 0 ? (
-                                        <div className="flex flex-wrap gap-2">
-                                            {q.options.map((opt: string) => {
-                                                const cleanOpt = opt.trim();
-                                                const currentAnswers = (answers[q.id] || '').split(',').map(s => s.trim()).filter(Boolean);
-                                                const isSelected = currentAnswers.includes(cleanOpt);
+                                        {q.options && Array.isArray(q.options) && q.options.length > 0 ? (
+                                            <div className="flex flex-wrap gap-2">
+                                                {q.options.map((opt: string) => {
+                                                    const cleanOpt = opt.trim();
+                                                    const currentAnswers = (answers[q.id] || '').split(',').map(s => s.trim()).filter(Boolean);
+                                                    const isSelected = currentAnswers.includes(cleanOpt);
 
-                                                return (
-                                                    <button
-                                                        key={opt}
-                                                        onClick={() => {
-                                                            let nextArr;
-                                                            if (isSelected) {
-                                                                nextArr = currentAnswers.filter(o => o !== cleanOpt);
-                                                            } else {
-                                                                nextArr = [...currentAnswers, cleanOpt];
-                                                            }
-                                                            setAnswers({ ...answers, [q.id]: nextArr.join(', ') });
-                                                        }}
-                                                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${isSelected
-                                                            ? 'bg-primary text-primary-foreground border-primary shadow-sm'
-                                                            : 'bg-background hover:bg-muted text-foreground'
-                                                            }`}
-                                                    >
-                                                        {opt}
-                                                    </button>
-                                                )
-                                            })}
-                                        </div>
-                                    ) : (
-                                        <Textarea
-                                            className="resize-none"
-                                            placeholder="Your answer..."
-                                            value={answers[q.id] || ''}
-                                            onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                                        />
-                                    )}
-                                </div>
-                            ))}
+                                                    return (
+                                                        <button
+                                                            key={opt}
+                                                            onClick={() => {
+                                                                let nextArr;
+                                                                if (isSelected) {
+                                                                    nextArr = currentAnswers.filter(o => o !== cleanOpt);
+                                                                } else {
+                                                                    nextArr = [...currentAnswers, cleanOpt];
+                                                                }
+                                                                setAnswers({ ...answers, [q.id]: nextArr.join(', ') });
+                                                            }}
+                                                            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${isSelected
+                                                                ? 'bg-primary text-primary-foreground border-primary shadow-sm ring-1 ring-primary'
+                                                                : 'bg-background hover:bg-muted text-foreground'
+                                                                }`}
+                                                        >
+                                                            {opt}
+                                                        </button>
+                                                    )
+                                                })}
+                                            </div>
+                                        ) : (
+                                            <Textarea
+                                                className="resize-none"
+                                                placeholder="Your answer..."
+                                                value={answers[q.id] || ''}
+                                                onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                                            />
+                                        )}
+                                    </div>
+                                );
+                            })()}
                         </div>
 
                         <div className="space-y-4">
-                            <Button
-                                onClick={() => handleFinishQuestions(rating)}
-                                className="w-full"
-                                size="lg"
-                            >
-                                Generate Review
-                            </Button>
+                            {currentQuestionIndex < initialQuestions.length - 1 ? (
+                                <Button
+                                    onClick={() => setCurrentQuestionIndex(prev => prev + 1)}
+                                    className="w-full h-12"
+                                    size="lg"
+                                >
+                                    Next Question <ArrowRight className="ml-2 h-4 w-4" />
+                                </Button>
+                            ) : (
+                                <Button
+                                    onClick={() => handleFinishQuestions(rating)}
+                                    className="w-full h-12"
+                                    size="lg"
+                                >
+                                    Generate Review
+                                </Button>
+                            )}
+
+                            {currentQuestionIndex > 0 && (
+                                <Button
+                                    variant="ghost"
+                                    onClick={() => setCurrentQuestionIndex(prev => prev - 1)}
+                                    className="w-full"
+                                >
+                                    Back
+                                </Button>
+                            )}
                         </div>
                     </div>
                 )}
