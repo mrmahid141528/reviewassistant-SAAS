@@ -3,35 +3,45 @@
 import { useState } from "react"
 import { useTransition } from "react"
 import Script from "next/script"
+import { Check, Star, Building2, Globe, Rocket } from "lucide-react"
 
 export default function BillingPage() {
     const [isPending, startTransition] = useTransition()
     const [error, setError] = useState<string | null>(null)
+    const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
 
-    const handleUpgrade = () => {
+    const handleUpgrade = (selectedPlanId: string) => {
         setError(null)
+        setLoadingPlan(selectedPlanId)
         startTransition(async () => {
             try {
                 // Fetch the subscription ID from our server backend securely
                 const res = await fetch("/api/razorpay/checkout", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ planId: "plan_sample123" }) // Usually dynamic, hardcoded for demonstration phase
+                    body: JSON.stringify({ planId: selectedPlanId })
                 })
 
+                const data = await res.json()
+
                 if (!res.ok) {
-                    const data = await res.json()
                     throw new Error(data.error || "Failed to initiate checkout")
                 }
 
-                const { subscriptionId } = await res.json()
+                const { subscriptionId, testModeSwitched } = data;
 
-                // Razorpay standard checkout configuration
+                if (testModeSwitched) {
+                    alert(`Developer Test-Mode Active: No API Keys detected. You have been upgraded to ${selectedPlanId} instantly!`);
+                    window.location.reload();
+                    return;
+                }
+
+                // Razorpay standard checkout configuration for Real Deployment
                 const options = {
                     key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, // Use Razorpay test/prod public key
                     subscription_id: subscriptionId,
-                    name: "SaaS Platform Pro",
-                    description: "Unlimited review campaigns and metrics",
+                    name: "Review Assistant SaaS",
+                    description: `Subscription Upgrade: ${selectedPlanId}`,
                     handler: function (response: any) {
                         alert(`Payment successful! Payment ID: ${response.razorpay_payment_id}`)
                         window.location.reload()
@@ -47,58 +57,129 @@ export default function BillingPage() {
 
             } catch (err: any) {
                 setError(err.message)
+            } finally {
+                setLoadingPlan(null)
             }
         })
     }
 
+    const plans = [
+        {
+            id: "plan_starter_01",
+            name: "Starter",
+            price: "₹799",
+            duration: "/mo",
+            description: "Perfect for single locations starting out.",
+            icon: Star,
+            features: ["1 Business Location", "50 AI Reviews/month", "Standard Branding", "Basic Analytics"],
+            iconClass: "bg-gray-100 text-gray-600",
+            popular: false
+        },
+        {
+            id: "plan_growth_01",
+            name: "Growth",
+            price: "₹1,499",
+            duration: "/mo",
+            description: "Our most popular tier for active businesses.",
+            icon: Rocket,
+            features: ["1 Business Location", "Unlimited AI Reviews", "No Watermark", "Custom Feedback Filtering", "Advanced Analytics"],
+            iconClass: "bg-blue-100 text-blue-600",
+            popular: true
+        },
+        {
+            id: "plan_business_01",
+            name: "Business",
+            price: "₹3,999",
+            duration: "/mo",
+            description: "For expanding brands and franchises.",
+            icon: Globe,
+            features: ["Up to 5 Locations", "Staff Accounts", "CSV Bulk Export", "Automated Pipelines"],
+            iconClass: "bg-indigo-100 text-indigo-600",
+            popular: false
+        },
+        {
+            id: "plan_enterprise_01",
+            name: "Enterprise",
+            price: "Custom",
+            duration: "",
+            description: "For digital marketing agencies.",
+            icon: Building2,
+            features: ["Unlimited Locations", "Whitelabel Dashboard", "Dedicated Support", "API Access"],
+            iconClass: "bg-slate-100 text-slate-600",
+            popular: false,
+            contactAction: true
+        }
+    ]
+
     return (
-        <div className="space-y-6 max-w-4xl mx-auto pt-6">
+        <div className="space-y-6 max-w-6xl mx-auto pt-6 pb-20">
             <Script src="https://checkout.razorpay.com/v1/checkout.js" />
 
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">Billing & Plans</h1>
-                <p className="text-muted-foreground mt-1">Manage your active subscription seamlessly.</p>
+                <p className="text-muted-foreground mt-1">Manage your active subscription or upgrade your Tier.</p>
             </div>
 
-            <div className="bg-white border rounded-xl p-8 shadow-sm">
+            <div className="bg-white border rounded-xl p-8 shadow-sm mb-12">
                 <div className="flex items-center justify-between">
                     <div>
                         <h2 className="text-xl font-semibold text-gray-900">Current Plan</h2>
-                        <p className="text-sm mt-1 text-gray-500">You are currently on the <strong className="text-gray-800">Free Tier</strong>.</p>
+                        <p className="text-sm mt-1 text-gray-500">You are currently on the <strong className="text-gray-800">Free Trial</strong> (7 days remaining).</p>
                         {error && <p className="text-red-600 mt-2 text-sm">{error}</p>}
                     </div>
                     <div className="text-right">
-                        <span className="inline-flex items-center rounded-md bg-gray-50 px-2.5 py-1 text-xs font-semibold text-gray-600 ring-1 ring-inset ring-gray-500/10 uppercase tracking-widest">
-                            Incomplete
+                        <span className="inline-flex items-center rounded-md bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-700 ring-1 ring-inset ring-green-600/10 uppercase tracking-widest">
+                            Active Trial
                         </span>
                     </div>
                 </div>
+            </div>
 
-                <div className="mt-8 border-t pt-8">
-                    <h3 className="font-semibold text-gray-900 mb-4">Available Upgrade</h3>
-                    <div className="flex border border-blue-200 bg-blue-50/50 rounded-lg p-6 relative">
-                        <div className="absolute top-0 right-0 py-1 px-3 bg-blue-600 text-white font-bold text-xs rounded-bl-lg rounded-tr-lg">POPULAR</div>
-                        <div className="flex-1">
-                            <h4 className="font-bold text-lg text-blue-900">SaaS Pro (Monthly)</h4>
-                            <p className="text-sm text-blue-700/80 mt-1 mb-4">Unlock unlimited automation capabilities, detailed metrics, and priority deployment flows.</p>
-                            <ul className="text-sm space-y-2 text-blue-800/90 mb-6">
-                                <li className="flex items-center gap-2">✓ Unlimited Review Generation Requests</li>
-                                <li className="flex items-center gap-2">✓ Dynamic Custom Survey Forms</li>
-                                <li className="flex items-center gap-2">✓ Direct Automation Pipeline</li>
-                            </ul>
+            <h2 className="text-2xl font-bold tracking-tight text-center mb-8">Select your upgrade</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {plans.map((plan) => {
+                    const isPopular = plan.popular;
+                    const Icon = plan.icon;
+                    return (
+                        <div key={plan.id} className={`relative flex flex-col bg-white border rounded-2xl shadow-sm overflow-hidden ${isPopular ? 'ring-2 ring-blue-600' : 'ring-1 ring-gray-200'}`}>
+                            {isPopular && (
+                                <div className="absolute top-0 inset-x-0 flex justify-center">
+                                    <span className="bg-blue-600 text-white text-[10px] font-bold uppercase tracking-wider py-1 px-3 rounded-b-lg">
+                                        Most Popular
+                                    </span>
+                                </div>
+                            )}
+                            <div className="p-6 pt-10 flex-1 flex flex-col">
+                                <div className="flex items-center gap-3 mb-2">
+                                    <div className={`p-2 rounded-lg ${plan.iconClass}`}>
+                                        <Icon className="w-5 h-5" />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-gray-900">{plan.name}</h3>
+                                </div>
+                                <p className="text-gray-500 text-sm mb-6 h-10">{plan.description}</p>
+                                <div className="mb-6">
+                                    <span className="text-3xl font-bold text-gray-900">{plan.price}</span>
+                                    {plan.duration && <span className="text-gray-500">{plan.duration}</span>}
+                                </div>
+                                <ul className="space-y-3 mb-8 flex-1">
+                                    {plan.features.map((feature, idx) => (
+                                        <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
+                                            <Check className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+                                            <span>{feature}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                                <button
+                                    disabled={isPending && loadingPlan === plan.id}
+                                    onClick={() => !plan.contactAction && handleUpgrade(plan.id)}
+                                    className={`w-full py-2.5 rounded-lg font-medium text-sm transition-colors ${plan.contactAction ? 'bg-gray-100 text-gray-900 border hover:bg-gray-200' : isPopular ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm' : 'bg-white text-blue-600 border border-blue-200 hover:bg-blue-50'}`}
+                                >
+                                    {loadingPlan === plan.id ? "Processing..." : plan.contactAction ? "Contact Sales" : "Upgrade Plan"}
+                                </button>
+                            </div>
                         </div>
-                        <div className="flex flex-col justify-center items-end ml-4">
-                            <p className="text-3xl font-bold text-blue-900 mb-4">₹1,999<span className="text-sm text-blue-600">/mo</span></p>
-                            <button
-                                onClick={handleUpgrade}
-                                disabled={isPending}
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium transition-colors"
-                            >
-                                {isPending ? "Validating..." : "Upgrade to Pro"}
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                    )
+                })}
             </div>
         </div>
     )
