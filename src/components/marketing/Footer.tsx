@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Star, Twitter, Github, Linkedin, Mail } from "lucide-react";
+import { Star, Mail } from "lucide-react";
 import prisma from "@/lib/prisma";
 
 export async function Footer() {
@@ -27,15 +27,15 @@ export async function Footer() {
                         <p className="text-muted-foreground text-sm leading-relaxed mt-2 max-w-sm">
                             Automating 5-star Google reputation for local businesses using frictionless QR AI workflows. Stop begging for reviews.
                         </p>
-                        <div className="flex items-center gap-4 mt-4">
+                        <div className="flex items-center gap-4 mt-4 text-sm font-medium">
                             <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                                <Twitter className="h-5 w-5" />
+                                Twitter
                             </Link>
                             <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                                <Github className="h-5 w-5" />
+                                GitHub
                             </Link>
                             <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                                <Linkedin className="h-5 w-5" />
+                                LinkedIn
                             </Link>
                         </div>
                     </div>
