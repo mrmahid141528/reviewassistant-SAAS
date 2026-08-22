@@ -2061,3 +2061,65 @@ Every future page request for Smart Review Assistant must follow this document.
 # 72. ONE-LINE DESIGN RULE
 
 > **Do not design each page separately. Design Smart Review Assistant as one complete product system.**
+
+---
+
+# 73. SYSTEM ARCHITECTURE & PRODUCTION CAPABILITIES BLUEPRINT
+
+This section mandates the architectural reality of the Smart Review Assistant. **NO DUMMY DATA IS ALLOWED.** Every interface operates on a fully interconnected backend ecosystem powered by Next.js (App Router), Supabase (Auth), Prisma (Database), Razorpay (Billing), and Google Gemini API (AI inference).
+
+## A. Core Infrastructure Protocols
+
+1. **Database Truth (Prisma & PostgreSQL):** All metrics, tiers, user data, business boundaries, review responses, and compliance pages are served dynamically from the PostgreSQL instance. No hardcoded configuration arrays.
+2. **Secure Identity (Supabase SSR):** Session boundaries are enforced at the server-action level. Unauthenticated hits to /dashboard or /superadmin result in permanent redirects.
+3. **Automated Billing (Razorpay Webhooks):** Subscription state is reconciled automatically. Trial expirations, plan upgrades, and location quotas are enforced strictly based on the Plan limits mapped to the Business gateway ID.
+
+---
+
+## B. Super Admin Full Control Suite
+
+The /superadmin workspace is the supreme controller of the entire SaaS platform. Designed for the platform owner, these tools directly mutate the underlying database state.
+
+### 1. Operations & CRM
+- **User Management (/users):** Displays real-time aggregated metrics of Supabase identities linked to their Prisma user profiles. Admins can permanently delete accounts, forcefully overwrite forgotten passwords, or modify global profile strings.
+- **Business Management (/businesses):** Granular tracking of all SaaS tenant accounts. Allows the Admin to view total locations, suspend bad actors (instantly freezing their public UI), override API configurations, or force a subscription tier upgrade manually.
+
+### 2. Commercial Engine
+- **Dynamic Pricing Engine (/pricing):** A fully functional CMS for SaaS subscription plans. Creating a new plan or editing an existing plan's price/rate limit will instantaneously reflect on the public marketing /pricing page and the internal /dashboard/billing upgrade panels without requiring developer intervention.
+- **Webhook Subscriptions:** Automatic downgrade of features if Razorpay triggers a subscription.cancelled or subscription.halted event.
+
+### 3. Compliance CMS
+- **Legal Page Generation (/pages):** Terms of Service, Privacy Policies, and Data Processing Agreements are created via the Admin CMS panel and automatically mapped to the public Marketing Footer URLs dynamically.
+
+---
+
+## C. The Business Owner Dashboard
+
+The /dashboard is the command center for paying SaaS tenants (the small-to-medium business owners).
+
+### 1. Onboarding & Physical Footprint
+- **Automated Provisioning (/onboarding):** New signups are forced through a mandatory onboarding gate to establish their global Business configuration and parse their official Google Review Destination URLs.
+- **Multi-Location Management (/locations):** Enterprise businesses can create distinct physical locations (e.g. "Downtown Branch" vs "Uptown Branch"), each possessing a unique identifier. System blocks location creation if the user's Subscription Tier limits are exceeded.
+
+### 2. Marketing & Conversion Workflows
+- **QR Code Engine (/qr):** Fully integrated generation of scannable QR tags embedded with specific Location IDs. Customers scanning the QR are directed entirely to the business's distinct review pipeline.
+- **Visual Analytics:** Real-time data visualization (via Recharts SVG charts) mapping the chronological velocity of 5-Star reviews generated per day, natively querying eviewCampaigns.
+
+### 3. Subscription Management
+- **Dashboard Billing (/billing):** Compares the user's active gatewayId against the active Prisma Plans. Features upgrade pathways and strict capacity constraints prohibiting businesses from overriding AI limits without paying.
+
+---
+
+## D. The End-Consumer Review Workflow
+
+The public eview/ segment is designed for extreme velocity, bypassing all forms of login friction.
+
+1. **Watermarked Verification:** Automatically detects if a Business is on a Free Tier and injects a "Powered by Smart Review Assistant" watermark into the flow.
+2. **Dynamic Traversal:** Extracts the Business ID and distinct Location ID from the QR-code query parameters, establishing a unified tracking metric.
+3. **Frictionless Google Gemini Inference:** 
+   - Consumer selects 1-5 stars.
+   - Consumer blindly taps tags or inputs a 2-word sentiment.
+   - Serverless action leverages @google/genai to synthesize a personalized, grammatically perfect, 2-3 paragraph 5-star review mimicking organic human sentiment.
+4. **Clipboard Injection Pipeline:** The completed text is instantly copied to the mobile clipboard just as the user is automatically redirected natively into the Google Maps App store listing.
+
+**Every single mechanic listed above has been deployed to production and enforces strict backend constraints. No future implementations should fake metrics.**
