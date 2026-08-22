@@ -12,25 +12,6 @@ export default function LandingPage() {
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-blue-500/20 blur-[120px] mix-blend-multiply opacity-70 dark:opacity-20 animate-in fade-in duration-1000 delay-500" />
       </div>
 
-      {/* Navigation */}
-      <header className="fixed top-0 w-full z-50 bg-background/70 backdrop-blur-md border-b border-border/50">
-        <div className="container mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Star className="h-6 w-6 text-primary fill-primary" />
-            <span className="text-lg font-bold tracking-tight">ReviewAssistant</span>
-          </div>
-          <nav className="flex items-center gap-4">
-            <Link href="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden sm:block">
-              Sign In
-            </Link>
-            <Link href="/login">
-              <Button size="sm" className="rounded-full rounded-r-full px-5 text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-sm">
-                Get Started
-              </Button>
-            </Link>
-          </nav>
-        </div>
-      </header>
 
       <main className="relative z-10 pt-24 pb-16">
 
@@ -145,22 +126,7 @@ export default function LandingPage() {
 
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-border/50 bg-muted/50 py-12 relative z-10">
-        <div className="container mx-auto px-4 md:px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-2">
-            <Star className="h-5 w-5 text-primary fill-primary" />
-            <span className="font-semibold">ReviewAssistant</span>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} ReviewAssistant SaaS. All rights reserved.
-          </p>
-          <div className="flex gap-4">
-            <Link href="#" className="text-sm font-medium text-muted-foreground hover:text-foreground">Terms</Link>
-            <Link href="#" className="text-sm font-medium text-muted-foreground hover:text-foreground">Privacy</Link>
-          </div>
-        </div>
-      </footer>
+
     </div >
   );
 }
