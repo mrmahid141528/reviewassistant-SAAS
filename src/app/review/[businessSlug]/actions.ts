@@ -7,6 +7,33 @@ export async function submitReviewDraft(rating: number, answers: object, busines
         const business = await prisma.business.findUnique({ where: { slug: businessSlug } });
         if (!business) return { success: false, error: "Business not found." };
 
+        // Determine AI generation limits based on the active Plan
+        let maxGenerations = 50; // Default Free/Starter tier limit
+        if (business.razorpayPlanId) {
+            const plan = await prisma.plan.findUnique({ where: { id: business.razorpayPlanId } });
+            if (plan && plan.limits) {
+                maxGenerations = (plan.limits as any).maxGenerations ?? 50;
+            }
+        }
+
+        let skipAI = false;
+        if (maxGenerations !== -1) {
+            const startOfMonth = new Date();
+            startOfMonth.setDate(1);
+            startOfMonth.setHours(0, 0, 0, 0);
+
+            const generatedThisMonth = await prisma.generatedReview.count({
+                where: {
+                    businessId: business.id,
+                    createdAt: { gte: startOfMonth }
+                }
+            });
+
+            if (generatedThisMonth >= maxGenerations) {
+                skipAI = true;
+            }
+        }
+
         // Auto-provision campaign if missing
         let campaign = await prisma.campaign.findFirst({ where: { businessId: business.id } });
         if (!campaign) {
@@ -28,7 +55,7 @@ export async function submitReviewDraft(rating: number, answers: object, busines
 
         const currentSettings = (campaign.settings as any) || {}
 
-        const draft = await generateGeminiReview(rating, business.name, qnaPairs, currentSettings);
+        const draft = await generateGeminiReview(rating, business.name, qnaPairs, currentSettings, skipAI);
 
         // Record submission in the database
         await prisma.feedbackSubmission.create({
@@ -58,7 +85,9 @@ export async function submitReviewDraft(rating: number, answers: object, busines
     }
 }
 
-async function generateGeminiReview(rating: number, businessName: string, qnaPairs: { question: string, answer: string }[], settings: any) {
+async function generateGeminiReview(rating: number, businessName: string, qnaPairs: { question: string, answer: string }[], settings: any, skipAI: boolean) {
+    if (skipAI) return generateMockReviewOffline(rating, businessName);
+
     const aiLanguage = settings?.aiLanguage || "English";
     const aiTone = settings?.aiTone || "Professional & Friendly";
 
