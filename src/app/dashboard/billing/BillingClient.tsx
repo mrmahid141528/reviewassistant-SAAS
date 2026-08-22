@@ -5,7 +5,7 @@ import { useTransition } from "react"
 import Script from "next/script"
 import { Check, Star, Building2, Globe, Rocket } from "lucide-react"
 
-export default function BillingClient({ plans }: { plans: any[] }) {
+export default function BillingClient({ plans, activePlanId, daysSinceCreated, isExpired }: { plans: any[], activePlanId: string | null, daysSinceCreated: number, isExpired: boolean }) {
     const [isPending, startTransition] = useTransition()
     const [error, setError] = useState<string | null>(null)
     const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
@@ -91,13 +91,29 @@ export default function BillingClient({ plans }: { plans: any[] }) {
                 <div className="flex items-center justify-between">
                     <div>
                         <h2 className="text-xl font-semibold text-gray-900">Current Plan</h2>
-                        <p className="text-sm mt-1 text-gray-500">You are currently on the <strong className="text-gray-800">Free Trial</strong> (7 days remaining).</p>
+                        {activePlanId ? (
+                            <p className="text-sm mt-1 text-gray-500">You are currently subscribed to the <strong className="text-gray-800">{plans.find(p => p.id === activePlanId)?.name || 'Premium'}</strong> plan.</p>
+                        ) : isExpired ? (
+                            <p className="text-sm mt-1 text-red-500">Your Free Trial has expired. Please choose a plan below.</p>
+                        ) : (
+                            <p className="text-sm mt-1 text-gray-500">You are currently on the <strong className="text-gray-800">Free Trial</strong> ({Math.max(0, 7 - daysSinceCreated)} days remaining).</p>
+                        )}
                         {error && <p className="text-red-600 mt-2 text-sm">{error}</p>}
                     </div>
                     <div className="text-right">
-                        <span className="inline-flex items-center rounded-md bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-700 ring-1 ring-inset ring-green-600/10 uppercase tracking-widest">
-                            Active Trial
-                        </span>
+                        {activePlanId ? (
+                            <span className="inline-flex items-center rounded-md bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-700 ring-1 ring-inset ring-green-600/10 uppercase tracking-widest">
+                                Active Subscription
+                            </span>
+                        ) : isExpired ? (
+                            <span className="inline-flex items-center rounded-md bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 ring-1 ring-inset ring-red-600/10 uppercase tracking-widest">
+                                Suspended
+                            </span>
+                        ) : (
+                            <span className="inline-flex items-center rounded-md bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-700 ring-1 ring-inset ring-green-600/10 uppercase tracking-widest">
+                                Active Trial
+                            </span>
+                        )}
                     </div>
                 </div>
             </div>
@@ -148,11 +164,11 @@ export default function BillingClient({ plans }: { plans: any[] }) {
                                     ))}
                                 </ul>
                                 <button
-                                    disabled={isPending && loadingPlan === plan.id}
+                                    disabled={loadingPlan === plan.id || plan.id === activePlanId}
                                     onClick={() => !isContactOnly && handleUpgrade(plan.id)}
-                                    className={`w-full py-2.5 rounded-lg font-medium text-sm transition-colors ${isContactOnly ? 'bg-gray-100 text-gray-900 border hover:bg-gray-200' : isPopular ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm' : 'bg-white text-blue-600 border border-blue-200 hover:bg-blue-50'}`}
+                                    className={`w-full py-2.5 rounded-lg font-medium text-sm transition-colors ${plan.id === activePlanId ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed' : isContactOnly ? 'bg-gray-100 text-gray-900 border hover:bg-gray-200' : isPopular ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm' : 'bg-white text-blue-600 border border-blue-200 hover:bg-blue-50'}`}
                                 >
-                                    {loadingPlan === plan.id ? "Processing..." : isContactOnly ? "Contact Sales" : "Upgrade Plan"}
+                                    {plan.id === activePlanId ? "Current Plan" : loadingPlan === plan.id ? "Processing..." : isContactOnly ? "Contact Sales" : "Upgrade Plan"}
                                 </button>
                             </div>
                         </div>
