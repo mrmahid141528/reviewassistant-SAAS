@@ -92,7 +92,7 @@ export default function BillingClient({ plans, activePlanId, daysSinceCreated, i
                     <div>
                         <h2 className="text-xl font-semibold text-gray-900">Current Plan</h2>
                         {activePlanId ? (
-                            <p className="text-sm mt-1 text-gray-500">You are currently subscribed to the <strong className="text-gray-800">{plans.find(p => p.id === activePlanId)?.name || 'Premium'}</strong> plan.</p>
+                            <p className="text-sm mt-1 text-gray-500">You are currently subscribed to the <strong className="text-gray-800">{plans.find(p => p.id === activePlanId || p.slug === activePlanId)?.name || ((activePlanId && activePlanId.includes("plan_")) ? 'External Gateway' : 'Custom')}</strong> plan.</p>
                         ) : isExpired ? (
                             <p className="text-sm mt-1 text-red-500">Your Free Trial has expired. Please choose a plan below.</p>
                         ) : (
@@ -164,11 +164,11 @@ export default function BillingClient({ plans, activePlanId, daysSinceCreated, i
                                     ))}
                                 </ul>
                                 <button
-                                    disabled={loadingPlan === plan.id || plan.id === activePlanId}
+                                    disabled={loadingPlan === plan.id || plan.id === activePlanId || plan.slug === activePlanId}
                                     onClick={() => !isContactOnly && handleUpgrade(plan.id)}
-                                    className={`w-full py-2.5 rounded-lg font-medium text-sm transition-colors ${plan.id === activePlanId ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed' : isContactOnly ? 'bg-gray-100 text-gray-900 border hover:bg-gray-200' : isPopular ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm' : 'bg-white text-blue-600 border border-blue-200 hover:bg-blue-50'}`}
+                                    className={`w-full py-2.5 rounded-lg font-medium text-sm transition-colors ${(plan.id === activePlanId || plan.slug === activePlanId) ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed' : isContactOnly ? 'bg-gray-100 text-gray-900 border hover:bg-gray-200' : isPopular ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm' : 'bg-white text-blue-600 border border-blue-200 hover:bg-blue-50'}`}
                                 >
-                                    {plan.id === activePlanId ? "Current Plan" : loadingPlan === plan.id ? "Processing..." : isContactOnly ? "Contact Sales" : "Upgrade Plan"}
+                                    {(plan.id === activePlanId || plan.slug === activePlanId) ? "Current Plan" : loadingPlan === plan.id ? "Processing..." : isContactOnly ? "Contact Sales" : "Upgrade Plan"}
                                 </button>
                             </div>
                         </div>
