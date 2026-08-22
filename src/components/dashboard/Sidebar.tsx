@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { LayoutDashboard, MessageSquare, QrCode, Settings, LogOut, Store, Shield } from "lucide-react";
+import { LayoutDashboard, MessageSquare, QrCode, Settings, LogOut, Store, CreditCard } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navigation = [
@@ -11,6 +11,7 @@ const navigation = [
   { name: "Questions", href: "/dashboard/questions", icon: MessageSquare },
   { name: "QR Code", href: "/dashboard/qr", icon: QrCode },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
+  { name: "Billing & Plans", href: "/dashboard/billing", icon: CreditCard },
 ];
 
 export function Sidebar() {

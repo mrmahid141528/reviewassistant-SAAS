@@ -66,6 +66,11 @@ model Business {
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
 
+  razorpayCustomerId       String?   @map("razorpay_customer_id")
+  razorpaySubscriptionId   String?   @map("razorpay_subscription_id")
+  razorpayPlanId           String?   @map("razorpay_plan_id")
+  razorpayCurrentPeriodEnd DateTime? @map("razorpay_current_period_end")
+
   members             BusinessMember[]
   locations           BusinessLocation[]
   customers           Customer[]

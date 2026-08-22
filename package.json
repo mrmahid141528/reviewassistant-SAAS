@@ -25,6 +25,7 @@
     "nextjs-toploader": "^3.9.17",
     "pg": "^8.23.0",
     "qrcode.react": "^4.2.0",
+    "razorpay": "^2.9.8",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "recharts": "^3.10.1",
