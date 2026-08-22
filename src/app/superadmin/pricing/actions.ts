@@ -9,7 +9,7 @@ const SUPER_ADMIN = "mrmahid141528@gmail.com"
 async function checkAdmin() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user || user.email !== SUPER_ADMIN) throw new Error("Unauthorized")
+    if (!user || user.email?.toLowerCase() !== SUPER_ADMIN) throw new Error("Unauthorized")
 }
 
 export async function getPlans() {

@@ -12,7 +12,7 @@ async function verifySuperAdmin() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user || !user.email || !SUPER_ADMIN_EMAILS.includes(user.email)) {
+    if (!user || !user.email || !SUPER_ADMIN_EMAILS.includes(user.email.toLowerCase())) {
         throw new Error("Unauthorized Access")
     }
     return user

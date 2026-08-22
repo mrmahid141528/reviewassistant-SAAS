@@ -24,7 +24,7 @@ export default async function SuperAdminLayout({
     }
 
     // Not a super admin -> send back to normal dashboard
-    if (!SUPER_ADMIN_EMAILS.includes(user.email)) {
+    if (!user.email || !SUPER_ADMIN_EMAILS.includes(user.email.toLowerCase())) {
         redirect("/dashboard");
     }
 

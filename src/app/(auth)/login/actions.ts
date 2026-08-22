@@ -20,7 +20,7 @@ export async function login(formData: FormData) {
     }
 
     revalidatePath('/dashboard', 'layout')
-    if (email === "mrmahid141528@gmail.com") {
+    if (email.toLowerCase() === "mrmahid141528@gmail.com") {
         redirect('/superadmin')
     }
     redirect('/dashboard')
@@ -46,7 +46,7 @@ export async function signup(formData: FormData) {
     }
 
     revalidatePath('/dashboard', 'layout')
-    if (email === "mrmahid141528@gmail.com") {
+    if (email.toLowerCase() === "mrmahid141528@gmail.com") {
         redirect('/superadmin')
     }
     redirect('/dashboard')
