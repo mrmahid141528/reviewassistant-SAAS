@@ -56,7 +56,9 @@ export default function PricingCMSPage() {
                                 <h2 className="text-xl font-bold">{plan.name}</h2>
                                 <p className="text-sm text-gray-500">{plan.description}</p>
                             </div>
-                            <span className="text-lg font-bold bg-green-100 text-green-800 px-3 py-1 rounded-full">₹{Number(plan.priceMonthly)}/mo</span>
+                            <span className="text-lg font-bold bg-green-100 text-green-800 px-3 py-1 rounded-full">
+                                {plan.limits?.customPlan ? "Custom Pricing" : `₹${Number(plan.priceMonthly)}/mo`}
+                            </span>
                         </div>
 
                         <div className="flex-1 mb-6">
