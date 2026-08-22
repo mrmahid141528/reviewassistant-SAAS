@@ -81,11 +81,11 @@ export default async function PublicPricingPage() {
 
                                     <Link href={isContactOnly ? "mailto:sales@example.com" : "/login"}>
                                         <button
-                                            className={`w-full py-2.5 rounded-lg font-medium text-sm transition-colors ${isContactOnly
-                                                    ? 'bg-muted text-foreground border hover:bg-muted/80'
-                                                    : isPopular
-                                                        ? 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm'
-                                                        : 'bg-background text-primary border border-primary/20 hover:bg-primary/5'
+                                            className={`w-full py-2.5 rounded-xl font-medium text-sm transition-colors ${isContactOnly
+                                                ? 'bg-muted text-foreground border hover:bg-muted/80'
+                                                : isPopular
+                                                    ? 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm'
+                                                    : 'bg-background text-primary border border-primary/20 hover:bg-primary/5'
                                                 }`}
                                         >
                                             {isContactOnly ? "Contact Sales" : "Start 7-Day Free Trial"}

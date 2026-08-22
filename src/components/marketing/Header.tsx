@@ -8,11 +8,11 @@ export function Header() {
             <div className="container mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
 
                 {/* Logo */}
-                <Link href="/" className="flex items-center gap-2 transition-transform hover:scale-105">
+                <Link href="/" className="flex items-center gap-2 transition-transform hover:scale-[1.02]">
                     <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
                         <Star className="h-5 w-5 text-primary fill-primary" />
                     </div>
-                    <span className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80">
+                    <span className="text-xl font-bold tracking-tight text-foreground">
                         ReviewAssistant
                     </span>
                 </Link>
@@ -36,7 +36,7 @@ export function Header() {
                         Sign In
                     </Link>
                     <Link href="/login">
-                        <Button size="sm" className="rounded-full px-6 text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20 transition-all">
+                        <Button size="sm" className="rounded-xl px-6 text-sm font-semibold border-transparent shadow-sm hover:scale-[1.02] transition-all">
                             Get Started
                         </Button>
                     </Link>

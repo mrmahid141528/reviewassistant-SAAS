@@ -71,7 +71,7 @@ export default function ContactUsPage() {
                                 <label className="text-sm font-medium">Message</label>
                                 <textarea className="w-full px-3 py-2 border rounded-lg bg-background min-h-[120px]" placeholder="How can we help?"></textarea>
                             </div>
-                            <button type="button" className="w-full py-2.5 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors">
+                            <button type="button" className="w-full py-2.5 bg-primary text-primary-foreground font-semibold rounded-xl hover:bg-primary/90 transition-colors">
                                 Send Message
                             </button>
                         </form>

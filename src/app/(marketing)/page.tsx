@@ -6,11 +6,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background font-sans selection:bg-primary/20 overflow-x-hidden">
 
-      {/* Background Gradients */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/20 blur-[120px] mix-blend-multiply opacity-50 dark:opacity-20 animate-in fade-in duration-1000" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-blue-500/20 blur-[120px] mix-blend-multiply opacity-70 dark:opacity-20 animate-in fade-in duration-1000 delay-500" />
-      </div>
+
 
 
       <main className="relative z-10 pt-24 pb-16">
@@ -28,12 +24,12 @@ export default function LandingPage() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full md:w-auto">
             <Link href="/login">
-              <Button size="lg" className="w-full sm:w-auto rounded-full px-8 h-14 text-base font-semibold shadow-lg shadow-primary/20 hover:scale-105 transition-all">
+              <Button size="lg" className="w-full sm:w-auto rounded-xl px-8 h-14 text-base font-semibold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all">
                 Start 7-Day Free Trial
               </Button>
             </Link>
             <Link href="#features">
-              <Button variant="outline" size="lg" className="w-full sm:w-auto rounded-full px-8 h-14 text-base font-semibold bg-background/50 backdrop-blur-sm">
+              <Button variant="outline" size="lg" className="w-full sm:w-auto rounded-xl px-8 h-14 text-base font-semibold bg-background border-border hover:bg-muted/50 transition-all">
                 See How It Works
               </Button>
             </Link>
