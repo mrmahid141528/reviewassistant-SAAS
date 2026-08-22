@@ -16,13 +16,13 @@ export default async function SuperAdminDashboard() {
     });
 
     return (
-        <div className="space-y-6 max-w-7xl mx-auto">
+        <div className="space-y-6 max-w-7xl mx-auto animate-in fade-in duration-500">
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">System Overview</h1>
                 <p className="text-muted-foreground mt-1">Platform-wide statistics and recent activity for Review Assistant.</p>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 animate-in fade-in slide-in-from-bottom-3 duration-500 delay-100 fill-mode-both">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                         <CardTitle className="text-sm font-medium">Total SaaS Users</CardTitle>
@@ -61,7 +61,7 @@ export default async function SuperAdminDashboard() {
                 </Card>
             </div>
 
-            <Card>
+            <Card className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200 fill-mode-both">
                 <CardHeader>
                     <CardTitle>Recent Businesses Created</CardTitle>
                     <CardDescription>The newest registered tenants on the platform</CardDescription>

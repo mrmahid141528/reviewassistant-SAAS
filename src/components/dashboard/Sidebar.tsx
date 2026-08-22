@@ -27,9 +27,11 @@ export function Sidebar() {
 
   return (
     <div className="flex h-full w-64 flex-col gap-4 border-r bg-muted/40 p-4 shrink-0 hidden md:flex">
-      <div className="flex items-center gap-2 px-2 pb-4 pt-2">
-        <Store className="h-6 w-6 text-primary" />
-        <span className="font-bold text-lg">Review Assistant</span>
+      <div className="flex items-center gap-2 px-2 pb-4 pt-2 group cursor-pointer transition-transform duration-300 hover:scale-[1.02]">
+        <div className="p-1.5 bg-blue-600/10 rounded-lg group-hover:bg-blue-600/20 transition-colors">
+          <Store className="h-5 w-5 text-blue-600" />
+        </div>
+        <span className="font-bold text-lg bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">Review Assistant</span>
       </div>
 
       <nav className="flex-1 space-y-1">
@@ -40,10 +42,10 @@ export function Sidebar() {
               key={item.name}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
+                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
                 isActive
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted"
+                  ? "bg-blue-600/10 text-blue-700 font-semibold shadow-sm"
+                  : "text-gray-500 hover:bg-gray-100/80 hover:text-gray-900 hover:translate-x-1"
               )}
             >
               <item.icon className="h-4 w-4" />
@@ -57,7 +59,7 @@ export function Sidebar() {
 
         <button
           onClick={handleLogout}
-          className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-500 transition-all duration-200 hover:bg-red-50 hover:text-red-600 hover:translate-x-1"
         >
           <LogOut className="h-4 w-4" />
           Sign Out

@@ -79,7 +79,7 @@ export default async function DashboardOverviewPage() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-in fade-in duration-500">
             <div>
                 <h2 className="text-2xl font-bold tracking-tight">Overview</h2>
                 <p className="text-muted-foreground">
@@ -87,7 +87,7 @@ export default async function DashboardOverviewPage() {
                 </p>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 animate-in fade-in slide-in-from-bottom-3 duration-500 delay-100 fill-mode-both">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">
@@ -136,7 +136,7 @@ export default async function DashboardOverviewPage() {
                 </Card>
             </div>
 
-            <Card className="col-span-full">
+            <Card className="col-span-full animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200 fill-mode-both">
                 <CardHeader>
                     <CardTitle>AI Performance Trend</CardTitle>
                     <CardDescription>
@@ -148,7 +148,7 @@ export default async function DashboardOverviewPage() {
                 </CardContent>
             </Card>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300 fill-mode-both">
                 <Card className="col-span-4">
                     <CardHeader>
                         <CardTitle>Recent Activity</CardTitle>
