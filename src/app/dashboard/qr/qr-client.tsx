@@ -14,14 +14,14 @@ import { Label } from "@/components/ui/label";
 import { Copy, Download, Link as LinkIcon, RefreshCw } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 
-export function QrClient({ publicReviewUrl }: { publicReviewUrl: string }) {
-    const copyLink = () => {
-        navigator.clipboard.writeText(publicReviewUrl);
+export function QrClient({ publicReviewUrl, locations }: { publicReviewUrl: string, locations: { id: string, name: string }[] }) {
+    const copyLink = (url: string) => {
+        navigator.clipboard.writeText(url);
         alert("Link copied to clipboard!");
     }
 
-    const handleDownloadHighQualityPng = () => {
-        const svg = document.getElementById("qr-code-svg");
+    const handleDownloadHighQualityPng = (elementId: string, filename: string) => {
+        const svg = document.getElementById(elementId);
         if (!svg) return;
         const svgData = new XMLSerializer().serializeToString(svg);
         const canvas = document.createElement("canvas");
@@ -38,7 +38,7 @@ export function QrClient({ publicReviewUrl }: { publicReviewUrl: string }) {
             }
             const pngFile = canvas.toDataURL("image/png", 1.0);
             const downloadLink = document.createElement("a");
-            downloadLink.download = "review-assistant-qr-hq.png";
+            downloadLink.download = filename;
             downloadLink.href = pngFile;
             downloadLink.click();
         };
@@ -59,29 +59,52 @@ export function QrClient({ publicReviewUrl }: { publicReviewUrl: string }) {
                     <CardHeader>
                         <CardTitle>Your Review Code</CardTitle>
                         <CardDescription>
-                            Customers can scan this code with their smartphone camera to access your review assistant.
+                            {locations.length > 0 ? "You have multiple locations. Generate specific QR codes below to track analytics accurately." : "Customers can scan this code with their smartphone camera to access your review assistant."}
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="flex flex-col items-center justify-center py-6">
-                        <div className="rounded-xl border bg-white p-6 shadow-sm">
-                            <QRCodeSVG
-                                id="qr-code-svg"
-                                value={publicReviewUrl}
-                                size={220}
-                                level="Q"
-                                includeMargin={true}
-                            />
-                        </div>
-
-                        <p className="text-sm text-muted-foreground text-center mt-6">
-                            Place this at your checkout counter, tables, or on receipts.
-                        </p>
+                        {locations.length > 0 ? (
+                            <div className="flex flex-col w-full gap-8">
+                                {locations.map(loc => {
+                                    const locUrl = `${publicReviewUrl}?locationId=${loc.id}`;
+                                    const locIdStr = `qr-code-svg-${loc.id}`;
+                                    return (
+                                        <div key={loc.id} className="border p-4 rounded-xl shadow-sm bg-gray-50 flex flex-col items-center">
+                                            <h3 className="font-bold mb-4">{loc.name} Branch</h3>
+                                            <div className="rounded-xl border bg-white p-6 shadow-sm">
+                                                <QRCodeSVG id={locIdStr} value={locUrl} size={180} level="Q" includeMargin={true} />
+                                            </div>
+                                            <div className="mt-4 flex flex-col w-full gap-2 px-4 max-w-sm">
+                                                <Button size="sm" variant="secondary" onClick={() => copyLink(locUrl)}>
+                                                    <Copy className="h-4 w-4 mr-2" /> Copy Link
+                                                </Button>
+                                                <Button size="sm" onClick={() => handleDownloadHighQualityPng(locIdStr, `${loc.name}-qr.png`)}>
+                                                    <Download className="h-4 w-4 mr-2" /> Download QR
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        ) : (
+                            <>
+                                <div className="rounded-xl border bg-white p-6 shadow-sm">
+                                    <QRCodeSVG id="qr-code-svg" value={publicReviewUrl} size={220} level="Q" includeMargin={true} />
+                                </div>
+                                <p className="text-sm text-muted-foreground text-center mt-6">
+                                    Place this at your checkout counter, tables, or on receipts.
+                                </p>
+                            </>
+                        )}
                     </CardContent>
-                    <CardFooter className="flex items-center justify-center gap-2 border-t px-6 py-4">
-                        <Button className="w-full gap-2" onClick={handleDownloadHighQualityPng}>
-                            <Download className="h-4 w-4" /> Download High-Quality PNG
-                        </Button>
-                    </CardFooter>
+
+                    {locations.length === 0 && (
+                        <CardFooter className="flex items-center justify-center gap-2 border-t px-6 py-4">
+                            <Button className="w-full gap-2" onClick={() => handleDownloadHighQualityPng("qr-code-svg", "review-assistant-qr-hq.png")}>
+                                <Download className="h-4 w-4" /> Download High-Quality PNG
+                            </Button>
+                        </CardFooter>
+                    )}
                 </Card>
 
                 <div className="space-y-6">
@@ -102,7 +125,7 @@ export function QrClient({ publicReviewUrl }: { publicReviewUrl: string }) {
                                         readOnly
                                         className="bg-muted"
                                     />
-                                    <Button variant="secondary" size="icon" className="shrink-0" title="Copy to clipboard" onClick={copyLink}>
+                                    <Button variant="secondary" size="icon" className="shrink-0" title="Copy to clipboard" onClick={() => copyLink(publicReviewUrl)}>
                                         <Copy className="h-4 w-4" />
                                     </Button>
                                     <Button variant="outline" size="icon" className="shrink-0" title="Open in new tab" onClick={() => window.open(publicReviewUrl, '_blank')}>

@@ -17,10 +17,18 @@ export default async function CustomerReviewPage({
     if (!business) return notFound();
 
     let isExpired = false;
+    let hasWatermark = false;
+
     if (!business.razorpayPlanId) {
         const daysSinceCreated = (Date.now() - business.createdAt.getTime()) / (1000 * 60 * 60 * 24);
         if (daysSinceCreated > 7) {
             isExpired = true;
+        }
+        hasWatermark = true; // Trials always have watermark
+    } else {
+        const plan = await prisma.plan.findUnique({ where: { id: business.razorpayPlanId } });
+        if (plan?.limits) {
+            hasWatermark = (plan.limits as Record<string, any>).hasWatermark ?? false;
         }
     }
 
@@ -50,5 +58,5 @@ export default async function CustomerReviewPage({
         });
     }
 
-    return <ReviewClient businessName={business.name} initialQuestions={questions} />;
+    return <ReviewClient businessName={business.name} initialQuestions={questions} hasWatermark={hasWatermark} />;
 }

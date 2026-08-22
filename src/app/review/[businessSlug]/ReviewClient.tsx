@@ -9,7 +9,7 @@ import { submitReviewDraft } from './actions';
 
 type FlowState = "WELCOME" | "RATING" | "QUESTIONS" | "GENERATING" | "RESULT";
 
-export default function ReviewClient({ businessName, initialQuestions = [] }: { businessName: string, initialQuestions?: any[] }) {
+export default function ReviewClient({ businessName, initialQuestions = [], hasWatermark = false }: { businessName: string, initialQuestions?: any[], hasWatermark?: boolean }) {
     const params = useParams();
     const slug = params?.businessSlug as string;
 
@@ -225,6 +225,12 @@ export default function ReviewClient({ businessName, initialQuestions = [] }: { 
                     </div>
                 )}
             </main>
+
+            {hasWatermark && (
+                <footer className="py-4 text-center border-t text-xs text-muted-foreground bg-gray-50/50">
+                    Powered by <span className="font-semibold text-gray-700">Google Review Assistant</span>
+                </footer>
+            )}
         </>
     );
 }

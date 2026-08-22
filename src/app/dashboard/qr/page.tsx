@@ -12,6 +12,7 @@ export default async function QrCodePage() {
     const host = headersList.get("host") || "localhost:3000";
     const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
 
+    let locations: any[] = [];
     if (user) {
         const membership = await prisma.businessMember.findFirst({
             where: { userId: user.id },
@@ -19,10 +20,14 @@ export default async function QrCodePage() {
         });
         if (membership?.business) {
             businessSlug = membership.business.slug;
+            locations = await prisma.businessLocation.findMany({
+                where: { businessId: membership.businessId },
+                select: { id: true, name: true, googlePlaceId: true }
+            })
         }
     }
 
     const publicReviewUrl = `${protocol}://${host}/review/${businessSlug}`;
 
-    return <QrClient publicReviewUrl={publicReviewUrl} />;
+    return <QrClient publicReviewUrl={publicReviewUrl} locations={locations} />;
 }
