@@ -9,15 +9,26 @@ export async function submitReviewDraft(rating: number, answers: object, busines
 
         // Determine AI generation limits based on the active Plan
         let maxGenerations = 50; // Default Free/Starter tier limit
+        let isExpired = false;
+
         if (business.razorpayPlanId) {
             const plan = await prisma.plan.findUnique({ where: { id: business.razorpayPlanId } });
             if (plan && plan.limits) {
                 maxGenerations = (plan.limits as any).maxGenerations ?? 50;
             }
+        } else {
+            // Null Plan -> Evaluate Free Trial Period Constraints
+            const daysSinceCreated = (Date.now() - business.createdAt.getTime()) / (1000 * 60 * 60 * 24);
+            if (daysSinceCreated > 7) {
+                isExpired = true;
+                maxGenerations = 0; // Frozen completely
+            }
         }
 
         let skipAI = false;
-        if (maxGenerations !== -1) {
+        if (isExpired) {
+            skipAI = true;
+        } else if (maxGenerations !== -1) {
             const startOfMonth = new Date();
             startOfMonth.setDate(1);
             startOfMonth.setHours(0, 0, 0, 0);
