@@ -1,6 +1,6 @@
 "use client"
 import { useTransition, useState, useEffect, useRef } from 'react'
-import { MoreHorizontal, Edit, Key, Power, Trash2 } from 'lucide-react'
+import { MoreHorizontal, Edit, Key, Power, Trash2, Zap } from 'lucide-react'
 
 export function AdminActionButtons({
     id,
@@ -11,7 +11,10 @@ export function AdminActionButtons({
     toggleAction,
     deleteAction,
     editAction,
-    resetPasswordAction
+    resetPasswordAction,
+    assignPlanAction,
+    plans,
+    currentPlanId
 }: {
     id: string
     currentStatus: string
@@ -22,16 +25,21 @@ export function AdminActionButtons({
     deleteAction: (formData: FormData) => Promise<void>
     editAction?: (formData: FormData) => Promise<void>
     resetPasswordAction?: (formData: FormData) => Promise<void>
+    assignPlanAction?: (formData: FormData) => Promise<void>
+    plans?: any[]
+    currentPlanId?: string | null
 }) {
     const [isPending, startTransition] = useTransition()
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [isEditing, setIsEditing] = useState(false)
     const [isResetting, setIsResetting] = useState(false)
+    const [isManagingPlan, setIsManagingPlan] = useState(false)
 
     const menuRef = useRef<HTMLDivElement>(null)
     const [editName, setEditName] = useState(userName || '')
     const [editEmail, setEditEmail] = useState(userEmail || '')
     const [newPassword, setNewPassword] = useState('')
+    const [selectedPlanId, setSelectedPlanId] = useState(currentPlanId || 'none')
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -92,6 +100,18 @@ export function AdminActionButtons({
         })
     }
 
+    const handleAssignPlan = () => {
+        if (!assignPlanAction) return
+        startTransition(async () => {
+            const formData = new FormData()
+            formData.append('businessId', id)
+            formData.append('planId', selectedPlanId)
+            await assignPlanAction(formData)
+            setIsManagingPlan(false)
+            alert("Subscription Override saved!")
+        })
+    }
+
     return (
         <div className="flex justify-end gap-2 relative">
             <div className="relative" ref={menuRef}>
@@ -133,6 +153,16 @@ export function AdminActionButtons({
                             <Power className="w-4 h-4" />
                             {currentStatus === 'active' ? 'Suspend' : 'Activate'}
                         </button>
+                        {type === 'business' && assignPlanAction && (
+                            <button
+                                onClick={() => { setIsMenuOpen(false); setIsManagingPlan(true); }}
+                                disabled={isPending}
+                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                            >
+                                <Zap className="w-4 h-4 text-orange-600" />
+                                Manage Subscription
+                            </button>
+                        )}
                         <button
                             onClick={() => { setIsMenuOpen(false); handleDelete(); }}
                             disabled={isPending}
@@ -144,6 +174,35 @@ export function AdminActionButtons({
                     </div>
                 )}
             </div>
+
+            {/* Manage Plan Modal Native Equivalent */}
+            {isManagingPlan && (
+                <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center backdrop-blur-sm">
+                    <div className="bg-white p-6 rounded-xl shadow-xl w-[400px] text-left">
+                        <h3 className="text-lg font-bold mb-2 text-foreground">Manage Subscription</h3>
+                        <p className="text-sm text-muted-foreground mb-4">Manually assign a subscription plan. This will override existing payments and set a 1-year grace period.</p>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-xs font-semibold text-muted-foreground uppercase">Select Plan</label>
+                                <select
+                                    value={selectedPlanId}
+                                    onChange={(e) => setSelectedPlanId(e.target.value)}
+                                    className="w-full mt-1 border rounded-md px-3 py-2 text-sm text-foreground bg-white"
+                                >
+                                    <option value="none">No Plan (Suspended/Trial)</option>
+                                    {plans?.map((p: any) => (
+                                        <option key={p.id} value={p.id}>{p.name} - ₹{Number(p.priceMonthly ?? 0)}/mo</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="mt-6 flex justify-end gap-3">
+                            <button onClick={() => setIsManagingPlan(false)} className="px-4 py-2 text-sm text-muted-foreground hover:bg-muted rounded-md transition-colors">Cancel</button>
+                            <button onClick={handleAssignPlan} disabled={isPending} className="px-4 py-2 text-sm bg-orange-600 hover:bg-orange-700 text-white rounded-md transition-all">Save Override</button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Edit Modal Native Equivalent */}
             {isEditing && (

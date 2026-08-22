@@ -109,3 +109,34 @@ export async function resetUserPassword(formData: FormData) {
 
     revalidatePath('/superadmin/users')
 }
+
+export async function assignBusinessPlan(formData: FormData) {
+    await verifySuperAdmin()
+
+    const businessId = formData.get('businessId') as string
+    const planId = formData.get('planId') as string
+
+    // Setup a 1 year manual extension period explicitly from today
+    const oneYearFromNow = new Date()
+    oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1)
+
+    if (!planId || planId === 'none') {
+        await prisma.business.update({
+            where: { id: businessId },
+            data: {
+                razorpayPlanId: null,
+                razorpayCurrentPeriodEnd: new Date() // Expire instantly
+            }
+        })
+    } else {
+        await prisma.business.update({
+            where: { id: businessId },
+            data: {
+                razorpayPlanId: planId,
+                razorpayCurrentPeriodEnd: oneYearFromNow
+            }
+        })
+    }
+
+    revalidatePath('/superadmin/businesses')
+}

@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { toggleBusinessStatus, deleteBusiness } from "../actions";
+import { toggleBusinessStatus, deleteBusiness, assignBusinessPlan } from "../actions";
 import { AdminActionButtons } from "../components/AdminActionButtons";
 
 export const dynamic = "force-dynamic";
@@ -12,6 +12,11 @@ export default async function SuperAdminBusinesses() {
             }
         },
         orderBy: { createdAt: 'desc' }
+    });
+
+    const activePlans = await prisma.plan.findMany({
+        where: { status: 'active' },
+        orderBy: { priceMonthly: 'asc' }
     });
 
     return (
@@ -57,6 +62,9 @@ export default async function SuperAdminBusinesses() {
                                             type="business"
                                             toggleAction={toggleBusinessStatus}
                                             deleteAction={deleteBusiness}
+                                            assignPlanAction={assignBusinessPlan}
+                                            plans={activePlans}
+                                            currentPlanId={b.razorpayPlanId}
                                         />
                                     </td>
                                 </tr>
