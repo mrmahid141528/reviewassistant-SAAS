@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
         const razorpayCustomerId = subscription.customer_id;
         const razorpayPlanId = subscription.plan_id;
         const currentPeriodEnd = new Date(subscription.current_end * 1000);
-        let status = subscription.status;
+        const status = subscription.status;
 
         // In Razorpay, "active" means billing is working. "halted" or "cancelled" means it's inactive.
 

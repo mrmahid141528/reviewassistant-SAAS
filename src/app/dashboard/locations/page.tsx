@@ -16,10 +16,30 @@ export default async function LocationsPage() {
 
     if (!membership) redirect("/onboarding")
 
-    const locations = await prisma.businessLocation.findMany({
+    let locations = await prisma.businessLocation.findMany({
         where: { businessId: membership.businessId },
-        orderBy: { createdAt: 'desc' }
+        orderBy: [
+            { isMain: 'desc' },
+            { createdAt: 'desc' }
+        ]
     });
+
+    // Retroactive Default Location Fallback for users who created accounts before the Multi-Location architecture
+    if (locations.length === 0) {
+        const fallBackLocation = await prisma.businessLocation.create({
+            data: {
+                businessId: membership.businessId,
+                name: 'Main Location',
+                phone: membership.business.phone,
+                country: 'India',
+                isMain: true,
+                status: 'active'
+            }
+        });
+        locations = [fallBackLocation];
+    }
+
+    const activeLocationsCount = locations.filter(loc => loc.status === 'active').length;
 
     let maxLocations = 1;
     if (membership.business.razorpayPlanId) {
@@ -36,10 +56,12 @@ export default async function LocationsPage() {
         if (trialDays > 7) maxLocations = 0; // Frozen
     }
 
-    return <LocationsClient
-        locations={locations}
-        maxLocations={maxLocations}
-        currentCount={locations.length}
-        businessSlug={membership.business.slug}
-    />;
+    return (
+        <LocationsClient
+            locations={locations}
+            maxLocations={maxLocations}
+            currentCount={activeLocationsCount}
+            businessSlug={membership.business.slug}
+        />
+    );
 }

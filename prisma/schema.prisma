@@ -16,9 +16,11 @@ model User {
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
-  accounts      Account[]
-  sessions      Session[]
-  memberships   BusinessMember[]
+  accounts       Account[]
+  sessions       Session[]
+  memberships    BusinessMember[]
+  adminSessions  AdminSession[]
+  securityEvents SecurityEvent[]
 
   @@map("users")
 }
@@ -57,6 +59,8 @@ model Business {
   id         String   @id @default(uuid())
   name       String
   slug       String   @unique
+  category   String?
+  settings   Json?
   logoUrl    String?  @map("logo_url")
   websiteUrl String?  @map("website_url")
   phone      String?
@@ -83,21 +87,24 @@ model Business {
   payments            Payment[]
   usageRecords        UsageRecord[]
   auditLogs           AuditLog[]
+  couponRedemptions   CouponRedemption[]
 
   @@map("businesses")
 }
 
 model BusinessMember {
-  id         String   @id @default(uuid())
-  businessId String   @map("business_id")
-  userId     String   @map("user_id")
-  role       String   @default("staff") // owner/admin/manager/staff
-  status     String   @default("invited")
+  id         String    @id @default(uuid())
+  businessId String    @map("business_id")
+  locationId String?   @map("location_id")
+  userId     String    @map("user_id")
+  role       String    @default("staff") // owner/admin/manager/staff
+  status     String    @default("invited")
   joinedAt   DateTime? @map("joined_at")
-  createdAt  DateTime @default(now()) @map("created_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
 
-  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  business Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  location BusinessLocation? @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([businessId, userId])
   @@map("business_members")
@@ -115,12 +122,15 @@ model BusinessLocation {
   phone            String?
   googlePlaceId    String?  @map("google_place_id")
   googleBusinessId String?  @map("google_business_id")
+  reviewLink       String?  @map("review_link")
   status           String   @default("active")
+  isMain           Boolean  @default(false) @map("is_main")
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
 
-  business           Business             @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  business           Business            @relation(fields: [businessId], references: [id], onDelete: Cascade)
   customers          Customer[]
+  members            BusinessMember[]
   campaigns          Campaign[]
   reviewRequests     ReviewRequest[]
   googleIntegrations GoogleIntegration[]
@@ -140,11 +150,11 @@ model Customer {
   createdAt         DateTime @default(now()) @map("created_at")
   updatedAt         DateTime @updatedAt @map("updated_at")
 
-  business           Business            @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  location           BusinessLocation?   @relation(fields: [locationId], references: [id])
+  business            Business             @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  location            BusinessLocation?    @relation(fields: [locationId], references: [id])
   feedbackSubmissions FeedbackSubmission[]
-  reviewRequests     ReviewRequest[]
-  generatedReviews   GeneratedReview[]
+  reviewRequests      ReviewRequest[]
+  generatedReviews    GeneratedReview[]
 
   @@map("customers")
 }
@@ -156,8 +166,8 @@ model Campaign {
   name            String
   slug            String
   status          String   @default("active")
-  ratingThreshold Int      @map("rating_threshold") @default(4)
-  reviewPlatform  String   @map("review_platform") @default("google")
+  ratingThreshold Int      @default(4) @map("rating_threshold")
+  reviewPlatform  String   @default("google") @map("review_platform")
   settings        Json?
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
@@ -180,8 +190,8 @@ model CampaignQuestion {
   sortOrder    Int      @default(0) @map("sort_order")
   createdAt    DateTime @default(now()) @map("created_at")
 
-  campaign     Campaign         @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  answers      FeedbackAnswer[]
+  campaign Campaign         @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  answers  FeedbackAnswer[]
 
   @@map("campaign_questions")
 }
@@ -197,12 +207,12 @@ model FeedbackSubmission {
   submittedAt DateTime @default(now()) @map("submitted_at")
   createdAt   DateTime @default(now()) @map("created_at")
 
-  business    Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  campaign    Campaign        @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  customer    Customer?       @relation(fields: [customerId], references: [id], onDelete: SetNull)
-  answers     FeedbackAnswer[]
-  reviews     GeneratedReview[]
-  requests    ReviewRequest[]
+  business Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  campaign Campaign          @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  customer Customer?         @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  answers  FeedbackAnswer[]
+  reviews  GeneratedReview[]
+  requests ReviewRequest[]
 
   @@map("feedback_submissions")
 }
@@ -267,7 +277,7 @@ model GeneratedReview {
   provider             String   @default("gemini")
   model                String   @default("gemini-1.5-flash")
   promptVersion        String?  @map("prompt_version")
-  reviewText           String   @db.Text @map("review_text")
+  reviewText           String   @map("review_text") @db.Text
   rating               Int
   status               String   @default("generated")
   tokenUsage           Json?    @map("token_usage")
@@ -331,9 +341,10 @@ model Subscription {
   createdAt              DateTime @default(now()) @map("created_at")
   updatedAt              DateTime @updatedAt @map("updated_at")
 
-  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  plan     Plan     @relation(fields: [planId], references: [id])
-  payments Payment[]
+  business          Business           @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  plan              Plan               @relation(fields: [planId], references: [id])
+  payments          Payment[]
+  couponRedemptions CouponRedemption[]
 
   @@map("subscriptions")
 }
@@ -374,18 +385,37 @@ model UsageRecord {
 }
 
 model AuditLog {
-  id         String   @id @default(uuid())
-  businessId String?  @map("business_id")
-  userId     String?  @map("user_id")
-  action     String
-  entityType String   @map("entity_type")
-  entityId   String?  @map("entity_id")
-  metadata   Json?
-  ipAddress  String?  @map("ip_address")
-  userAgent  String?  @map("user_agent")
-  createdAt  DateTime @default(now()) @map("created_at")
+  id           String   @id @default(uuid())
+  traceId      String   @unique @default(dbgenerated("concat('AUD-', replace(cast(gen_random_uuid() as text), '-', ''))")) @map("trace_id")
+  
+  actorType    String   @default("superadmin") @map("actor_type") // superadmin, system, business_owner, etc.
+  actorId      String?  @map("actor_id") // The User ID
+
+  action       String
+  
+  resourceType String   @map("resource_type") // e.g., 'business', 'subscription'
+  resourceId   String?  @map("resource_id") // e.g., biz_123
+  businessId   String?  @map("business_id")
+  
+  description  String?
+  result       String   @default("success") // success | warning | failed
+  
+  beforeData   Json?    @map("before_data")
+  afterData    Json?    @map("after_data")
+  metadata     Json?    // Optional for backwards compatibility
+  
+  ipAddress    String?  @map("ip_address")
+  userAgent    String?  @map("user_agent")
+  sessionId    String?  @map("session_id")
+  
+  createdAt    DateTime @default(now()) @map("created_at")
 
   business Business? @relation(fields: [businessId], references: [id], onDelete: SetNull)
+
+  @@index([traceId])
+  @@index([resourceType, resourceId])
+  @@index([businessId])
+  @@index([createdAt])
 
   @@map("audit_logs")
 }
@@ -400,4 +430,110 @@ model LegalPage {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("legal_pages")
+}
+
+model Coupon {
+  id               String    @id @default(uuid())
+  code             String    @unique
+  type             String // "percentage" | "fixed"
+  value            Decimal // Either % (e.g. 50) or fixed amt (e.g. 200)
+  appliesTo        Json // Array of Plan IDs or ["all"]
+  billingCycle     String // "monthly" | "yearly" | "both"
+  maxRedemptions   Int?      @map("max_redemptions")
+  usedRedemptions  Int       @default(0) @map("used_redemptions")
+  perCustomer      Int       @default(1) @map("per_customer")
+  validFrom        DateTime  @map("valid_from")
+  validUntil       DateTime? @map("valid_until")
+  minPurchase      Decimal?  @map("min_purchase")
+  duration         String // "first_payment" | "first_n_months" | "forever"
+  durationInMonths Int?      @map("duration_months") // If "first_n_months"
+  status           String    @default("active") // "active", "disabled", "expired"
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  redemptions CouponRedemption[]
+
+  @@map("coupons")
+}
+
+model CouponRedemption {
+  id             String   @id @default(uuid())
+  couponId       String   @map("coupon_id")
+  businessId     String   @map("business_id")
+  subscriptionId String?  @map("subscription_id")
+  discountAmount Decimal  @map("discount_amount")
+  redeemedAt     DateTime @default(now()) @map("redeemed_at")
+
+  coupon       Coupon        @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  business     Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  @@map("coupon_redemptions")
+}
+
+// --- SECURITY & SOC MODELS ---
+
+model AdminSession {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  ipAddress    String?  @map("ip_address")
+  userAgent    String?  @map("user_agent")
+  status       String   @default("active") // active/revoked
+  lastActiveAt DateTime @default(now()) @map("last_active_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("admin_sessions")
+}
+
+model SecurityEvent {
+  id        String   @id @default(uuid())
+  email     String?
+  userId    String?  @map("user_id")
+  event     String   // Failed Login, Locked Account, Suspicious IP
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  status    String   // Failed, Locked, Suspicious
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("security_events")
+}
+
+model BlockedIP {
+  id        String   @id @default(uuid())
+  ipAddress String   @unique @map("ip_address")
+  reason    String?
+  status    String   @default("blocked") // blocked/unblocked
+  blockedAt DateTime @default(now()) @map("blocked_at")
+
+  @@map("blocked_ips")
+}
+
+model SecuritySetting {
+  id                     String  @id @default(uuid())
+  
+  // Auth
+  admin2faEnabled        Boolean @default(false)
+  sessionTimeout         Int     @default(30)
+  maxLoginAttempts       Int     @default(5)
+  accountLockDuration    Int     @default(15)
+
+  // Login Sec
+  loginNotification      Boolean @default(true)
+  newDeviceNotification  Boolean @default(true)
+  suspiciousLoginDetect  Boolean @default(true)
+
+  // Session
+  maxConcurrentSessions  Int     @default(3)
+  revokeOnPasswordChange Boolean @default(true)
+
+  // System Wide (Lockdown)
+  lockdownEnabled        Boolean @default(false)
+  
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("security_settings")
 }

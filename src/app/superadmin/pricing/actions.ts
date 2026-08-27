@@ -14,41 +14,47 @@ async function checkAdmin() {
 
 export async function getPlans() {
     await checkAdmin();
-    return await prisma.plan.findMany({
-        orderBy: { priceMonthly: 'asc' }
+    const plans = await prisma.plan.findMany({
+        orderBy: { priceMonthly: 'asc' },
+        include: {
+            _count: {
+                select: { subscriptions: { where: { status: 'active' } } }
+            }
+        }
     });
+    return JSON.parse(JSON.stringify(plans));
 }
 
-export async function updatePlan(id: string, formData: FormData) {
+export async function updatePlan(id: string, payload: any) {
     await checkAdmin();
-
-    const name = formData.get("name") as string;
-    const description = formData.get("description") as string;
-    const priceMonthly = parseFloat(formData.get("priceMonthly") as string);
-    const featuresStr = formData.get("features") as string;
-    const limitsStr = formData.get("limits") as string;
-
-    // Parse the lists
-    let features = [];
-    try { features = JSON.parse(featuresStr); } catch (e) { features = featuresStr.split(",").map(s => s.trim()); }
-
-    let limits = {};
-    try { limits = JSON.parse(limitsStr); } catch (e) { console.error("Limits must be valid JSON"); }
 
     await prisma.plan.update({
         where: { id },
         data: {
-            name,
-            description,
-            priceMonthly,
-            priceYearly: priceMonthly * 10,
-            features,
-            limits
+            name: payload.name,
+            description: payload.description,
+            priceMonthly: payload.priceMonthly,
+            priceYearly: payload.priceYearly,
+            currency: payload.currency || "INR",
+            features: payload.features,
+            limits: payload.limits,
+            status: payload.status || "active"
         }
     });
 
     revalidatePath("/superadmin/pricing");
     revalidatePath("/dashboard/billing");
+    return { success: true };
+}
+
+export async function archivePlan(id: string) {
+    await checkAdmin();
+    await prisma.plan.update({
+        where: { id },
+        data: { status: 'archived' }
+    });
+    revalidatePath("/superadmin/pricing");
+    return { success: true };
 }
 
 export async function seedPlans() {

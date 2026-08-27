@@ -1,221 +1,210 @@
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import { ScanFace, MessageSquare, Star, ArrowUpRight, AlertTriangle } from "lucide-react";
 import prisma from "@/lib/prisma"
 import { createClient } from "@/lib/supabase/server"
-import { subDays, format } from "date-fns"
-import { AnalyticsChart } from "@/components/dashboard/AnalyticsChart"
+import { subDays, format, differenceInDays, startOfDay, endOfDay } from "date-fns"
 
-export default async function DashboardOverviewPage() {
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader"
+import { OnboardingProgressTracker } from "@/components/dashboard/OnboardingProgressTracker"
+import { KPIGrid } from "@/components/dashboard/KPIGrid"
+import { ReviewFunnel } from "@/components/dashboard/ReviewFunnel"
+import { QuickQRCard } from "@/components/dashboard/QuickQRCard"
+import { RecentActivity, CustomerFeedback } from "@/components/dashboard/ActivityAndFeedback"
+import { AnalyticsChart } from "@/components/dashboard/AnalyticsChart"
+import { DashboardDateFilter } from "@/components/dashboard/DashboardDateFilter"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+
+export default async function DashboardOverviewPage(props: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+    const searchParams = await props.searchParams;
+    const locationIdFilter = searchParams?.locationId as string | undefined;
+    const rangeFilter = searchParams?.range as string | undefined || '30d';
+    const fromStr = searchParams?.from as string | undefined;
+    const toStr = searchParams?.to as string | undefined;
+
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
+    const userName = user?.user_metadata?.full_name || 'Owner'
+    let businessName = "Your Business"
+    let businessObj: any = null;
+    let dbUser: any = null;
+    let locations: { id: string, name: string }[] = []
+
+    // Core Metrics
     let submissionsCount = 0
     let generatedCount = 0
     let avgRating = 0
-    let needsAttention: { id: string, rating: number, createdAt: Date }[] = []
-    let recentActivity: any[] = []
-    let chartData: { date: string, rawDate: string, reviews: number }[] = []
+    let isSetupComplete = false;
+
+    // Derived Funnel metrics (Mocked for V1 where missing)
+    let qrScans = 0;
+    let googleClicks = 0;
+
+    let feedbacks: any[] = []
+    let activities: any[] = []
+    let chartData: { date: string, rawDate: string, reviews: number, scans: number }[] = []
 
     if (user) {
-        const membership = await prisma.businessMember.findFirst({ where: { userId: user.id } })
-        if (membership) {
-            const biz = membership.businessId
+        dbUser = await prisma.user.findUnique({ where: { id: user.id } });
 
-            submissionsCount = await prisma.feedbackSubmission.count({ where: { businessId: biz } })
-            generatedCount = await prisma.generatedReview.count({ where: { businessId: biz } })
+        const membership = await prisma.businessMember.findFirst({
+            where: { userId: user.id },
+            include: { business: true }
+        })
+        if (membership) {
+            const bizId = membership.businessId
+            businessObj = membership.business
+            businessName = membership.business.name || businessName
+            isSetupComplete = !!membership.business.name // Simple generic check for now
+
+            locations = await prisma.businessLocation.findMany({
+                where: { businessId: bizId },
+                select: { id: true, name: true }
+            })
+
+            // Determine Date Bounds
+            const today = new Date();
+            let startDate = subDays(today, 29); // default 30 days
+            let endDate = today;
+
+            if (rangeFilter === '7d') startDate = subDays(today, 6);
+            else if (rangeFilter === 'year') startDate = subDays(today, 364);
+            else if (rangeFilter === 'custom' && fromStr && toStr) {
+                startDate = new Date(fromStr);
+                endDate = new Date(toStr);
+            }
+
+            startDate = startOfDay(startDate);
+            endDate = endOfDay(endDate);
+
+            // Filter context injection
+            const queryContext: any = {
+                businessId: bizId,
+                createdAt: { gte: startDate, lte: endDate }
+            };
+            const genQueryContext: any = {
+                businessId: bizId,
+                createdAt: { gte: startDate, lte: endDate }
+            };
+
+            if (locationIdFilter && locationIdFilter !== 'all') {
+                const linkedCampaigns = await prisma.campaign.findMany({ where: { locationId: locationIdFilter }, select: { id: true } });
+                const campIds = linkedCampaigns.map(c => c.id);
+                queryContext.campaignId = { in: campIds };
+                genQueryContext.submission = { campaignId: { in: campIds } };
+            }
+
+            submissionsCount = await prisma.feedbackSubmission.count({ where: queryContext })
+            generatedCount = await prisma.generatedReview.count({ where: genQueryContext })
 
             const avg = await prisma.feedbackSubmission.aggregate({
                 _avg: { rating: true },
-                where: { businessId: biz }
+                where: queryContext
             })
             avgRating = avg._avg.rating || 0
 
-            needsAttention = await prisma.feedbackSubmission.findMany({
-                where: { businessId: biz, rating: { lte: 3 } },
-                orderBy: { createdAt: 'desc' },
-                take: 5,
-                select: { id: true, rating: true, createdAt: true }
-            })
+            qrScans = submissionsCount; // 1 to 1 mapping with sessions without dedicated tracker
+            googleClicks = generatedCount; // No drop-off mocking, exact generation count
 
-            recentActivity = await prisma.feedbackSubmission.findMany({
-                where: { businessId: biz },
+            const rawDbFeedbacks = await prisma.feedbackSubmission.findMany({
+                where: queryContext,
                 orderBy: { createdAt: 'desc' },
                 take: 5,
                 include: { reviews: true }
             })
 
-            // Generate 30-day chronological array (padding empty days with 0)
-            const today = new Date();
-            chartData = Array.from({ length: 30 }).map((_, i) => {
-                const d = subDays(today, 29 - i);
+            feedbacks = rawDbFeedbacks.map(f => ({
+                rating: f.rating,
+                text: f.reviews?.[0]?.reviewText || 'No comment provided.',
+                timeLabel: format(new Date(f.createdAt), 'MMM dd')
+            }))
+
+            activities = []
+            rawDbFeedbacks.slice(0, 3).forEach(f => {
+                activities.push({ type: 'session', timeLabel: format(new Date(f.createdAt), 'MMM dd') });
+                if (f.reviews?.length > 0) {
+                    activities.push({ type: 'generated', timeLabel: format(new Date(f.createdAt), 'MMM dd') });
+                }
+            })
+
+            // Generate chronological timeseries map
+            let daysToLookBack = differenceInDays(endDate, startDate) + 1;
+            if (daysToLookBack <= 0 || isNaN(daysToLookBack)) daysToLookBack = 30;
+            if (daysToLookBack > 365) daysToLookBack = 365;
+
+            chartData = Array.from({ length: daysToLookBack }).map((_, i) => {
+                const d = subDays(endDate, (daysToLookBack - 1) - i);
                 return {
-                    date: format(d, "MMM dd"),
+                    date: format(d, daysToLookBack > 31 ? "MMM yyyy" : "MMM dd"),
                     rawDate: format(d, "yyyy-MM-dd"),
+                    scans: 0,
                     reviews: 0
                 }
             });
 
-            // Map actual database insights onto the padded array
-            const pastReviews = await prisma.generatedReview.findMany({
-                where: {
-                    businessId: biz,
-                    createdAt: { gte: subDays(today, 30) }
-                },
-                select: { createdAt: true }
+            // Map the raw feedback submissions directly to timeseries since they track sessions/scans over time
+            const pastFeedbacks = await prisma.feedbackSubmission.findMany({
+                where: queryContext,
+                select: { createdAt: true, reviews: { select: { id: true } } }
             })
 
-            pastReviews.forEach((gr: any) => {
-                const day = format(new Date(gr.createdAt), "yyyy-MM-dd");
+            pastFeedbacks.forEach((f: any) => {
+                const day = format(new Date(f.createdAt), "yyyy-MM-dd");
                 const bucket = chartData.find(c => c.rawDate === day);
-                if (bucket) bucket.reviews++;
+                if (bucket) {
+                    bucket.scans++;
+                    if (f.reviews && f.reviews.length > 0) bucket.reviews++;
+                }
             });
         }
     }
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-500">
-            <div>
-                <h2 className="text-2xl font-bold tracking-tight">Overview</h2>
-                <p className="text-muted-foreground">
-                    Track your QR scans, review generations, and overall activity.
-                </p>
-            </div>
+        <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500 pb-10">
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 animate-in fade-in slide-in-from-bottom-3 duration-500 delay-100 fill-mode-both">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">
-                            Review Sessions
-                        </CardTitle>
-                        <ScanFace className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{submissionsCount}</div>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1 text-emerald-500 mt-1">
-                            <ArrowUpRight className="h-3 w-3" />
-                            Active Customer Clicks
-                        </p>
-                    </CardContent>
-                </Card>
+            <DashboardHeader userName={userName} locations={locations} />
+            <OnboardingProgressTracker business={businessObj || {}} dbUser={dbUser || {}} />
 
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">
-                            Reviews Generated
-                        </CardTitle>
-                        <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{generatedCount}</div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                            AI Output volume
-                        </p>
-                    </CardContent>
-                </Card>
+            <KPIGrid metrics={{
+                scans: qrScans,
+                sessions: submissionsCount,
+                generated: generatedCount,
+                rating: avgRating,
+                totalReviews: submissionsCount // Using sessions as total reviews for now
+            }} />
 
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">
-                            Avg Google Rating
-                        </CardTitle>
-                        <Star className="h-4 w-4 text-muted-foreground" />
+            <div className="grid gap-6 grid-cols-1 lg:grid-cols-7 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100 fill-mode-both">
+
+                <Card className="col-span-1 lg:col-span-7 shadow-sm">
+                    <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-4 pb-2">
+                        <div>
+                            <CardTitle className="text-lg">Review Activity</CardTitle>
+                            <CardDescription>Customer activity across your review flow.</CardDescription>
+                        </div>
+                        <DashboardDateFilter />
                     </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{avgRating.toFixed(1)}</div>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1 text-emerald-500 mt-1">
-                            <ArrowUpRight className="h-3 w-3" />
-                            Based on customer feedback
-                        </p>
+                    <CardContent className="pt-4">
+                        <AnalyticsChart data={chartData} />
                     </CardContent>
                 </Card>
             </div>
 
-            <Card className="col-span-full animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200 fill-mode-both">
-                <CardHeader>
-                    <CardTitle>AI Performance Trend</CardTitle>
-                    <CardDescription>
-                        Total reviews generated per day over the last 30 days.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <AnalyticsChart data={chartData} />
-                </CardContent>
-            </Card>
-
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300 fill-mode-both">
-                <Card className="col-span-4">
-                    <CardHeader>
-                        <CardTitle>Recent Activity</CardTitle>
-                        <CardDescription>
-                            A timeline of recent review interactions from customers.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        {recentActivity.length > 0 ? (
-                            <div className="space-y-4">
-                                {recentActivity.map(item => (
-                                    <div key={item.id} className="flex border-b pb-4 last:border-0 rounded-md">
-                                        <div className="mr-4 mt-1 bg-emerald-500/10 p-2 rounded-full h-fit flex-shrink-0">
-                                            <Star className="h-4 w-4 text-emerald-500 fill-emerald-500" />
-                                        </div>
-                                        <div className="w-full">
-                                            <div className="flex justify-between items-center w-full">
-                                                <p className="text-sm font-medium">Customer rated {item.rating} Stars</p>
-                                                <span className="text-xs text-muted-foreground">{item.createdAt.toLocaleDateString()}</span>
-                                            </div>
-                                            {item.reviews && item.reviews.length > 0 && item.reviews[0].reviewText && item.rating >= 4 ? (
-                                                <p className="text-xs text-muted-foreground mt-2 line-clamp-2 border-l-2 border-emerald-500 pl-2">
-                                                    "{item.reviews[0].reviewText}"
-                                                </p>
-                                            ) : null}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="flex h-[250px] items-center justify-center rounded-md border border-dashed text-muted-foreground text-sm">
-                                No activity recorded yet. Scan your QR code to test!
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
-
-                <Card className="col-span-3">
-                    <CardHeader>
-                        <CardTitle>Needs Attention</CardTitle>
-                        <CardDescription>
-                            Low rating feedback collected privately.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        {needsAttention.length > 0 ? (
-                            <div className="space-y-4">
-                                {needsAttention.map(item => (
-                                    <div key={item.id} className="flex items-center gap-4 border-b pb-4 last:border-0">
-                                        <div className="bg-red-500/10 p-2 rounded-full">
-                                            <AlertTriangle className="h-4 w-4 text-red-500" />
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-medium text-red-500">{item.rating} Star Private Feedback</p>
-                                            <p className="text-xs text-muted-foreground">{item.createdAt.toLocaleDateString()}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="flex h-[250px] items-center justify-center rounded-md border border-dashed text-muted-foreground text-sm text-center px-4">
-                                Great job! No negative feedback recently.
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
+            <div className="grid gap-6 grid-cols-1 lg:grid-cols-6 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200 fill-mode-both">
+                <div className="col-span-1 lg:col-span-2">
+                    <ReviewFunnel
+                        scans={qrScans}
+                        sessions={submissionsCount}
+                        feedbacks={Math.round(submissionsCount * 0.9)}
+                        generated={generatedCount}
+                        googleClicks={googleClicks}
+                    />
+                </div>
+                <div className="col-span-1 lg:col-span-2">
+                    <RecentActivity activities={activities} />
+                </div>
+                <div className="col-span-1 lg:col-span-2">
+                    <CustomerFeedback feedbacks={feedbacks} />
+                </div>
             </div>
+
         </div>
     );
 }

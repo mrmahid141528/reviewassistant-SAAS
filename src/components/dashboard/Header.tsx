@@ -17,7 +17,7 @@ const navigation = [
     { name: "Billing & Plans", href: "/dashboard/billing", icon: CreditCard },
 ];
 
-export function Header() {
+export function Header({ userAvatar, userNameInitials }: { userAvatar?: string | null, userNameInitials?: string }) {
     const pathname = usePathname();
     const router = useRouter();
 
@@ -84,10 +84,15 @@ export function Header() {
             </div>
 
             <div className="flex items-center gap-4">
-                {/* Placeholder for future User Profile Menu */}
-                <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-xs text-primary">
-                    MR
-                </div>
+                <Link href="/dashboard/profile" className="transition-transform hover:scale-105 active:scale-95">
+                    <div className="h-9 w-9 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center font-bold text-sm text-primary overflow-hidden shadow-sm">
+                        {userAvatar ? (
+                            <img src={userAvatar} alt="Profile" className="h-full w-full object-cover" />
+                        ) : (
+                            userNameInitials || "MR"
+                        )}
+                    </div>
+                </Link>
             </div>
         </header>
     );

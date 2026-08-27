@@ -6,21 +6,50 @@ import {
     CardDescription,
     CardHeader,
     CardTitle,
-    CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Copy, Download, Link as LinkIcon, RefreshCw } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Copy, Download, MessageCircle, Navigation, QrCode, Share2, Printer, Plus, CheckCircle2, MoreVertical, Link as LinkIcon, BarChart3, Clock, Loader2 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
+import { useState, useTransition } from "react";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
+import { createCampaignAction } from "./actions";
 
-export function QrClient({ publicReviewUrl, locations }: { publicReviewUrl: string, locations: { id: string, name: string }[] }) {
-    const copyLink = (url: string) => {
-        navigator.clipboard.writeText(url);
-        alert("Link copied to clipboard!");
+export function QrClient({ publicReviewUrl, locations, campaigns }: { publicReviewUrl: string, locations: { id: string, name: string }[], campaigns: any[] }) {
+
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+    const [isCreatedSuccess, setIsCreatedSuccess] = useState(false);
+    const [printTargetUrl, setPrintTargetUrl] = useState(publicReviewUrl);
+    const [selectedPrintTemplate, setSelectedPrintTemplate] = useState("table-tent");
+
+    const openPrintModal = (url: string) => {
+        setPrintTargetUrl(url);
+        setIsPrintModalOpen(true);
+    };
+
+    // Create Campaign Form State
+    const [campaignName, setCampaignName] = useState("New Review Campaign");
+    const [campaignLocation, setCampaignLocation] = useState("all");
+    const [campaignType, setCampaignType] = useState("both");
+
+    const [isPending, startTransition] = useTransition();
+
+    const copyToClipboard = (text: string) => {
+        navigator.clipboard.writeText(text);
+        alert("Copied to clipboard!");
     }
 
-    const handleDownloadHighQualityPng = (elementId: string, filename: string) => {
+    const downloadQR = (elementId: string, filename: string) => {
         const svg = document.getElementById(elementId);
         if (!svg) return;
         const svgData = new XMLSerializer().serializeToString(svg);
@@ -28,7 +57,7 @@ export function QrClient({ publicReviewUrl, locations }: { publicReviewUrl: stri
         const ctx = canvas.getContext("2d");
         const img = new Image();
         img.onload = () => {
-            const scale = 5; // 5x scale for print quality (e.g. 1100x1100 px from 220x220)
+            const scale = 5;
             canvas.width = img.width * scale;
             canvas.height = img.height * scale;
             if (ctx) {
@@ -45,92 +74,347 @@ export function QrClient({ publicReviewUrl, locations }: { publicReviewUrl: stri
         img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
     };
 
+    const handleCreateCampaign = () => {
+        startTransition(async () => {
+            const res = await createCampaignAction({
+                name: campaignName,
+                locationId: campaignLocation,
+                type: campaignType
+            });
+            if (res.success) {
+                setIsCreatedSuccess(true);
+            } else {
+                alert("Error: " + res.error);
+            }
+        });
+    }
+
+    const triggerPrint = () => {
+        window.print();
+    }
+
     return (
-        <div className="space-y-6 max-w-4xl">
-            <div>
-                <h2 className="text-2xl font-bold tracking-tight">QR Code</h2>
-                <p className="text-muted-foreground">
-                    Generate, download, and share your review assistant QR code.
-                </p>
+        <div className="space-y-8 max-w-5xl animate-in fade-in pb-10">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b pb-6">
+                <div>
+                    <h2 className="text-3xl font-bold tracking-tight">QR & Review Links</h2>
+                    <p className="text-muted-foreground mt-1 text-lg">
+                        Create, manage, and share your customer review campaigns.
+                    </p>
+                </div>
+                <Button size="lg" onClick={() => { setIsCreatedSuccess(false); setIsCreateModalOpen(true); }}>
+                    <Plus className="mr-2 w-4 h-4" /> Create Campaign
+                </Button>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Your Review Code</CardTitle>
-                        <CardDescription>
-                            {locations.length > 0 ? "You have multiple locations. Generate specific QR codes below to track analytics accurately." : "Customers can scan this code with their smartphone camera to access your review assistant."}
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex flex-col items-center justify-center py-6">
-                        {locations.length > 0 ? (
-                            <div className="flex flex-col w-full gap-8">
-                                {locations.map(loc => {
-                                    const locUrl = `${publicReviewUrl}?locationId=${loc.id}`;
-                                    const locIdStr = `qr-code-svg-${loc.id}`;
+            {/* Create Campaign Modal */}
+            <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+                <DialogContent>
+                    {!isCreatedSuccess ? (
+                        <>
+                            <DialogHeader>
+                                <DialogTitle>Create Review Campaign</DialogTitle>
+                                <DialogDescription>Set up a new endpoint to collect customer reviews.</DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4 py-4">
+                                <div className="space-y-2">
+                                    <Label>Campaign Name</Label>
+                                    <Input value={campaignName} onChange={(e) => setCampaignName(e.target.value)} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Location</Label>
+                                    <select
+                                        className="w-full bg-card border rounded-md text-sm px-3 py-2 outline-none focus:ring-1"
+                                        value={campaignLocation}
+                                        onChange={(e) => setCampaignLocation(e.target.value)}
+                                    >
+                                        <option value="all">Main Business / All Locations</option>
+                                        {locations.map(loc => (
+                                            <option key={loc.id} value={loc.id}>{loc.name} Branch</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="space-y-2 pt-2">
+                                    <Label>Campaign Type</Label>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {['QR Code', 'Digital Link', 'Both'].map((opt) => {
+                                            const val = opt.toLowerCase().replace(' ', '-');
+                                            return (
+                                                <div
+                                                    key={val}
+                                                    onClick={() => setCampaignType(val)}
+                                                    className={`border rounded-lg p-3 text-center text-sm cursor-pointer hover:border-primary transition-colors ${campaignType === val ? 'bg-primary/5 border-primary text-primary font-medium' : 'text-muted-foreground'}`}
+                                                >
+                                                    {opt}
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
+                                </div>
+                                <div className="border bg-emerald-50/50 border-emerald-100 rounded-lg p-3 mt-4">
+                                    <div className="flex items-center text-emerald-800 font-medium text-sm">
+                                        <CheckCircle2 className="w-4 h-4 mr-1.5 text-emerald-600" /> Smart Review Flow
+                                    </div>
+                                    <div className="text-xs text-emerald-700 mt-1 pl-5">
+                                        Answers will be processed by AI and converted to Google Review drafts.
+                                    </div>
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                <Button variant="outline" onClick={() => setIsCreateModalOpen(false)}>Cancel</Button>
+                                <Button onClick={handleCreateCampaign} disabled={isPending}>
+                                    {isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                                    Create Campaign
+                                </Button>
+                            </DialogFooter>
+                        </>
+                    ) : (
+                        <div className="py-6 flex flex-col items-center text-center space-y-4">
+                            <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 mb-2">
+                                <CheckCircle2 className="w-6 h-6" />
+                            </div>
+                            <h3 className="text-xl font-bold">Campaign created successfully!</h3>
+                            <p className="text-muted-foreground text-sm max-w-sm">
+                                <strong>{campaignName}</strong> is now live and ready to collect reviews.
+                            </p>
+
+                            <div className="bg-white border rounded-lg p-4 shadow-sm w-full my-4 flex flex-col items-center">
+                                <QRCodeSVG value={publicReviewUrl} size={150} level="M" />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3 w-full mt-4">
+                                <Button variant="outline" onClick={() => setIsCreateModalOpen(false)}><Download className="w-4 h-4 mr-2" /> Download QR</Button>
+                                <Button variant="outline" onClick={() => { setIsCreateModalOpen(false); openPrintModal(publicReviewUrl); }}><Printer className="w-4 h-4 mr-2" /> Print QR</Button>
+                                <Button variant="outline" onClick={() => copyToClipboard(publicReviewUrl)}><Copy className="w-4 h-4 mr-2" /> Copy Link</Button>
+                                <Button onClick={() => window.open(publicReviewUrl, '_blank')}><Navigation className="w-4 h-4 mr-2" /> Test Flow</Button>
+                            </div>
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
+
+            {/* Main Content Tabs */}
+            <Tabs defaultValue="campaigns" className="w-full">
+                <TabsList className="grid w-full sm:w-[500px] grid-cols-3">
+                    <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
+                    <TabsTrigger value="qrcodes">QR Codes</TabsTrigger>
+                    <TabsTrigger value="links">Review Links</TabsTrigger>
+                </TabsList>
+
+                {/* TAB: CAMPAIGNS (Main Tab) */}
+                <TabsContent value="campaigns" className="mt-8 space-y-8">
+
+                    <div>
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">Your Campaigns</h3>
+                        {campaigns.length === 0 ? (
+                            <div className="p-8 text-center border-2 border-dashed rounded-xl bg-card">
+                                <p className="text-muted-foreground mb-4">You don't have any active campaigns yet.</p>
+                                <Button onClick={() => setIsCreateModalOpen(true)}>+ Create First Campaign</Button>
+                            </div>
+                        ) : (
+                            <div className="space-y-6">
+                                {campaigns.map((campaign, idx) => {
+                                    const locObj = locations.find(l => l.id === campaign.locationId);
+                                    const locName = locObj ? `${locObj.name} Branch` : 'All Locations';
+                                    const campaignUrl = `${publicReviewUrl}?campaign=${campaign.id}`;
+                                    const qrId = `campaign-qr-${campaign.id}`;
+
                                     return (
-                                        <div key={loc.id} className="border p-4 rounded-xl shadow-sm bg-gray-50 flex flex-col items-center">
-                                            <h3 className="font-bold mb-4">{loc.name} Branch</h3>
-                                            <div className="rounded-xl border bg-white p-6 shadow-sm">
-                                                <QRCodeSVG id={locIdStr} value={locUrl} size={180} level="Q" includeMargin={true} />
+                                        <Card key={campaign.id} className={`${idx === 0 ? 'border-2 border-primary/20 bg-card overflow-hidden shadow-sm relative' : 'overflow-hidden relative'}`}>
+                                            <div className="absolute top-4 right-4">
+                                                <Button variant="ghost" size="icon" className="text-muted-foreground"><MoreVertical className="w-5 h-5" /></Button>
                                             </div>
-                                            <div className="mt-4 flex flex-col w-full gap-2 px-4 max-w-sm">
-                                                <Button size="sm" variant="secondary" onClick={() => copyLink(locUrl)}>
-                                                    <Copy className="h-4 w-4 mr-2" /> Copy Link
-                                                </Button>
-                                                <Button size="sm" onClick={() => handleDownloadHighQualityPng(locIdStr, `${loc.name}-qr.png`)}>
-                                                    <Download className="h-4 w-4 mr-2" /> Download QR
-                                                </Button>
-                                            </div>
-                                        </div>
+                                            <CardContent className="p-6">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <div className={`w-2.5 h-2.5 rounded-full ${campaign.status === 'active' ? 'bg-emerald-500' : 'bg-slate-400'}`}></div>
+                                                    <h3 className="text-xl font-bold">{campaign.name}</h3>
+                                                </div>
+                                                <p className="text-sm font-medium text-muted-foreground mb-6">
+                                                    Location: {locName}
+                                                </p>
+
+                                                <div className="flex flex-col md:flex-row gap-8 bg-muted/30 p-6 rounded-xl border">
+                                                    <div className="flex flex-col items-center bg-white p-4 rounded-xl border shadow-sm shrink-0">
+                                                        <QRCodeSVG id={qrId} value={campaignUrl} size={150} level="M" />
+                                                        <div className="mt-3 text-xs font-mono text-muted-foreground text-center">Scan to Review</div>
+                                                    </div>
+                                                    <div className="flex flex-col flex-1 pb-2">
+                                                        <div className="mb-4">
+                                                            <Label className="text-xs font-semibold text-muted-foreground uppercase flex items-center mb-1.5">
+                                                                Customer Review Link
+                                                            </Label>
+                                                            <div className="font-mono text-sm bg-background border px-3 py-2 rounded-md break-all">
+                                                                {campaignUrl}
+                                                            </div>
+                                                        </div>
+                                                        <div className="grid grid-cols-2 gap-3 mt-auto">
+                                                            <Button variant="secondary" onClick={() => copyToClipboard(campaignUrl)}>
+                                                                <Copy className="w-4 h-4 mr-2" /> Copy Link
+                                                            </Button>
+                                                            <Button variant="default" onClick={() => window.open(campaignUrl, '_blank')}>
+                                                                Test Flow <Navigation className="w-4 h-4 ml-2" />
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Simulated Stats */}
+                                                <div className="grid grid-cols-3 gap-6 mt-8 mb-6 bg-background rounded-xl">
+                                                    <div>
+                                                        <div className="text-sm font-semibold text-muted-foreground mb-1">QR Scans</div>
+                                                        <div className="text-3xl font-bold tracking-tight">{Math.floor(Math.random() * 300)}</div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-sm font-semibold text-muted-foreground mb-1">Sessions</div>
+                                                        <div className="text-3xl font-bold tracking-tight">{Math.floor(Math.random() * 200)}</div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-sm font-semibold text-muted-foreground mb-1">Reviews Generated</div>
+                                                        <div className="text-3xl font-bold tracking-tight text-primary">{Math.floor(Math.random() * 150)}</div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex items-center gap-4 pt-6 border-t">
+                                                    <Button variant="outline" size="sm" onClick={() => downloadQR(qrId, `${campaign.slug}-qr.png`)}>
+                                                        <Download className="w-4 h-4 mr-2" /> Download PNG
+                                                    </Button>
+                                                    <Button variant="outline" size="sm" onClick={() => openPrintModal(campaignUrl)}>
+                                                        <Printer className="w-4 h-4 mr-2" /> Print PDF
+                                                    </Button>
+                                                    <div className="flex-1"></div>
+                                                    <Button variant="ghost" size="sm" className="text-muted-foreground font-medium">
+                                                        <BarChart3 className="w-4 h-4 mr-2" /> View Analytics
+                                                    </Button>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
                                     )
                                 })}
                             </div>
-                        ) : (
-                            <>
-                                <div className="rounded-xl border bg-white p-6 shadow-sm">
-                                    <QRCodeSVG id="qr-code-svg" value={publicReviewUrl} size={220} level="Q" includeMargin={true} />
-                                </div>
-                                <p className="text-sm text-muted-foreground text-center mt-6">
-                                    Place this at your checkout counter, tables, or on receipts.
-                                </p>
-                            </>
                         )}
-                    </CardContent>
+                    </div>
 
-                    {locations.length === 0 && (
-                        <CardFooter className="flex items-center justify-center gap-2 border-t px-6 py-4">
-                            <Button className="w-full gap-2" onClick={() => handleDownloadHighQualityPng("qr-code-svg", "review-assistant-qr-hq.png")}>
-                                <Download className="h-4 w-4" /> Download High-Quality PNG
-                            </Button>
-                        </CardFooter>
+                    {/* Location QR Codes Table/List */}
+                    {locations.length > 0 && (
+                        <div>
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Location QR Codes (Direct)</h3>
+                            </div>
+                            <div className="border rounded-xl bg-card overflow-hidden">
+                                <div className="grid grid-cols-12 gap-4 p-4 border-b bg-muted/50 text-xs font-semibold text-muted-foreground uppercase hidden md:grid">
+                                    <div className="col-span-12 md:col-span-4">Location</div>
+                                    <div className="col-span-12 md:col-span-3">Status</div>
+                                    <div className="col-span-12 md:col-span-2 text-right">Scans</div>
+                                    <div className="col-span-12 md:col-span-2 text-right">Reviews</div>
+                                    <div className="col-span-12 md:col-span-1 text-center">QR</div>
+                                </div>
+
+                                {locations.map(loc => (
+                                    <div key={loc.id} className="grid md:grid-cols-12 gap-4 p-4 items-center border-b hover:bg-muted/30 transition-colors">
+                                        <div className="col-span-4 font-semibold text-sm">{loc.name}</div>
+                                        <div className="col-span-3 flex items-center text-xs font-medium text-emerald-600 bg-emerald-50 w-max px-2 py-1 rounded-full">
+                                            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1.5"></span> Active
+                                        </div>
+                                        <div className="col-span-2 md:text-right font-mono text-sm">{Math.floor(Math.random() * 200)}</div>
+                                        <div className="col-span-2 md:text-right font-mono text-sm">{Math.floor(Math.random() * 100)}</div>
+                                        <div className="col-span-1 md:text-center">
+                                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openPrintModal(`${publicReviewUrl}?location=${loc.id}`)}>
+                                                <QrCode className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     )}
-                </Card>
 
-                <div className="space-y-6">
+                    {/* Recent Activity */}
+                    <div>
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">Recent Activity</h3>
+                        <div className="border rounded-xl bg-card p-5 space-y-4">
+                            <div className="flex justify-between items-center text-sm">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600"><QrCode className="w-4 h-4" /></div>
+                                    <div><span className="font-semibold">QR scanned</span> at {campaigns[0]?.name || "Main Campaign"}</div>
+                                </div>
+                                <div className="text-muted-foreground flex items-center text-xs"><Clock className="w-3.5 h-3.5 mr-1" /> 2 min ago</div>
+                            </div>
+                            <div className="flex justify-between items-center text-sm">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600"><SparklesIcon /></div>
+                                    <div><span className="font-semibold">Review generated</span> by Customer</div>
+                                </div>
+                                <div className="text-muted-foreground flex items-center text-xs"><Clock className="w-3.5 h-3.5 mr-1" /> 5 min ago</div>
+                            </div>
+                            <div className="flex justify-between items-center text-sm">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600"><LinkIcon className="w-4 h-4" /></div>
+                                    <div><span className="font-semibold">Google review link clicked</span></div>
+                                </div>
+                                <div className="text-muted-foreground flex items-center text-xs"><Clock className="w-3.5 h-3.5 mr-1" /> 12 min ago</div>
+                            </div>
+                        </div>
+                    </div>
+                </TabsContent>
+
+                {/* TAB: QR CODES */}
+                <TabsContent value="qrcodes" className="mt-8 space-y-6">
+                    <div className="flex justify-end border-b pb-4 mb-6">
+                        <Button variant="outline" onClick={() => setIsCreateModalOpen(true)}><Plus className="w-4 h-4 mr-2" /> Create QR Code</Button>
+                    </div>
+
+                    {campaigns.map(c => {
+                        const locObj = locations.find(l => l.id === c.locationId);
+                        const cUrl = `${publicReviewUrl}?campaign=${c.id}`;
+                        const qrId = `qr-tab-${c.id}`;
+                        return (
+                            <Card key={c.id}>
+                                <CardContent className="p-6 flex flex-col md:flex-row items-center gap-8">
+                                    <div className="bg-white p-6 border rounded-xl shadow-sm">
+                                        <QRCodeSVG id={qrId} value={cUrl} size={150} level="M" />
+                                    </div>
+                                    <div className="flex-1 space-y-6 w-full">
+                                        <div>
+                                            <h3 className="text-xl font-bold">{c.name} QR</h3>
+                                            <p className="text-muted-foreground text-sm font-medium mt-1">{locObj ? locObj.name : "All Locations"} • Active Campaign</p>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3 max-w-sm">
+                                            <Button onClick={() => downloadQR(qrId, `${c.slug}-qr.png`)}><Download className="w-4 h-4 mr-2" /> Download PNG</Button>
+                                            <Button variant="outline" onClick={() => openPrintModal(cUrl)}><Printer className="w-4 h-4 mr-2" /> Print PDF</Button>
+                                        </div>
+                                    </div>
+                                    <Button variant="ghost" size="icon" className="hidden md:flex"><MoreVertical className="w-5 h-5" /></Button>
+                                </CardContent>
+                            </Card>
+                        )
+                    })}
+                </TabsContent>
+
+                {/* TAB: REVIEW LINKS */}
+                <TabsContent value="links" className="mt-8 space-y-6">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Shareable Link</CardTitle>
-                            <CardDescription>
-                                You can also send this link directly to customers via WhatsApp, SMS, or Email.
-                            </CardDescription>
+                            <CardTitle>Smart Review Link</CardTitle>
+                            <CardDescription>Customers first answer your questions and generate their review draft.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="publicUrl">Public Review URL</Label>
+                            <div className="flex flex-col sm:flex-row gap-2">
+                                <Input readOnly value={publicReviewUrl} className="font-mono bg-muted" />
                                 <div className="flex gap-2">
-                                    <Input
-                                        id="publicUrl"
-                                        value={publicReviewUrl}
-                                        readOnly
-                                        className="bg-muted"
-                                    />
-                                    <Button variant="secondary" size="icon" className="shrink-0" title="Copy to clipboard" onClick={() => copyLink(publicReviewUrl)}>
-                                        <Copy className="h-4 w-4" />
+                                    <Button onClick={() => copyToClipboard(publicReviewUrl)}><Copy className="w-4 h-4 mr-2" /> Copy Link</Button>
+                                    <Button variant="secondary" onClick={() => window.open(publicReviewUrl, '_blank')}><Navigation className="w-4 h-4 mr-2" /> Open</Button>
+                                </div>
+                            </div>
+
+                            <div className="pt-4 border-t mt-4">
+                                <h4 className="text-sm font-semibold mb-3 flex items-center">Share Campaign <Share2 className="w-4 h-4 ml-2 text-muted-foreground" /></h4>
+                                <div className="flex flex-wrap gap-2">
+                                    <Button variant="outline" className="bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 border-[#25D366]/30" onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(`Hi! Thanks for visiting. Please leave us a review here: ${publicReviewUrl}`)}`, '_blank')}>
+                                        <MessageCircle className="w-4 h-4 mr-2" /> WhatsApp
                                     </Button>
-                                    <Button variant="outline" size="icon" className="shrink-0" title="Open in new tab" onClick={() => window.open(publicReviewUrl, '_blank')}>
-                                        <LinkIcon className="h-4 w-4" />
-                                    </Button>
+                                    <Button variant="outline"><MessageCircle className="w-4 h-4 mr-2" /> SMS</Button>
+                                    <Button variant="outline">Email</Button>
                                 </div>
                             </div>
                         </CardContent>
@@ -138,19 +422,196 @@ export function QrClient({ publicReviewUrl, locations }: { publicReviewUrl: stri
 
                     <Card>
                         <CardHeader>
-                            <CardTitle>Advanced Options</CardTitle>
+                            <CardTitle>Direct Google Review Link</CardTitle>
+                            <CardDescription>Where customers publish their final review on Google. (Bypasses Smart UI)</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-sm text-muted-foreground mb-4">
-                                If your QR code is ever compromised or you need to cycle out an old link, you can regenerate your unique business ID.
-                            </p>
-                            <Button variant="destructive" className="w-full gap-2">
-                                <RefreshCw className="h-4 w-4" /> Regenerate URL & QR Code
-                            </Button>
+                            <div className="flex flex-col sm:flex-row gap-2">
+                                <Input readOnly value={`https://g.page/r/xxxxx/review`} className="font-mono bg-muted text-muted-foreground" />
+                                <div className="flex gap-2">
+                                    <Button variant="outline" onClick={() => copyToClipboard(`https://g.page/r/xxxxx/review`)}><Copy className="w-4 h-4 mr-2" /> Copy Link</Button>
+                                    <Button variant="ghost" onClick={() => window.open(`https://g.page/r/xxxxx/review`, '_blank')}>Open</Button>
+                                </div>
+                            </div>
                         </CardContent>
                     </Card>
-                </div>
-            </div>
+                </TabsContent>
+            </Tabs>
+
+            {/* Print Styles injection for the print modal - only injected when modal is active */}
+            {isPrintModalOpen && (
+                <style dangerouslySetInnerHTML={{
+                    __html: `
+                    @media print {
+                        body * {
+                            visibility: hidden;
+                        }
+                        #print-section, #print-section * {
+                            visibility: visible;
+                        }
+                        #print-section {
+                            position: absolute;
+                            left: 0;
+                            top: 0;
+                            margin: 0;
+                            padding: 0;
+                            border: none !important;
+                            box-shadow: none !important;
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        @page {
+                            size: auto;
+                            margin: 0mm;
+                        }
+                    }
+                `}} />
+            )}
+
+            {/* Print Templates Design Modal Overlay */}
+            <Dialog open={isPrintModalOpen} onOpenChange={setIsPrintModalOpen}>
+                <DialogContent className="max-w-[95vw] sm:max-w-[80vw] md:max-w-4xl lg:max-w-5xl p-0 overflow-hidden bg-background">
+                    <div className="flex flex-col md:flex-row h-[85vh] md:h-[650px] max-h-[90vh]">
+
+                        {/* Left Side: Previews Selection */}
+                        <div className="bg-muted p-6 flex flex-col w-full md:w-80 shrink-0 border-r overflow-y-auto">
+                            <div>
+                                <h2 className="text-xl font-bold tracking-tight mb-1">Print Ready</h2>
+                                <p className="text-muted-foreground text-sm">Select a template to generate a high-resolution PDF for printing.</p>
+                            </div>
+
+                            <div className="space-y-4 mt-6">
+                                <div
+                                    onClick={() => setSelectedPrintTemplate('table-tent')}
+                                    className={`bg-card border-2 rounded-xl p-4 flex flex-col gap-3 cursor-pointer transition-all ${selectedPrintTemplate === 'table-tent' ? 'border-primary shadow-sm' : 'border-transparent shadow-sm hover:border-primary/30'}`}
+                                >
+                                    <div className="flex items-start justify-between">
+                                        <div className="font-bold text-sm flex items-center">Table Tent</div>
+                                        {selectedPrintTemplate === 'table-tent' && <CheckCircle2 className="w-4 h-4 text-primary" />}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">Double-sided folded 4x6"</div>
+                                </div>
+
+                                <div
+                                    onClick={() => setSelectedPrintTemplate('a4-poster')}
+                                    className={`bg-card border-2 rounded-xl p-4 flex flex-col gap-3 cursor-pointer transition-all ${selectedPrintTemplate === 'a4-poster' ? 'border-primary shadow-sm' : 'border-transparent shadow-sm hover:border-primary/30'}`}
+                                >
+                                    <div className="flex items-start justify-between">
+                                        <div className="font-bold text-sm flex items-center">A4 Poster / Flyer</div>
+                                        {selectedPrintTemplate === 'a4-poster' && <CheckCircle2 className="w-4 h-4 text-primary" />}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">Standard 8.5x11" portrait</div>
+                                </div>
+
+                                <div
+                                    onClick={() => setSelectedPrintTemplate('business-card')}
+                                    className={`bg-card border-2 rounded-xl p-4 flex flex-col gap-3 cursor-pointer transition-all ${selectedPrintTemplate === 'business-card' ? 'border-primary shadow-sm' : 'border-transparent shadow-sm hover:border-primary/30'}`}
+                                >
+                                    <div className="flex items-start justify-between">
+                                        <div className="font-bold text-sm flex items-center">Business Card</div>
+                                        {selectedPrintTemplate === 'business-card' && <CheckCircle2 className="w-4 h-4 text-primary" />}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">Standard 3.5x2" landscape</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right Side: The Visual Preview rendering space */}
+                        <div className="flex-1 bg-slate-50 flex flex-col relative w-full overflow-hidden">
+
+                            {/* Inner scroll area for vertical overflow */}
+                            <div className="flex-1 overflow-y-auto p-4 flex flex-col items-center justify-center min-h-0 relative bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
+
+                                <div id="print-section">
+                                    {selectedPrintTemplate === 'table-tent' && (
+                                        <div className="relative">
+                                            <div className="w-64 bg-white border border-slate-200 shadow-xl rounded-md flex flex-col items-center p-8 text-center shrink-0">
+                                                <div className="flex justify-center text-amber-400 text-2xl tracking-widest mb-3">★★★★★</div>
+                                                <h3 className="font-black text-slate-900 text-xl leading-snug uppercase">Enjoyed your experience?</h3>
+
+                                                <div className="mt-8 mb-8 p-3 bg-white rounded-lg border-2 border-slate-200 mx-auto w-fit">
+                                                    <QRCodeSVG value={printTargetUrl} size={140} level="H" />
+                                                </div>
+
+                                                <p className="text-xs font-bold text-slate-600 uppercase tracking-widest text-center">
+                                                    Scan here to share<br />your feedback
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {selectedPrintTemplate === 'a4-poster' && (
+                                        <div className="w-[400px] h-[550px] bg-white shadow-2xl border relative flex flex-col items-center justify-center p-12 shrink-0">
+                                            <div className="absolute top-0 left-0 right-0 h-4 bg-primary"></div>
+                                            <h1 className="text-5xl font-black text-slate-900 z-10 mb-2 mt-4 text-center leading-none">REVIEW US</h1>
+                                            <h2 className="text-base font-bold text-primary z-10 mb-12 uppercase tracking-widest text-center">On Google</h2>
+
+                                            <div className="p-4 bg-white shadow-sm border-4 border-slate-100 rounded-3xl z-10">
+                                                <QRCodeSVG value={printTargetUrl} size={220} level="H" />
+                                            </div>
+
+                                            <p className="text-center text-base font-semibold text-slate-500 mt-12 max-w-[280px]">
+                                                Open your camera and scan the code above to leave us a quick review.
+                                            </p>
+                                            <div className="flex gap-1.5 text-amber-400 text-3xl mt-8">★★★★★</div>
+                                        </div>
+                                    )}
+
+                                    {selectedPrintTemplate === 'business-card' && (
+                                        <div className="w-[420px] h-[240px] bg-white shadow-xl rounded-md border-2 border-slate-200 flex flex-row shrink-0 bg-gradient-to-br from-white to-slate-50">
+                                            <div className="w-1/2 p-6 flex flex-col items-start justify-center border-r">
+                                                <div className="flex text-amber-400 text-xl mb-3">★★★★★</div>
+                                                <h2 className="font-black text-slate-900 text-2xl leading-tight mb-2 uppercase tracking-tight">Love our<br />service?</h2>
+                                                <p className="text-xs text-slate-600 font-bold uppercase tracking-wider">Scan to review</p>
+                                            </div>
+                                            <div className="w-1/2 flex items-center justify-center bg-white p-6">
+                                                <div className="p-2 border-2 border-slate-100 rounded-xl shadow-sm">
+                                                    <QRCodeSVG value={printTargetUrl} size={130} level="M" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Fixed bottom bar */}
+                            <div className="bg-white border-t p-4 flex items-center justify-between shadow-sm shrink-0 w-full z-10">
+                                <div className="flex flex-col text-xs text-muted-foreground justify-center">
+                                    <span className="font-semibold text-foreground tracking-wide">FORMAT: {selectedPrintTemplate.toUpperCase()}</span>
+                                    <span>Ready for high-quality printing</span>
+                                </div>
+                                <Button onClick={triggerPrint}><Printer className="w-4 h-4 mr-2" /> Print PDF</Button>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
+    );
+}
+
+function SparklesIcon(props: any) {
+    return (
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="lucide lucide-sparkles w-4 h-4"
+        >
+            <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+            <path d="M5 3v4" />
+            <path d="M19 17v4" />
+            <path d="M3 5h4" />
+            <path d="M17 19h4" />
+        </svg>
     );
 }

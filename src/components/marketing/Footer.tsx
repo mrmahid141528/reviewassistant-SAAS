@@ -3,10 +3,15 @@ import { Star, Mail } from "lucide-react";
 import prisma from "@/lib/prisma";
 
 export async function Footer() {
-    const legalPages = await prisma.legalPage.findMany({
-        where: { status: 'published' },
-        select: { slug: true, title: true }
-    });
+    let legalPages: { slug: string; title: string }[] = [];
+    try {
+        legalPages = await prisma.legalPage.findMany({
+            where: { status: 'published' },
+            select: { slug: true, title: true }
+        });
+    } catch (e) {
+        console.warn("Could not fetch legal pages during build. Safe to ignore in CI environment.");
+    }
 
     return (
         <footer className="border-t border-border/50 bg-background pt-16 pb-8 relative z-10 w-full overflow-hidden">

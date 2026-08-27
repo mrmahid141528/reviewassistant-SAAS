@@ -2,16 +2,37 @@ import { QuestionsClient } from "./QuestionsClient";
 import prisma from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 
-export default async function QuestionsBuilderPage() {
+export default async function QuestionsBuilderPage(props: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+    const searchParams = await props.searchParams;
+    const locationIdFilter = searchParams?.locationId as string | undefined;
+
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     let savedQuestions: any[] = [];
+    let businessName = "Your Business";
+    let locations: { id: string, name: string }[] = [];
 
     if (user) {
-        const membership = await prisma.businessMember.findFirst({ where: { userId: user.id } });
+        const membership = await prisma.businessMember.findFirst({ where: { userId: user.id }, include: { business: true } });
         if (membership) {
-            const campaign = await prisma.campaign.findFirst({ where: { businessId: membership.businessId } });
+            businessName = membership.business.name || businessName;
+
+            locations = await prisma.businessLocation.findMany({
+                where: { businessId: membership.businessId },
+                select: { id: true, name: true }
+            })
+
+            const queryContext: any = { businessId: membership.businessId }
+            if (locationIdFilter && locationIdFilter !== 'all') {
+                queryContext.locationId = locationIdFilter;
+            }
+
+            const campaign = await prisma.campaign.findFirst({
+                where: queryContext,
+                orderBy: { createdAt: 'desc' }
+            });
+
             if (campaign) {
                 const results = await prisma.campaignQuestion.findMany({
                     where: { campaignId: campaign.id },
@@ -28,11 +49,10 @@ export default async function QuestionsBuilderPage() {
         }
     }
 
-    if (savedQuestions.length === 0) {
-        savedQuestions = [
-            { id: "1", question: "How was the quality of our service?", type: "Rating (1-5)", required: true, options: ["Great Service", "Friendly Staff", "Slow"] },
-        ];
-    }
-
-    return <QuestionsClient initialQuestions={savedQuestions} />;
+    return <QuestionsClient
+        initialQuestions={savedQuestions}
+        businessName={businessName}
+        locations={locations}
+        currentLocationId={locationIdFilter || 'all'}
+    />;
 }

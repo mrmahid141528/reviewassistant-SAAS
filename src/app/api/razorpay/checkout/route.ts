@@ -34,24 +34,11 @@ export async function POST(req: NextRequest) {
         const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
         const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
-        // Check if Razorpay keys exist strictly. If absent or "undefined" fallback string, trigger simulated Local Test Mode upgrade.
+        // Check if Razorpay keys exist strictly. If absent or "undefined" fallback string, return 500.
         if (!keyId || !keySecret || keyId === "undefined" || keySecret === "undefined" || keyId.trim() === "" || keySecret.trim() === "") {
-
-            // Bypass Razorpay completely and forcibly upgrade the Business in Prisma
-            await prisma.business.update({
-                where: { id: business.id },
-                data: {
-                    razorpayCustomerId: "cust_mock_test123",
-                    razorpaySubscriptionId: "sub_mock_test123",
-                    razorpayPlanId: planId,
-                    razorpayCurrentPeriodEnd: new Date(new Date().setMonth(new Date().getMonth() + 1))
-                }
-            });
-
             return NextResponse.json({
-                subscriptionId: "sub_mock_test123",
-                testModeSwitched: true
-            }, { status: 200 });
+                error: "Payment configuration is missing in the production environment."
+            }, { status: 500 });
         }
 
         // Initialize Razorpay SDK for Real Environment

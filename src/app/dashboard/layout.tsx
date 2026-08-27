@@ -28,7 +28,7 @@ export default async function DashboardLayout({
         if (prismaUser.status === 'suspended' || (membership && membership.business.status === 'suspended')) {
             return (
                 <div className="flex min-h-screen bg-background">
-                    <Sidebar />
+                    <Sidebar role={membership?.role} />
                     <div className="flex flex-1 flex-col">
                         <Header />
                         <main className="flex-1 overflow-y-auto p-4 md:p-8 flex items-center justify-center">
@@ -69,11 +69,21 @@ export default async function DashboardLayout({
         }
     }
 
+    let userAvatar = null;
+    let userNameInitials = "MR";
+    if (user) {
+        const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
+        if (dbUser) {
+            userAvatar = dbUser.image;
+            userNameInitials = dbUser.name ? dbUser.name.slice(0, 2).toUpperCase() : "USR";
+        }
+    }
+
     return (
         <div className="flex min-h-screen bg-background">
-            <Sidebar />
+            <Sidebar role={user ? (await prisma.businessMember.findFirst({ where: { userId: user.id } }))?.role : undefined} />
             <div className="flex flex-1 flex-col">
-                <Header />
+                <Header userAvatar={userAvatar} userNameInitials={userNameInitials} />
                 <main className="flex-1 overflow-y-auto p-4 md:p-8 flex flex-col">
                     {isExpired && (
                         <div className="mb-6 bg-red-50 border border-red-200 text-red-800 p-4 rounded-lg flex items-center justify-between shadow-sm">
