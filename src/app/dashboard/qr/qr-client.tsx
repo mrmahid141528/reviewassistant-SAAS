@@ -110,7 +110,7 @@ export function QrClient({ publicReviewUrl, locations, campaigns }: { publicRevi
 
             {/* Create Campaign Modal */}
             <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-                <DialogContent>
+                <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
                     {!isCreatedSuccess ? (
                         <>
                             <DialogHeader>
@@ -260,7 +260,7 @@ export function QrClient({ publicReviewUrl, locations, campaigns }: { publicRevi
                                                 </div>
 
                                                 {/* Simulated Stats */}
-                                                <div className="grid grid-cols-3 gap-6 mt-8 mb-6 bg-background rounded-xl">
+                                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-8 mb-6 bg-background border rounded-xl p-4 sm:p-0 sm:border-none">
                                                     <div>
                                                         <div className="text-sm font-semibold text-muted-foreground mb-1">QR Scans</div>
                                                         <div className="text-3xl font-bold tracking-tight">{Math.floor(Math.random() * 300)}</div>
@@ -311,15 +311,24 @@ export function QrClient({ publicReviewUrl, locations, campaigns }: { publicRevi
                                 </div>
 
                                 {locations.map(loc => (
-                                    <div key={loc.id} className="grid md:grid-cols-12 gap-4 p-4 items-center border-b hover:bg-muted/30 transition-colors">
-                                        <div className="col-span-4 font-semibold text-sm">{loc.name}</div>
-                                        <div className="col-span-3 flex items-center text-xs font-medium text-emerald-600 bg-emerald-50 w-max px-2 py-1 rounded-full">
+                                    <div key={loc.id} className="flex flex-col sm:grid sm:grid-cols-12 gap-4 p-4 items-start sm:items-center border-b hover:bg-muted/30 transition-colors relative">
+                                        <div className="sm:col-span-4 font-semibold text-sm">{loc.name}</div>
+                                        <div className="sm:col-span-3 flex items-center text-xs font-medium text-emerald-600 bg-emerald-50 w-max px-2 py-1 rounded-full">
                                             <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1.5"></span> Active
                                         </div>
-                                        <div className="col-span-2 md:text-right font-mono text-sm">{Math.floor(Math.random() * 200)}</div>
-                                        <div className="col-span-2 md:text-right font-mono text-sm">{Math.floor(Math.random() * 100)}</div>
-                                        <div className="col-span-1 md:text-center">
-                                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openPrintModal(`${publicReviewUrl}?location=${loc.id}`)}>
+
+                                        <div className="flex w-full justify-between sm:contents mt-2 sm:mt-0">
+                                            <div className="sm:hidden text-xs text-muted-foreground uppercase font-semibold">Scans</div>
+                                            <div className="sm:col-span-2 sm:text-right font-mono text-sm">{Math.floor(Math.random() * 200)}</div>
+                                        </div>
+
+                                        <div className="flex w-full justify-between sm:contents mt-1 sm:mt-0">
+                                            <div className="sm:hidden text-xs text-muted-foreground uppercase font-semibold">Reviews</div>
+                                            <div className="sm:col-span-2 sm:text-right font-mono text-sm">{Math.floor(Math.random() * 100)}</div>
+                                        </div>
+
+                                        <div className="absolute top-4 right-4 sm:static sm:col-span-1 sm:text-center">
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 bg-muted sm:bg-transparent" onClick={() => openPrintModal(`${publicReviewUrl}?location=${loc.id}`)}>
                                                 <QrCode className="w-4 h-4" />
                                             </Button>
                                         </div>
