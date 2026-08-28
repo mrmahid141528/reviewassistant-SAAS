@@ -103,7 +103,7 @@ export function QrClient({ publicReviewUrl, locations, campaigns }: { publicRevi
                         Create, manage, and share your customer review campaigns.
                     </p>
                 </div>
-                <Button size="lg" onClick={() => { setIsCreatedSuccess(false); setIsCreateModalOpen(true); }}>
+                <Button className="w-full md:w-auto" size="lg" onClick={() => { setIsCreatedSuccess(false); setIsCreateModalOpen(true); }}>
                     <Plus className="mr-2 w-4 h-4" /> Create Campaign
                 </Button>
             </div>
@@ -183,11 +183,11 @@ export function QrClient({ publicReviewUrl, locations, campaigns }: { publicRevi
                                 <QRCodeSVG value={publicReviewUrl} size={150} level="M" />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3 w-full mt-4">
-                                <Button variant="outline" onClick={() => setIsCreateModalOpen(false)}><Download className="w-4 h-4 mr-2" /> Download QR</Button>
-                                <Button variant="outline" onClick={() => { setIsCreateModalOpen(false); openPrintModal(publicReviewUrl); }}><Printer className="w-4 h-4 mr-2" /> Print QR</Button>
-                                <Button variant="outline" onClick={() => copyToClipboard(publicReviewUrl)}><Copy className="w-4 h-4 mr-2" /> Copy Link</Button>
-                                <Button onClick={() => window.open(publicReviewUrl, '_blank')}><Navigation className="w-4 h-4 mr-2" /> Test Flow</Button>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full mt-4">
+                                <Button variant="outline" className="w-full justify-center" onClick={() => setIsCreateModalOpen(false)}><Download className="w-4 h-4 mr-2" /> Download QR</Button>
+                                <Button variant="outline" className="w-full justify-center" onClick={() => { setIsCreateModalOpen(false); openPrintModal(publicReviewUrl); }}><Printer className="w-4 h-4 mr-2" /> Print QR</Button>
+                                <Button variant="outline" className="w-full justify-center" onClick={() => copyToClipboard(publicReviewUrl)}><Copy className="w-4 h-4 mr-2" /> Copy Link</Button>
+                                <Button className="w-full justify-center" onClick={() => window.open(publicReviewUrl, '_blank')}><Navigation className="w-4 h-4 mr-2" /> Test Flow</Button>
                             </div>
                         </div>
                     )}
@@ -248,11 +248,11 @@ export function QrClient({ publicReviewUrl, locations, campaigns }: { publicRevi
                                                                 {campaignUrl}
                                                             </div>
                                                         </div>
-                                                        <div className="grid grid-cols-2 gap-3 mt-auto">
-                                                            <Button variant="secondary" onClick={() => copyToClipboard(campaignUrl)}>
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-auto">
+                                                            <Button variant="secondary" className="w-full" onClick={() => copyToClipboard(campaignUrl)}>
                                                                 <Copy className="w-4 h-4 mr-2" /> Copy Link
                                                             </Button>
-                                                            <Button variant="default" onClick={() => window.open(campaignUrl, '_blank')}>
+                                                            <Button variant="default" className="w-full" onClick={() => window.open(campaignUrl, '_blank')}>
                                                                 Test Flow <Navigation className="w-4 h-4 ml-2" />
                                                             </Button>
                                                         </div>
@@ -275,15 +275,15 @@ export function QrClient({ publicReviewUrl, locations, campaigns }: { publicRevi
                                                     </div>
                                                 </div>
 
-                                                <div className="flex items-center gap-4 pt-6 border-t">
-                                                    <Button variant="outline" size="sm" onClick={() => downloadQR(qrId, `${campaign.slug}-qr.png`)}>
+                                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-6 border-t">
+                                                    <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => downloadQR(qrId, `${campaign.slug}-qr.png`)}>
                                                         <Download className="w-4 h-4 mr-2" /> Download PNG
                                                     </Button>
-                                                    <Button variant="outline" size="sm" onClick={() => openPrintModal(campaignUrl)}>
+                                                    <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => openPrintModal(campaignUrl)}>
                                                         <Printer className="w-4 h-4 mr-2" /> Print PDF
                                                     </Button>
-                                                    <div className="flex-1"></div>
-                                                    <Button variant="ghost" size="sm" className="text-muted-foreground font-medium">
+                                                    <div className="hidden sm:block flex-1"></div>
+                                                    <Button variant="ghost" size="sm" className="w-full sm:w-auto text-muted-foreground font-medium">
                                                         <BarChart3 className="w-4 h-4 mr-2" /> View Analytics
                                                     </Button>
                                                 </div>
@@ -388,9 +388,9 @@ export function QrClient({ publicReviewUrl, locations, campaigns }: { publicRevi
                                             <h3 className="text-xl font-bold">{c.name} QR</h3>
                                             <p className="text-muted-foreground text-sm font-medium mt-1">{locObj ? locObj.name : "All Locations"} • Active Campaign</p>
                                         </div>
-                                        <div className="grid grid-cols-2 gap-3 max-w-sm">
-                                            <Button onClick={() => downloadQR(qrId, `${c.slug}-qr.png`)}><Download className="w-4 h-4 mr-2" /> Download PNG</Button>
-                                            <Button variant="outline" onClick={() => openPrintModal(cUrl)}><Printer className="w-4 h-4 mr-2" /> Print PDF</Button>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-sm">
+                                            <Button className="w-full" onClick={() => downloadQR(qrId, `${c.slug}-qr.png`)}><Download className="w-4 h-4 mr-2" /> Download</Button>
+                                            <Button className="w-full" variant="outline" onClick={() => openPrintModal(cUrl)}><Printer className="w-4 h-4 mr-2" /> Print PDF</Button>
                                         </div>
                                     </div>
                                     <Button variant="ghost" size="icon" className="hidden md:flex"><MoreVertical className="w-5 h-5" /></Button>
@@ -410,9 +410,9 @@ export function QrClient({ publicReviewUrl, locations, campaigns }: { publicRevi
                         <CardContent className="space-y-4">
                             <div className="flex flex-col sm:flex-row gap-2">
                                 <Input readOnly value={publicReviewUrl} className="font-mono bg-muted" />
-                                <div className="flex gap-2">
-                                    <Button onClick={() => copyToClipboard(publicReviewUrl)}><Copy className="w-4 h-4 mr-2" /> Copy Link</Button>
-                                    <Button variant="secondary" onClick={() => window.open(publicReviewUrl, '_blank')}><Navigation className="w-4 h-4 mr-2" /> Open</Button>
+                                <div className="grid grid-cols-2 sm:flex sm:gap-2 gap-3 mt-2 sm:mt-0">
+                                    <Button className="w-full" onClick={() => copyToClipboard(publicReviewUrl)}><Copy className="w-4 h-4 mr-2" /> Copy Link</Button>
+                                    <Button className="w-full" variant="secondary" onClick={() => window.open(publicReviewUrl, '_blank')}><Navigation className="w-4 h-4 mr-2" /> Open</Button>
                                 </div>
                             </div>
 
@@ -437,9 +437,9 @@ export function QrClient({ publicReviewUrl, locations, campaigns }: { publicRevi
                         <CardContent>
                             <div className="flex flex-col sm:flex-row gap-2">
                                 <Input readOnly value={`https://g.page/r/xxxxx/review`} className="font-mono bg-muted text-muted-foreground" />
-                                <div className="flex gap-2">
-                                    <Button variant="outline" onClick={() => copyToClipboard(`https://g.page/r/xxxxx/review`)}><Copy className="w-4 h-4 mr-2" /> Copy Link</Button>
-                                    <Button variant="ghost" onClick={() => window.open(`https://g.page/r/xxxxx/review`, '_blank')}>Open</Button>
+                                <div className="grid grid-cols-2 sm:flex sm:gap-2 gap-3 mt-2 sm:mt-0">
+                                    <Button className="w-full" variant="outline" onClick={() => copyToClipboard(`https://g.page/r/xxxxx/review`)}><Copy className="w-4 h-4 mr-2" /> Copy Link</Button>
+                                    <Button className="w-full" variant="ghost" onClick={() => window.open(`https://g.page/r/xxxxx/review`, '_blank')}>Open</Button>
                                 </div>
                             </div>
                         </CardContent>
