@@ -137,7 +137,7 @@ export function QrClient({ publicReviewUrl, locations, campaigns, recentActivity
                                 </div>
                                 <div className="space-y-2 pt-2">
                                     <Label>Campaign Type</Label>
-                                    <div className="grid grid-cols-3 gap-2">
+                                    <div className="flex flex-col sm:grid sm:grid-cols-3 gap-2">
                                         {['QR Code', 'Digital Link', 'Both'].map((opt) => {
                                             const val = opt.toLowerCase().replace(' ', '-');
                                             return (
@@ -197,9 +197,9 @@ export function QrClient({ publicReviewUrl, locations, campaigns, recentActivity
             {/* Main Content Tabs */}
             <Tabs defaultValue="campaigns" className="w-full">
                 <TabsList className="flex overflow-x-auto w-full sm:inline-flex sm:w-auto p-1 touch-pan-x justify-start">
-                    <TabsTrigger value="campaigns" className="flex-1 min-w-[110px] whitespace-nowrap">Campaigns</TabsTrigger>
-                    <TabsTrigger value="qrcodes" className="flex-1 min-w-[110px] whitespace-nowrap">QR Codes</TabsTrigger>
-                    <TabsTrigger value="links" className="flex-1 min-w-[110px] whitespace-nowrap">Review Links</TabsTrigger>
+                    <TabsTrigger value="campaigns" className="flex-1 shrink-0 min-w-[110px] whitespace-nowrap">Campaigns</TabsTrigger>
+                    <TabsTrigger value="qrcodes" className="flex-1 shrink-0 min-w-[110px] whitespace-nowrap">QR Codes</TabsTrigger>
+                    <TabsTrigger value="links" className="flex-1 shrink-0 min-w-[110px] whitespace-nowrap">Review Links</TabsTrigger>
                 </TabsList>
 
                 {/* TAB: CAMPAIGNS (Main Tab) */}
@@ -523,8 +523,8 @@ export function QrClient({ publicReviewUrl, locations, campaigns, recentActivity
                         {/* Right Side: The Visual Preview rendering space */}
                         <div className="flex-1 bg-slate-50 flex flex-col relative w-full overflow-hidden">
 
-                            {/* Inner scroll area for vertical overflow */}
-                            <div className="flex-1 overflow-y-auto p-4 flex flex-col items-center justify-center min-h-0 relative bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
+                            {/* Inner scroll area for vertical & horizontal overflow */}
+                            <div className="flex-1 overflow-auto p-4 flex flex-col items-start min-h-0 sm:items-center sm:justify-start relative bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
 
                                 <div id="print-section">
                                     {selectedPrintTemplate === 'table-tent' && (
