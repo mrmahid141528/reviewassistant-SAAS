@@ -244,8 +244,8 @@ export function QrClient({ publicReviewUrl, locations, campaigns, recentActivity
                                                             <Label className="text-xs font-semibold text-muted-foreground uppercase flex items-center mb-1.5">
                                                                 Customer Review Link
                                                             </Label>
-                                                            <div className="flex items-center gap-2 bg-background border rounded-md px-3 py-2 w-full">
-                                                                <div className="font-mono text-sm text-muted-foreground truncate flex-1 leading-none pt-0.5">
+                                                            <div className="flex items-center gap-2 bg-background border rounded-md px-3 py-2 w-full overflow-hidden">
+                                                                <div className="font-mono text-sm text-muted-foreground truncate flex-1 min-w-0 leading-none pt-0.5">
                                                                     {campaignUrl}
                                                                 </div>
                                                                 <button onClick={() => copyToClipboard(campaignUrl)} className="text-muted-foreground hover:text-primary transition-colors cursor-pointer shrink-0 ml-2" title="Copy link">
@@ -396,8 +396,8 @@ export function QrClient({ publicReviewUrl, locations, campaigns, recentActivity
                             <CardDescription>Customers first answer your questions and generate their review draft.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="flex items-center gap-2 bg-background border rounded-md px-3 py-2 w-full">
-                                <div className="font-mono text-sm text-foreground truncate flex-1 leading-none pt-0.5">
+                            <div className="flex items-center gap-2 bg-background border rounded-md px-3 py-2 w-full overflow-hidden">
+                                <div className="font-mono text-sm text-foreground truncate flex-1 min-w-0 leading-none pt-0.5">
                                     {publicReviewUrl}
                                 </div>
                                 <button onClick={() => copyToClipboard(publicReviewUrl)} className="text-muted-foreground hover:text-primary transition-colors cursor-pointer shrink-0 ml-2" title="Copy link">
@@ -428,8 +428,8 @@ export function QrClient({ publicReviewUrl, locations, campaigns, recentActivity
                             <CardDescription>Where customers publish their final review on Google. (Bypasses Smart UI)</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div className="flex items-center gap-2 bg-background border rounded-md px-3 py-2 w-full mb-3">
-                                <div className="font-mono text-sm text-muted-foreground truncate flex-1 leading-none pt-0.5">
+                            <div className="flex items-center gap-2 bg-background border rounded-md px-3 py-2 w-full mb-3 overflow-hidden">
+                                <div className="font-mono text-sm text-muted-foreground truncate flex-1 min-w-0 leading-none pt-0.5">
                                     https://g.page/r/xxxxx/review
                                 </div>
                                 <button onClick={() => copyToClipboard(`https://g.page/r/xxxxx/review`)} className="text-muted-foreground hover:text-primary transition-colors cursor-pointer shrink-0 ml-2" title="Copy link">
