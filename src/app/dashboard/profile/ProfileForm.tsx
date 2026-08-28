@@ -21,6 +21,8 @@ export function ProfileForm({
     const [isCropOpen, setIsCropOpen] = useState(false);
     const [uploadingImageSrc, setUploadingImageSrc] = useState<string | null>(null);
     const [isRemoved, setIsRemoved] = useState(false);
+    const [base64Data, setBase64Data] = useState<string>("");
+    const [mimeType, setMimeType] = useState<string>("");
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,11 +41,24 @@ export function ProfileForm({
     const handleCropComplete = (croppedFile: File) => {
         setPreview(URL.createObjectURL(croppedFile));
         setIsRemoved(false); // Resets removed state if user uploaded new
+        setMimeType(croppedFile.type || "image/jpeg");
+
+        // Convert the cropped file to Base64 for reliable mobile form submission
+        const reader = new FileReader();
+        reader.readAsDataURL(croppedFile);
+        reader.onloadend = () => {
+            const base64String = (reader.result as string).split(',')[1];
+            setBase64Data(base64String);
+        }
 
         if (fileInputRef.current) {
-            const dataTransfer = new DataTransfer();
-            dataTransfer.items.add(croppedFile);
-            fileInputRef.current.files = dataTransfer.files;
+            try {
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(croppedFile);
+                fileInputRef.current.files = dataTransfer.files;
+            } catch (e) {
+                console.warn("DataTransfer not supported, falling back to base64");
+            }
         }
 
         setUploadingImageSrc(null); // safely clears source state
@@ -76,6 +91,8 @@ export function ProfileForm({
         <ActionForm action={updateProfile} className="space-y-8">
             {/* Hidden flag explicitly tells backend to wipe image if true */}
             <input type="hidden" name="removeAvatar" value={isRemoved ? "true" : "false"} />
+            <input type="hidden" name="avatarBase64" value={base64Data} suppressHydrationWarning />
+            <input type="hidden" name="avatarMimeType" value={mimeType} suppressHydrationWarning />
 
             <Card>
                 <CardHeader>

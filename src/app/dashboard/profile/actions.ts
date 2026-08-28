@@ -20,8 +20,23 @@ export async function updateProfile(formData: FormData) {
         let finalAvatarUrl = undefined;
         const avatarFile = formData.get("avatar") as File | null;
 
+        let finalAvatarBuffer: Buffer | null = null;
+        let finalMimeType: string | null = null;
+
         if (avatarFile && avatarFile.size > 0 && avatarFile.name && avatarFile.name !== "undefined") {
-            const fileExt = avatarFile.name.split('.').pop()
+            const arrayBuffer = await avatarFile.arrayBuffer()
+            finalAvatarBuffer = Buffer.from(arrayBuffer)
+            finalMimeType = avatarFile.type;
+        } else {
+            const base64Str = formData.get("avatarBase64") as string | null;
+            if (base64Str) {
+                finalAvatarBuffer = Buffer.from(base64Str, 'base64');
+                finalMimeType = (formData.get("avatarMimeType") as string) || "image/jpeg";
+            }
+        }
+
+        if (finalAvatarBuffer && finalMimeType) {
+            const fileExt = finalMimeType.split('/')[1] || 'jpg';
             const fileName = `user-${user.id}-${Date.now()}.${fileExt}`
 
             const { createClient: createSupabaseClient } = require('@supabase/supabase-js')
@@ -29,9 +44,6 @@ export async function updateProfile(formData: FormData) {
                 process.env.NEXT_PUBLIC_SUPABASE_URL!,
                 process.env.SUPABASE_SERVICE_ROLE_KEY!
             )
-
-            const arrayBuffer = await avatarFile.arrayBuffer()
-            const buffer = Buffer.from(arrayBuffer)
 
             // Ensure "avatars" bucket exists
             const { data: bucketData, error: bucketError } = await supabaseAdmin.storage.getBucket('avatars')
@@ -42,9 +54,9 @@ export async function updateProfile(formData: FormData) {
 
             const { error: uploadError } = await supabaseAdmin.storage
                 .from('avatars')
-                .upload(fileName, buffer, {
+                .upload(fileName, finalAvatarBuffer, {
                     upsert: true,
-                    contentType: avatarFile.type
+                    contentType: finalMimeType
                 })
 
             if (uploadError) {
