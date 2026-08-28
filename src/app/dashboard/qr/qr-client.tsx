@@ -196,10 +196,10 @@ export function QrClient({ publicReviewUrl, locations, campaigns }: { publicRevi
 
             {/* Main Content Tabs */}
             <Tabs defaultValue="campaigns" className="w-full">
-                <TabsList className="grid w-full sm:w-[500px] grid-cols-3">
-                    <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
-                    <TabsTrigger value="qrcodes">QR Codes</TabsTrigger>
-                    <TabsTrigger value="links">Review Links</TabsTrigger>
+                <TabsList className="flex overflow-x-auto w-full sm:inline-flex sm:w-auto p-1 touch-pan-x justify-start">
+                    <TabsTrigger value="campaigns" className="flex-1 min-w-[110px] whitespace-nowrap">Campaigns</TabsTrigger>
+                    <TabsTrigger value="qrcodes" className="flex-1 min-w-[110px] whitespace-nowrap">QR Codes</TabsTrigger>
+                    <TabsTrigger value="links" className="flex-1 min-w-[110px] whitespace-nowrap">Review Links</TabsTrigger>
                 </TabsList>
 
                 {/* TAB: CAMPAIGNS (Main Tab) */}

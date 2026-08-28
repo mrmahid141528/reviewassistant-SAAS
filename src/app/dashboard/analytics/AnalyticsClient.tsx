@@ -121,7 +121,8 @@ export function MainAnalyticsClient({ timeseries, recentFeedbacks, overallRating
                 </CardHeader>
                 <CardContent>
                     <div className="rounded-md border overflow-hidden">
-                        <table className="w-full text-sm text-left">
+                        {/* Desktop Table Content */}
+                        <table className="hidden md:table w-full text-sm text-left">
                             <thead className="bg-muted text-muted-foreground font-medium text-xs px-4 border-b">
                                 <tr>
                                     <th className="py-3 px-4">Date</th>
@@ -155,6 +156,39 @@ export function MainAnalyticsClient({ timeseries, recentFeedbacks, overallRating
                                 )}
                             </tbody>
                         </table>
+
+                        {/* Mobile Stacked List Content */}
+                        <div className="md:hidden divide-y bg-background">
+                            {recentFeedbacks.length > 0 ? recentFeedbacks.map(fb => (
+                                <div key={fb.id} className="p-4 flex flex-col space-y-3">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <div className="font-semibold text-sm">{fb.location}</div>
+                                            <div className="text-xs text-muted-foreground mt-0.5">{fb.date}</div>
+                                        </div>
+                                        <div className="flex px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold text-sm border border-primary/20">
+                                            ⭐ {fb.rating}.0
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-between items-center text-sm pt-2 border-t border-dashed">
+                                        <span className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">AI Draft Generated</span>
+                                        {fb.hasGenerated ? (
+                                            <span className="text-emerald-600 font-bold flex items-center bg-emerald-50 px-2 py-0.5 rounded-full text-xs">
+                                                <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> YES
+                                            </span>
+                                        ) : (
+                                            <span className="text-muted-foreground font-medium text-xs">
+                                                Logged Out
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            )) : (
+                                <div className="h-32 flex items-center justify-center text-center text-muted-foreground text-sm">
+                                    No data available for the selected period.
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </CardContent>
             </Card>
