@@ -66,7 +66,7 @@ export function SupportClient({ articles, contact }: { articles: any[], contact:
                 {/* Dynamically Fetched Articles */}
                 <div className="lg:col-span-2 space-y-4">
                     <h2 className="text-xl font-bold tracking-tight mb-4">
-                        {search ? "Search Results" : "Knowledge Base Articles"}
+                        {search ? "Search Results" : "Frequently Asked Questions & Articles"}
                     </h2>
 
                     {filteredArticles.length > 0 ? (
