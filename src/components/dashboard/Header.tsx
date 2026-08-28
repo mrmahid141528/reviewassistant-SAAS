@@ -10,9 +10,12 @@ import { createClient } from "@/lib/supabase/client";
 
 import { Sidebar } from "./Sidebar";
 
+import React from "react";
+
 export function Header({ userAvatar, userNameInitials, role }: { userAvatar?: string | null, userNameInitials?: string, role?: string }) {
     const pathname = usePathname();
     const router = useRouter();
+    const [open, setOpen] = React.useState(false);
 
     const handleLogout = async () => {
         const supabase = createClient();
@@ -22,13 +25,13 @@ export function Header({ userAvatar, userNameInitials, role }: { userAvatar?: st
     };
     return (
         <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
-            <Sheet>
+            <Sheet open={open} onOpenChange={setOpen}>
                 <SheetTrigger render={<Button variant="outline" size="icon" className="md:hidden" aria-label="Toggle Menu" />}>
                     <Menu className="h-5 w-5" />
                 </SheetTrigger>
                 <SheetContent side="left" className="w-[280px] p-0 border-r-0">
                     <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                    <Sidebar role={role} className="flex md:flex w-full h-full pb-12 border-r-0 shadow-none border-none" />
+                    <Sidebar role={role} onNavClick={() => setOpen(false)} className="flex md:flex w-full h-full pb-12 border-r-0 shadow-none border-none" />
                 </SheetContent>
             </Sheet>
 

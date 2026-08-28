@@ -24,30 +24,31 @@ const supportNavigation = [
   { name: "Profile", href: "/dashboard/profile", icon: User },
 ];
 
-function NavLink({ item, pathname }: { item: any, pathname: string }) {
-  const isDashboardRoot = item.href === "/dashboard";
-  const isActive = isDashboardRoot
-    ? pathname === "/dashboard"
-    : pathname === item.href || pathname.startsWith(`${item.href}/`);
-  return (
-    <Link
-      href={item.href}
-      className={cn(
-        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-        isActive
-          ? "bg-slate-900 text-white font-semibold shadow-sm"
-          : "text-slate-500 hover:bg-slate-100 hover:text-slate-900 hover:translate-x-1"
-      )}
-    >
-      <item.icon className={cn("h-4 w-4", isActive ? "text-white" : "")} />
-      {item.name}
-    </Link>
-  );
-}
-
-export function Sidebar({ role, className }: { role?: string, className?: string }) {
+export function Sidebar({ role, className, onNavClick }: { role?: string, className?: string, onNavClick?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
+
+  const NavLinkComponent = ({ item, pathname }: { item: any, pathname: string }) => {
+    const isDashboardRoot = item.href === "/dashboard";
+    const isActive = isDashboardRoot
+      ? pathname === "/dashboard"
+      : pathname === item.href || pathname.startsWith(`${item.href}/`);
+    return (
+      <Link
+        href={item.href}
+        onClick={onNavClick}
+        className={cn(
+          "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+          isActive
+            ? "bg-slate-900 text-white font-semibold shadow-sm"
+            : "text-slate-500 hover:bg-slate-100 hover:text-slate-900 hover:translate-x-1"
+        )}
+      >
+        <item.icon className={cn("h-4 w-4", isActive ? "text-white" : "")} />
+        {item.name}
+      </Link>
+    );
+  }
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -73,7 +74,7 @@ export function Sidebar({ role, className }: { role?: string, className?: string
 
       <nav className="space-y-1">
         {mainNavigation.map((item) => (
-          <NavLink key={item.name} item={item} pathname={pathname} />
+          <NavLinkComponent key={item.name} item={item} pathname={pathname} />
         ))}
       </nav>
 
@@ -81,7 +82,7 @@ export function Sidebar({ role, className }: { role?: string, className?: string
 
       <nav className="space-y-1">
         {filteredSettings.map((item) => (
-          <NavLink key={item.name} item={item} pathname={pathname} />
+          <NavLinkComponent key={item.name} item={item} pathname={pathname} />
         ))}
       </nav>
 
@@ -89,7 +90,7 @@ export function Sidebar({ role, className }: { role?: string, className?: string
 
       <nav className="space-y-1">
         {supportNavigation.map((item) => (
-          <NavLink key={item.name} item={item} pathname={pathname} />
+          <NavLinkComponent key={item.name} item={item} pathname={pathname} />
         ))}
       </nav>
 

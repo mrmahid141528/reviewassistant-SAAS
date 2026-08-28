@@ -17,6 +17,7 @@ interface SuperadminHeaderProps {
 export function SuperadminHeader({ adminEmail = "Admin" }: SuperadminHeaderProps) {
     const router = useRouter();
     const [open, setOpen] = React.useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
     React.useEffect(() => {
         const down = (e: KeyboardEvent) => {
@@ -33,15 +34,19 @@ export function SuperadminHeader({ adminEmail = "Admin" }: SuperadminHeaderProps
     return (
         <header className="h-16 flex items-center justify-between px-4 sm:px-8 border-b bg-white shrink-0 gap-2">
             {/* Mobile Sidebar Trigger */}
-            <Sheet>
-                <SheetTrigger className="md:hidden flex h-9 w-9 items-center justify-center rounded-md hover:bg-slate-100 transition-colors">
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                <SheetTrigger render={
+                    <Button variant="ghost" size="icon" className="md:hidden flex h-9 w-9 items-center justify-center rounded-md hover:bg-slate-100 transition-colors">
+                        <Menu className="h-5 w-5 text-slate-600" />
+                    </Button>
+                }>
                     <Menu className="h-5 w-5 text-slate-600" />
                 </SheetTrigger>
                 <SheetContent side="left" className="w-[280px] p-0 border-r-0">
                     <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
                     {/* Render the actual sidebar content inside the sheet for mobile */}
                     <div className="w-full flex-shrink-0 bg-white flex flex-col h-full">
-                        <SuperadminSidebar className="flex md:flex w-full h-full border-r-0" />
+                        <SuperadminSidebar onNavClick={() => setMobileMenuOpen(false)} className="flex md:flex w-full h-full border-r-0" />
                     </div>
                 </SheetContent>
             </Sheet>

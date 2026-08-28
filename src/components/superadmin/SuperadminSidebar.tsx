@@ -47,7 +47,7 @@ const systemNavItems = [
     { name: "Admins", href: "/superadmin/admins", icon: UserCog },
 ];
 
-export function SuperadminSidebar({ className }: { className?: string }) {
+export function SuperadminSidebar({ className, onNavClick }: { className?: string, onNavClick?: () => void }) {
     const pathname = usePathname();
 
     const renderLink = (item: any) => {
@@ -56,6 +56,7 @@ export function SuperadminSidebar({ className }: { className?: string }) {
             <Link
                 key={item.name}
                 href={item.href}
+                onClick={onNavClick}
                 className={cn(
                     buttonVariants({ variant: "ghost" }),
                     "w-full justify-start gap-3 h-9 text-[13px] font-medium transition-colors",
@@ -101,12 +102,14 @@ export function SuperadminSidebar({ className }: { className?: string }) {
             <div className="p-4 border-t space-y-1 shrink-0 bg-slate-50/50">
                 <Link
                     href="/superadmin/settings"
+                    onClick={onNavClick}
                     className={cn(buttonVariants({ variant: "ghost" }), "w-full justify-start gap-3 h-9 text-[13px] font-medium text-slate-600 hover:bg-slate-200 hover:text-slate-900")}
                 >
                     <Settings className="h-4 w-4 shrink-0 text-slate-500" /> <span className="truncate">Profile Settings</span>
                 </Link>
                 <Link
                     href="/dashboard"
+                    onClick={onNavClick}
                     className={cn(buttonVariants({ variant: "outline" }), "w-full gap-2 h-9 text-[13px] text-slate-600 hover:bg-slate-100 hover:text-slate-900 border-slate-200 shadow-sm")}
                 >
                     <LogOut className="h-4 w-4 shrink-0 text-slate-500" /> Exit Portal
