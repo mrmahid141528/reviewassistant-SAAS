@@ -19,7 +19,8 @@ import {
     FileText,
     Database,
     UserCog,
-    LogOut
+    LogOut,
+    HelpCircle
 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 
@@ -29,6 +30,7 @@ const platformNavItems = [
     { name: "Analytics", href: "/superadmin/analytics", icon: BarChart3 },
     { name: "Reviews", href: "/superadmin/reviews", icon: Star },
     { name: "QR Campaigns", href: "/superadmin/campaigns", icon: QrCode },
+    { name: "Support Hub", href: "/superadmin/support", icon: HelpCircle },
 ];
 
 const monetizationNavItems = [
