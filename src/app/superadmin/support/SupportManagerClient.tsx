@@ -55,8 +55,8 @@ export default function SupportManagerClient({ initialArticles, initialContact }
                             <p className="text-muted-foreground text-sm">These articles are visible to all business owners.</p>
                         </div>
                         <Dialog open={openAdd} onOpenChange={setOpenAdd}>
-                            <DialogTrigger asChild>
-                                <Button className="gap-2"><Plus className="h-4 w-4" /> Add Article</Button>
+                            <DialogTrigger render={<Button className="gap-2" />}>
+                                <Plus className="h-4 w-4" /> Add Article / FAQ
                             </DialogTrigger>
                             <DialogContent className="sm:max-w-[700px]">
                                 <DialogHeader>

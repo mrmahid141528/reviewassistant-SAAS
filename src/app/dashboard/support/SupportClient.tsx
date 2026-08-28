@@ -73,14 +73,12 @@ export function SupportClient({ articles, contact }: { articles: any[], contact:
                         <div className="space-y-3">
                             {filteredArticles.map((article) => (
                                 <Dialog key={article.id}>
-                                    <DialogTrigger asChild>
-                                        <div className="flex justify-between items-center p-5 rounded-lg border bg-card hover:bg-muted/50 transition-colors cursor-pointer group">
-                                            <div className="flex items-center gap-3">
-                                                <FileText className="h-5 w-5 text-primary/70" />
-                                                <span className="font-medium text-base group-hover:text-primary transition-colors">{article.title}</span>
-                                            </div>
-                                            <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+                                    <DialogTrigger render={<div className="flex justify-between items-center p-5 rounded-lg border bg-card hover:bg-muted/50 transition-colors cursor-pointer group" />}>
+                                        <div className="flex items-center gap-3">
+                                            <FileText className="h-5 w-5 text-primary/70" />
+                                            <span className="font-medium text-base group-hover:text-primary transition-colors">{article.title}</span>
                                         </div>
+                                        <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
                                     </DialogTrigger>
                                     <DialogContent className="sm:max-w-[700px] max-h-[85vh] overflow-y-auto">
                                         <DialogHeader>
