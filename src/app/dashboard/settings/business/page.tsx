@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea"
 import LogoUpload from "@/components/dashboard/LogoUpload";
+import CategorySelect from "@/components/dashboard/CategorySelect";
 
 import prisma from "@/lib/prisma"
 import { createClient } from "@/lib/supabase/server"
@@ -51,14 +52,7 @@ export default async function BusinessSettingsPage() {
         }
     }
 
-    const CAETGORIES = [
-        "Restaurant", "Cafe", "Hotel", "Salon", "Spa",
-        "Retail Store", "Clothing Store", "Grocery Store",
-        "Internet Cafe", "Marketing Agency", "Clinic", "Education", "Other"
-    ];
-
-    const isOtherCategory = category && !CAETGORIES.includes(category);
-    const displayCategory = isOtherCategory ? "Other" : category;
+    // Removed static list definition from here since it's now encapsulated in CategorySelect.tsx
 
     return (
         <Card>
@@ -77,32 +71,11 @@ export default async function BusinessSettingsPage() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
+                        <div className="space-y-2 md:col-span-2 lg:col-span-1">
                             <Label htmlFor="businessName">Business Name *</Label>
                             <Input suppressHydrationWarning id="businessName" name="businessName" placeholder="e.g. ABC Restaurant" defaultValue={businessName} required />
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="category">Business Category *</Label>
-                            <select
-                                suppressHydrationWarning
-                                id="category"
-                                name="category"
-                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background disabled:cursor-not-allowed disabled:opacity-50"
-                                defaultValue={displayCategory || ""}
-                                required
-                            >
-                                <option value="" disabled>Select a category...</option>
-                                {CAETGORIES.map(cat => (
-                                    <option key={cat} value={cat}>{cat}</option>
-                                ))}
-                            </select>
-                        </div>
-                        {isOtherCategory && (
-                            <div className="space-y-2 md:col-start-2">
-                                <Label htmlFor="otherCategory">Other Category</Label>
-                                <Input suppressHydrationWarning id="otherCategory" name="otherCategory" defaultValue={isOtherCategory ? category : ""} placeholder="Enter category..." />
-                            </div>
-                        )}
+                        <CategorySelect defaultValue={category} />
                     </div>
 
                     <div className="space-y-2">
