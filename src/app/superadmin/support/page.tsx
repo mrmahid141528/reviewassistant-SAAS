@@ -11,14 +11,7 @@ export default async function SuperadminSupportPage() {
 
     if (!user) redirect("/superadmin/login")
 
-    // Check if user is superadmin
-    const { data: profile } = await supabase
-        .from('superadmin_profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .single()
 
-    if (!profile) redirect("/dashboard")
 
     // Fetch existing data
     const articles = await prisma.faqArticle.findMany({
