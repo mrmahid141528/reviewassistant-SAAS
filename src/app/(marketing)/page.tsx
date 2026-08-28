@@ -16,7 +16,7 @@ export default function LandingPage() {
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary mb-6 border border-primary/20 text-xs font-semibold uppercase tracking-wider backdrop-blur-sm">
             <Zap className="h-4 w-4" /> Powered by Google Gemini AI
           </div>
-          <h1 className="max-w-4xl mx-auto text-4xl md:text-5xl lg:text-7xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-foreground to-foreground/70 mb-6 leading-tight">
+          <h1 className="max-w-4xl mx-auto text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-foreground to-foreground/70 mb-6 leading-tight">
             Turn Happy Customers Into <br className="hidden md:block" /> <span className="text-primary">5-Star Google Reviews</span>
           </h1>
           <p className="max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed">
@@ -56,7 +56,7 @@ export default function LandingPage() {
         {/* Features Grid */}
         <section id="features" className="container mx-auto px-4 md:px-6 py-24 border-t border-border/50">
           <div className="text-center mb-16 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">A Zero-Friction Feedback Engine</h2>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-4">A Zero-Friction Feedback Engine</h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
               We removed every hurdle between your customer and a published 5-star review.
             </p>
@@ -100,7 +100,7 @@ export default function LandingPage() {
             {/* Background elements */}
             <div className="absolute top-0 right-0 w-[50%] h-[150%] bg-white/10 rotate-12 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2 pointer-events-none" />
 
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6 relative z-10">Stop Begging For Reviews.</h2>
+            <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold tracking-tight mb-6 relative z-10">Stop Begging For Reviews.</h2>
             <p className="text-primary-foreground/80 text-lg md:text-xl max-w-2xl mb-10 relative z-10 leading-relaxed">
               Join the businesses dominating local SEO by automating their Google My Business reputation through artificial intelligence.
             </p>

@@ -35,9 +35,9 @@ export default async function SuperadminReviewsOverviewPage() {
                     <div className="text-4xl font-bold text-emerald-400">{conversionRate}%</div>
                     <p className="text-xs text-slate-400 mt-2">Overall scan to redirect</p>
                 </div>
-                <div className="md:col-span-4 border rounded-xl bg-white p-6 shadow-sm flex items-center justify-between">
+                <div className="md:col-span-4 border rounded-xl bg-white p-4 sm:p-6 shadow-sm grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-0 items-start lg:items-center">
                     {funnelStages.map((stage, idx) => (
-                        <div key={idx} className="flex items-center w-full">
+                        <div key={idx} className="flex relative items-center w-full">
                             <div className="flex flex-col items-center text-center w-full relative z-10">
                                 <div className={`h-14 w-14 rounded-full flex items-center justify-center border-4 ${stage.bg} ${stage.border} shadow-sm bg-white mb-3`}>
                                     <stage.icon className={`h-6 w-6 ${stage.color}`} />
@@ -46,7 +46,7 @@ export default async function SuperadminReviewsOverviewPage() {
                                 <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">{stage.label}</div>
                             </div>
                             {idx < funnelStages.length - 1 && (
-                                <div className="hidden sm:block flex-1 h-0.5 bg-slate-200 -mx-4 relative top-[-18px]">
+                                <div className="hidden lg:block flex-1 h-0.5 bg-slate-200 -mx-4 relative top-[-18px]">
                                     <ArrowRight className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-slate-300 h-4 w-4 bg-white" />
                                 </div>
                             )}

@@ -27,8 +27,8 @@ export default function SuperadminFlaggedPage() {
             </div>
 
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mt-2">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left">
+                <div className="overflow-x-auto w-full block">
+                    <table className="w-full text-sm text-left hidden md:table">
                         <thead className="text-xs text-slate-500 uppercase bg-slate-50/80 border-b border-slate-200">
                             <tr>
                                 <th className="px-6 py-4 font-semibold">Severity</th>
@@ -51,6 +51,12 @@ export default function SuperadminFlaggedPage() {
                             </tr>
                         </tbody>
                     </table>
+
+                    <div className="md:hidden flex flex-col p-6 items-center justify-center text-center">
+                        <ShieldAlert className="h-8 w-8 text-slate-300 mb-3" />
+                        <p className="font-medium text-slate-600">No anomalous activity detected.</p>
+                        <p className="text-xs mt-1 text-slate-500">Platform operations are running optimally.</p>
+                    </div>
                 </div>
             </div>
         </div>

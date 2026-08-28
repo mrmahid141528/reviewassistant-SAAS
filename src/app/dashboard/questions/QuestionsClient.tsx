@@ -150,7 +150,7 @@ export function QuestionsClient({ initialQuestions, businessName, locations, cur
                         <Plus className="mr-2 w-4 h-4" /> Add Question
                     </Button>
                     <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-                        <DialogContent>
+                        <DialogContent className="w-[95vw] max-h-[90vh] overflow-y-auto sm:max-w-[425px]">
                             <DialogHeader>
                                 <DialogTitle>Add New Question</DialogTitle>
                                 <DialogDescription>Ask your customers to share specific details about their visit.</DialogDescription>

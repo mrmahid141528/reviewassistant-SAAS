@@ -29,7 +29,8 @@ export default async function SuperadminAllReviewsPage() {
 
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left">
+                    {/* Desktop Table View */}
+                    <table className="w-full text-sm text-left hidden md:table">
                         <thead className="text-xs text-slate-500 uppercase bg-slate-50/80 border-b border-slate-200">
                             <tr>
                                 <th className="px-6 py-4 font-semibold">Tenant & Session</th>
@@ -113,6 +114,83 @@ export default async function SuperadminAllReviewsPage() {
                             )}
                         </tbody>
                     </table>
+
+                    {/* Mobile Card List View (Option A) */}
+                    <div className="md:hidden flex flex-col divide-y divide-slate-100">
+                        {reviews.length === 0 ? (
+                            <div className="px-6 py-12 text-center text-slate-500">
+                                <div className="flex flex-col items-center justify-center">
+                                    <MessageSquare className="h-8 w-8 text-slate-300 mb-3" />
+                                    <p className="font-medium text-slate-600">No reviews captured yet</p>
+                                </div>
+                            </div>
+                        ) : (
+                            reviews.map((review) => {
+                                const latestRequest = review.requests[0];
+                                const latestGenerated = review.reviews[0];
+
+                                const isGenerated = !!latestGenerated;
+                                const isEdited = latestGenerated?.status === 'edited' || latestGenerated?.status === 'copied';
+                                const isCopied = latestGenerated?.status === 'copied';
+                                const isRedirected = !!latestRequest?.clickedAt;
+
+                                const sessionIcon = (active: boolean) => active
+                                    ? <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                                    : <CircleDashed className="h-4 w-4 text-slate-200" />;
+
+                                return (
+                                    <div key={review.id} className="flex flex-col p-4 bg-white hover:bg-slate-50/50 transition-colors gap-3">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <div className="font-bold text-slate-900">{review.business.name}</div>
+                                                <div className="text-xs text-slate-500 mt-0.5">
+                                                    Cust: {review.customer ? (review.customer.name || review.customer.email || "Anonymous") : "Anonymous"}
+                                                </div>
+                                                <div className="text-[10px] text-slate-400 font-mono mt-1">ID: {review.id.substring(0, 8)}...</div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="flex items-center gap-1 justify-end">
+                                                    <span className="font-bold text-slate-900">{review.rating}</span>
+                                                    <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                                                </div>
+                                                <div className="mt-1">
+                                                    {review.rating >= 4
+                                                        ? <span className="text-[10px] uppercase font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">Positive</span>
+                                                        : <span className="text-[10px] uppercase font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded">Critical</span>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="bg-slate-50/50 rounded-lg p-3 border border-slate-100 flex justify-between items-center">
+                                            <div className="flex flex-col items-center gap-1 text-[10px] font-medium text-slate-500">
+                                                {sessionIcon(isGenerated)}
+                                                <span>Gen</span>
+                                            </div>
+                                            <div className="flex flex-col items-center gap-1 text-[10px] font-medium text-slate-500">
+                                                {sessionIcon(isEdited)}
+                                                <span>Edit</span>
+                                            </div>
+                                            <div className="flex flex-col items-center gap-1 text-[10px] font-medium text-slate-500">
+                                                {sessionIcon(isCopied)}
+                                                <span>Copy</span>
+                                            </div>
+                                            <div className="flex flex-col items-center gap-1 text-[10px] font-medium text-slate-500">
+                                                {sessionIcon(isRedirected)}
+                                                <span>Redir</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-between items-center text-slate-500">
+                                            <div className="text-[11px] font-medium uppercase tracking-wide">Date</div>
+                                            <div className="text-xs text-right whitespace-nowrap">
+                                                {new Date(review.submittedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                <span className="ml-2 text-[11px]">{new Date(review.submittedAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

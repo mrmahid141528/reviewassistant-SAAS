@@ -44,7 +44,7 @@ export function ImageCropperDialog({ isOpen, onOpenChange, imageSrc, onCropCompl
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="w-[95vw] max-h-[90vh] overflow-y-auto sm:max-w-[425px]">
                 <DialogHeader>
                     <DialogTitle>Adjust Image</DialogTitle>
                     <DialogDescription className="sr-only">Crop and adjust your image</DialogDescription>

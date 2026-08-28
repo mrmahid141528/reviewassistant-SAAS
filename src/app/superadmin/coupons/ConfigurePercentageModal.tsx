@@ -36,7 +36,7 @@ export function ConfigurePercentageModal({ currentPercentage }: { currentPercent
             <DialogTrigger render={<Button variant="outline" className="ml-auto bg-white" />}>
                 Configure Percentage
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="w-[95vw] sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Annual Billing Discount</DialogTitle>
                 </DialogHeader>

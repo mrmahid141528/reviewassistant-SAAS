@@ -17,8 +17,9 @@ export default async function SuperAdminUsers() {
             </div>
 
             <div className="border rounded-lg bg-white shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left">
+                <div className="overflow-x-auto w-full block">
+                    {/* Desktop Table View */}
+                    <table className="w-full text-sm text-left hidden md:table">
                         <thead className="text-xs text-muted-foreground bg-gray-50/50 uppercase border-b">
                             <tr>
                                 <th className="px-6 py-4 font-semibold">ID</th>
@@ -63,6 +64,43 @@ export default async function SuperAdminUsers() {
                             )}
                         </tbody>
                     </table>
+
+                    {/* Mobile Card List View (Option A) */}
+                    <div className="md:hidden flex flex-col divide-y divide-slate-100">
+                        {users.map(u => (
+                            <div key={u.id} className="p-4 flex flex-col gap-3 bg-white hover:bg-slate-50 transition-colors">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <div className="font-semibold text-slate-900">{u.name || "N/A"}</div>
+                                        <div className="text-xs text-slate-500 mt-0.5">{u.email || "No Email"}</div>
+                                        <div className="text-[10px] text-slate-400 font-mono mt-1">ID: {u.id.substring(0, 8)}...</div>
+                                    </div>
+                                    <div className="flex flex-col items-end gap-2">
+                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${u.status === 'active' ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-800'}`}>
+                                            {u.status}
+                                        </span>
+                                        <span className="text-xs text-muted-foreground">{u.createdAt.toLocaleDateString()}</span>
+                                    </div>
+                                </div>
+                                <div className="flex justify-end pt-2 border-t mt-2">
+                                    <AdminActionButtons
+                                        id={u.id}
+                                        currentStatus={u.status}
+                                        type="user"
+                                        userEmail={u.email || ""}
+                                        userName={u.name || ""}
+                                        toggleAction={toggleUserStatus}
+                                        deleteAction={deleteUser}
+                                        editAction={editUser}
+                                        resetPasswordAction={resetUserPassword}
+                                    />
+                                </div>
+                            </div>
+                        ))}
+                        {users.length === 0 && (
+                            <div className="px-6 py-8 text-center text-muted-foreground">No users found.</div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

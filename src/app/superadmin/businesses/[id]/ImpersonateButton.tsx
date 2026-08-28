@@ -35,7 +35,7 @@ export function ImpersonateButton({ businessId, businessName }: { businessId: st
             <DialogTrigger className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-slate-900 text-white shadow hover:bg-slate-900/90 h-9 px-4 py-2 gap-2 shadow-sm rounded-md">
                 <MonitorPlay className="h-4 w-4" /> Impersonate
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md border-rose-200">
+            <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto border-rose-200">
                 <DialogHeader className="pt-2">
                     <div className="mx-auto w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center mb-4 border border-rose-200">
                         <ShieldAlert className="h-6 w-6 text-rose-600" />

@@ -2,7 +2,7 @@ import prisma from "@/lib/prisma";
 import { toggleBusinessStatus, deleteBusiness, assignBusinessPlan } from "../actions";
 import { AdminActionButtons } from "../components/AdminActionButtons";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { ExternalLink, Filter, Building, User, Target, Search } from "lucide-react";
+import { ExternalLink, Filter, Building, User, Target, Search, Star } from "lucide-react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -96,7 +96,8 @@ export default async function SuperAdminBusinesses(props: { searchParams?: Promi
                 </CardHeader>
                 <CardContent className="p-0">
                     <div className="overflow-auto max-h-[calc(100vh-270px)] w-full block">
-                        <table className="w-full text-sm text-left whitespace-nowrap">
+                        {/* Desktop Table View */}
+                        <table className="w-full text-sm text-left whitespace-nowrap hidden md:table">
                             <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-20 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
                                 <tr>
                                     <th className="px-6 py-4 font-semibold text-slate-600 text-[13px]">Business Name</th>
@@ -176,6 +177,62 @@ export default async function SuperAdminBusinesses(props: { searchParams?: Promi
                                 )}
                             </tbody>
                         </table>
+
+                        {/* Mobile Card List View (Option A) */}
+                        <div className="md:hidden flex flex-col gap-4 p-4">
+                            {businesses.map(b => (
+                                <div key={b.id} className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col">
+                                    <div className="p-4 flex items-center justify-between border-b bg-slate-50/50 gap-2">
+                                        <div className="flex items-center gap-3 min-w-0">
+                                            <div className="h-10 w-10 rounded-md bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                                                <Building className="h-5 w-5" />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <Link href={`/superadmin/businesses/${b.id}`} className="font-semibold text-[15px] text-slate-900 hover:text-primary transition-colors flex items-center gap-1.5 truncate">
+                                                    <span className="truncate">{b.name}</span> <ExternalLink className="h-3 w-3 shrink-0" />
+                                                </Link>
+                                                <p className="text-[11px] text-slate-500 font-mono mt-0.5 truncate">{b.slug}</p>
+                                            </div>
+                                        </div>
+                                        <span className={`inline-flex shrink-0 items-center px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase ${b.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                                            {b.status}
+                                        </span>
+                                    </div>
+                                    <div className="p-4 flex flex-col gap-3">
+                                        <div className="flex justify-between items-center text-[13px]">
+                                            <span className="text-slate-500 flex items-center gap-1.5"><User className="h-3.5 w-3.5" /> Email</span>
+                                            <span className="font-medium truncate max-w-[150px]">{b.members[0]?.user.email || "No Owner"}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-[13px]">
+                                            <span className="text-slate-500 flex items-center gap-1.5"><Target className="h-3.5 w-3.5" /> Campaigns</span>
+                                            <span className="font-medium">{b._count.campaigns.toLocaleString()}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-[13px]">
+                                            <span className="text-slate-500 flex items-center gap-1.5"><Star className="h-3.5 w-3.5" /> Reviews</span>
+                                            <span className="font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">{b._count.feedbackSubmissions.toLocaleString()}</span>
+                                        </div>
+                                    </div>
+                                    <div className="p-3 border-t bg-slate-50/80 flex justify-end">
+                                        <AdminActionButtons
+                                            id={b.id}
+                                            currentStatus={b.status}
+                                            type="business"
+                                            toggleAction={toggleBusinessStatus}
+                                            deleteAction={deleteBusiness}
+                                            assignPlanAction={assignBusinessPlan}
+                                            plans={activePlans}
+                                            currentPlanId={b.razorpayPlanId}
+                                        />
+                                    </div>
+                                </div>
+                            ))}
+                            {businesses.length === 0 && (
+                                <div className="py-12 text-center text-slate-500 border border-dashed rounded-xl">
+                                    <Building className="h-8 w-8 mx-auto text-slate-300 mb-3" />
+                                    <p className="font-medium text-slate-600">No businesses found</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </CardContent>
             </Card>

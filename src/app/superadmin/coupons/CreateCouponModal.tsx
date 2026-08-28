@@ -60,7 +60,7 @@ export function CreateCouponModal({ plans }: { plans: { id: string, name: string
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Create Coupon
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Create Coupon</DialogTitle>
                 </DialogHeader>
@@ -71,7 +71,7 @@ export function CreateCouponModal({ plans }: { plans: { id: string, name: string
                     </div>
                 )}
                 <form onSubmit={onSubmit} className="space-y-6 pt-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label>Coupon Code</Label>
                             <Input name="code" placeholder="LAUNCH50" required />
@@ -88,7 +88,7 @@ export function CreateCouponModal({ plans }: { plans: { id: string, name: string
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label>Discount Value</Label>
                             <Input name="value" type="number" min="1" step="0.01" placeholder="50" required />
@@ -106,7 +106,7 @@ export function CreateCouponModal({ plans }: { plans: { id: string, name: string
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-3 col-span-2">
                             <Label>Applies To Plans</Label>
                             <Select name="appliesToToggle" defaultValue="all">
@@ -127,7 +127,7 @@ export function CreateCouponModal({ plans }: { plans: { id: string, name: string
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label>Max Redemptions (Optional)</Label>
                             <Input name="maxRedemptions" type="number" placeholder="100" />
@@ -145,7 +145,7 @@ export function CreateCouponModal({ plans }: { plans: { id: string, name: string
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label>Start Date</Label>
                             <Input name="validFrom" type="date" required defaultValue={new Date().toISOString().split('T')[0]} />

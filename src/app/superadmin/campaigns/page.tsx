@@ -45,8 +45,9 @@ export default async function SuperadminCampaignsPage() {
                     </Button>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm text-left whitespace-nowrap">
+                    <div className="overflow-x-auto w-full block">
+                        {/* Desktop Table View */}
+                        <table className="w-full text-sm text-left whitespace-nowrap hidden md:table">
                             <thead className="bg-slate-50 border-b border-slate-200">
                                 <tr>
                                     <th className="px-6 py-4 font-semibold text-slate-600 text-[13px]">Campaign Name</th>
@@ -124,6 +125,59 @@ export default async function SuperadminCampaignsPage() {
                                 )}
                             </tbody>
                         </table>
+
+                        {/* Mobile Card List View (Option A) */}
+                        <div className="md:hidden flex flex-col gap-4 p-4">
+                            {campaigns.map(c => (
+                                <div key={c.id} className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col">
+                                    <div className="p-4 flex items-center justify-between border-b bg-slate-50/50 gap-2">
+                                        <div className="flex items-center gap-3 min-w-0">
+                                            <div className="h-10 w-10 rounded-md bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+                                                <QrCode className="h-5 w-5" />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <span className="font-semibold text-[15px] text-slate-900 flex items-center gap-1.5 truncate">
+                                                    <span className="truncate">{c.name}</span>
+                                                </span>
+                                                <p className="text-[11px] text-slate-500 font-mono mt-0.5 truncate">{c.slug}</p>
+                                            </div>
+                                        </div>
+                                        <span className={`inline-flex shrink-0 items-center px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase ${c.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                                            {c.status}
+                                        </span>
+                                    </div>
+                                    <div className="p-4 flex flex-col gap-3">
+                                        <div className="flex justify-between items-center text-[13px]">
+                                            <span className="text-slate-500">Tenant</span>
+                                            <Link href={`/superadmin/businesses/${c.businessId}`} className="font-semibold tracking-tight text-slate-700 hover:text-primary transition-colors flex items-center gap-1.5 w-fit">
+                                                <Building className="h-3.5 w-3.5 text-slate-400" />
+                                                {c.business.name}
+                                            </Link>
+                                        </div>
+                                        <div className="flex justify-between items-center text-[13px]">
+                                            <span className="text-slate-500 flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> Loc</span>
+                                            <span className="font-medium truncate max-w-[150px]">{c.location ? c.location.name : "Global Campaign"}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-[13px]">
+                                            <span className="text-slate-500 flex items-center gap-1.5 capitalize">{c.reviewPlatform} Platform</span>
+                                            <span className="text-[11px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">
+                                                ≥ {c.ratingThreshold}★
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-[13px]">
+                                            <span className="text-slate-500 flex items-center gap-1.5"><Target className="h-3.5 w-3.5" /> Submissions</span>
+                                            <span className="font-medium text-purple-700 bg-purple-50 border border-purple-100 px-2 py-0.5 rounded-md">{c._count.feedbackSubmissions.toLocaleString()}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                            {campaigns.length === 0 && (
+                                <div className="py-12 text-center text-slate-500 border border-dashed rounded-xl m-4">
+                                    <QrCode className="h-8 w-8 mx-auto text-slate-300 mb-3" />
+                                    <p className="font-medium text-slate-600">No campaigns found</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </CardContent>
             </Card>
