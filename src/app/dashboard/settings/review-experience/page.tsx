@@ -123,7 +123,7 @@ export default async function ReviewExperiencePage() {
 
                             <div className="space-y-3 mt-4">
                                 <Label>Private Feedback Threshold</Label>
-                                <RadioGroup name="privateFeedbackThreshold" defaultValue={privateFeedbackThreshold.toString()} className="flex gap-4">
+                                <RadioGroup name="privateFeedbackThreshold" defaultValue={privateFeedbackThreshold.toString()} className="flex flex-wrap gap-3 sm:gap-4">
                                     {[1, 2, 3, 4, 5].map(star => (
                                         <div key={star} className="flex items-center space-x-2">
                                             <RadioGroupItem value={star.toString()} id={`star-${star}`} />

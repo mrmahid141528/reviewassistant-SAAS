@@ -108,7 +108,7 @@ export default async function AIAssistantPage() {
 
                         <div className="space-y-3">
                             <Label>Review Length</Label>
-                            <RadioGroup name="reviewLength" defaultValue={reviewLength} className="flex gap-6">
+                            <RadioGroup name="reviewLength" defaultValue={reviewLength} className="flex flex-wrap gap-4 sm:gap-6">
                                 <div className="flex items-center space-x-2">
                                     <RadioGroupItem value="Short" id="len-short" />
                                     <Label htmlFor="len-short" className="font-normal">Short</Label>

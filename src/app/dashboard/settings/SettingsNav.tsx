@@ -1,9 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Building, Star, Sparkles, Bell, Users, Shield, LucideIcon } from "lucide-react"
+import { Building, Star, Sparkles, Bell, Users, Shield, LucideIcon, ChevronDown } from "lucide-react"
 
 const settingsNav = [
     { name: "Business", href: "/dashboard/settings/business", icon: Building },
@@ -26,28 +26,51 @@ export function SettingsNav({ role }: { role?: string }) {
         return true;
     });
 
-    return (
-        <nav className="flex space-x-2 lg:flex-col lg:space-x-0 lg:space-y-1 overflow-x-auto px-4 lg:px-0 pb-2">
-            {filteredSettingsNav.map((item) => {
-                const Icon = item.icon
-                const isActive = pathname === item.href
+    const router = useRouter()
 
-                return (
-                    <Link
-                        key={item.href}
-                        href={item.href}
-                        className={cn(
-                            "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors",
-                            isActive
-                                ? "bg-indigo-600 text-white shadow-md hover:bg-indigo-700"
-                                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                        )}
-                    >
-                        <Icon className="h-4 w-4" />
-                        {item.name}
-                    </Link>
-                )
-            })}
-        </nav>
+    return (
+        <div className="w-full">
+            {/* Desktop Navigation */}
+            <nav className="hidden lg:flex lg:flex-col lg:space-y-1 pb-2">
+                {filteredSettingsNav.map((item) => {
+                    const Icon = item.icon
+                    const isActive = pathname === item.href
+
+                    return (
+                        <Link
+                            key={item.href}
+                            href={item.href}
+                            className={cn(
+                                "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
+                                isActive
+                                    ? "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
+                                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                            )}
+                        >
+                            <Icon className="h-4 w-4" />
+                            {item.name}
+                        </Link>
+                    )
+                })}
+            </nav>
+
+            {/* Mobile Navigation Dropdown */}
+            <div className="lg:hidden px-4 mb-6 relative">
+                <select
+                    className="w-full h-12 pl-4 pr-10 border rounded-lg bg-card text-foreground appearance-none shadow-sm focus:outline-none focus:ring-2 focus:ring-primary text-sm font-medium"
+                    value={pathname}
+                    onChange={(e) => router.push(e.target.value)}
+                >
+                    {filteredSettingsNav.map((item) => (
+                        <option key={item.href} value={item.href}>
+                            {item.name}
+                        </option>
+                    ))}
+                </select>
+                <div className="absolute inset-y-0 right-7 flex items-center pointer-events-none">
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                </div>
+            </div>
+        </div>
     )
 }
