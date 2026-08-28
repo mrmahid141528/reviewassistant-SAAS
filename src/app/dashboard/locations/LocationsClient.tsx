@@ -201,9 +201,6 @@ export default function LocationsClient({ locations, maxLocations, currentCount,
                                     <Button variant="outline" className="flex-1 lg:flex-none font-semibold rounded-lg shadow-sm" onClick={() => window.location.href = `/dashboard/analytics?locationId=${loc.id}`}>
                                         <TrendingUp className="h-4 w-4 mr-2" /> Analytics
                                     </Button>
-                                    <Button variant="default" className="flex-1 lg:flex-none font-semibold rounded-lg shadow-md">
-                                        Manage
-                                    </Button>
                                     <DropdownMenu>
                                         <DropdownMenuTrigger className="h-10 w-10 shrink-0 text-muted-foreground rounded-lg hover:bg-accent hover:text-accent-foreground inline-flex items-center justify-center outline-none">
                                             <MoreVertical className="h-5 w-5" />
