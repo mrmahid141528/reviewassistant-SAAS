@@ -13,19 +13,28 @@ export default async function DashboardLayout({
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
+    let isExpired = false;
+    let userAvatar = null;
+    let userNameInitials = "MR";
+    let dbUser = null;
+    let membership: any = null;
+
     if (user) {
-        const prismaUser = await prisma.user.upsert({
+        dbUser = await prisma.user.upsert({
             where: { id: user.id },
             update: { email: user.email },
             create: { id: user.id, email: user.email, name: user.email?.split('@')[0] }
         })
 
-        const membership = await prisma.businessMember.findFirst({
+        userAvatar = dbUser.image;
+        userNameInitials = dbUser.name ? dbUser.name.slice(0, 2).toUpperCase() : "USR";
+
+        membership = await prisma.businessMember.findFirst({
             where: { userId: user.id },
             include: { business: true }
         });
 
-        if (prismaUser.status === 'suspended' || (membership && membership.business.status === 'suspended')) {
+        if (dbUser.status === 'suspended' || (membership && membership.business.status === 'suspended')) {
             return (
                 <div className="flex min-h-screen bg-background">
                     <Sidebar role={membership?.role} />
@@ -49,39 +58,19 @@ export default async function DashboardLayout({
         if (!membership) {
             redirect("/onboarding");
         }
-    }
 
-    let isExpired = false;
-    if (user) {
-        const membership = await prisma.businessMember.findFirst({
-            where: { userId: user.id },
-            include: { business: true }
-        });
-
-        if (membership) {
-            const b = membership.business;
-            if (!b.razorpayPlanId) {
-                const daysSinceCreated = (Date.now() - b.createdAt.getTime()) / (1000 * 60 * 60 * 24);
-                if (daysSinceCreated > 7) {
-                    isExpired = true;
-                }
+        const b = membership.business;
+        if (!b.razorpayPlanId) {
+            const daysSinceCreated = (Date.now() - b.createdAt.getTime()) / (1000 * 60 * 60 * 24);
+            if (daysSinceCreated > 7) {
+                isExpired = true;
             }
-        }
-    }
-
-    let userAvatar = null;
-    let userNameInitials = "MR";
-    if (user) {
-        const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
-        if (dbUser) {
-            userAvatar = dbUser.image;
-            userNameInitials = dbUser.name ? dbUser.name.slice(0, 2).toUpperCase() : "USR";
         }
     }
 
     return (
         <div className="flex min-h-screen bg-background">
-            <Sidebar role={user ? (await prisma.businessMember.findFirst({ where: { userId: user.id } }))?.role : undefined} />
+            <Sidebar role={membership?.role} />
             <div className="flex flex-1 flex-col">
                 <Header userAvatar={userAvatar} userNameInitials={userNameInitials} />
                 <main className="flex-1 overflow-y-auto p-4 md:p-8 flex flex-col">

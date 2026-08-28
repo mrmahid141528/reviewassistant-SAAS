@@ -92,24 +92,31 @@ export default async function DashboardOverviewPage(props: { searchParams: Promi
                 genQueryContext.submission = { campaignId: { in: campIds } };
             }
 
-            submissionsCount = await prisma.feedbackSubmission.count({ where: queryContext })
-            generatedCount = await prisma.generatedReview.count({ where: genQueryContext })
+            const [subCount, genCount, avgData, rawDbFeedbacks, pastFeedbacks] = await Promise.all([
+                prisma.feedbackSubmission.count({ where: queryContext }),
+                prisma.generatedReview.count({ where: genQueryContext }),
+                prisma.feedbackSubmission.aggregate({
+                    _avg: { rating: true },
+                    where: queryContext
+                }),
+                prisma.feedbackSubmission.findMany({
+                    where: queryContext,
+                    orderBy: { createdAt: 'desc' },
+                    take: 5,
+                    include: { reviews: true }
+                }),
+                prisma.feedbackSubmission.findMany({
+                    where: queryContext,
+                    select: { createdAt: true, reviews: { select: { id: true } } }
+                })
+            ]);
 
-            const avg = await prisma.feedbackSubmission.aggregate({
-                _avg: { rating: true },
-                where: queryContext
-            })
-            avgRating = avg._avg.rating || 0
+            submissionsCount = subCount;
+            generatedCount = genCount;
+            avgRating = avgData._avg.rating || 0;
 
             qrScans = submissionsCount; // 1 to 1 mapping with sessions without dedicated tracker
             googleClicks = generatedCount; // No drop-off mocking, exact generation count
-
-            const rawDbFeedbacks = await prisma.feedbackSubmission.findMany({
-                where: queryContext,
-                orderBy: { createdAt: 'desc' },
-                take: 5,
-                include: { reviews: true }
-            })
 
             feedbacks = rawDbFeedbacks.map(f => ({
                 rating: f.rating,
@@ -141,11 +148,6 @@ export default async function DashboardOverviewPage(props: { searchParams: Promi
             });
 
             // Map the raw feedback submissions directly to timeseries since they track sessions/scans over time
-            const pastFeedbacks = await prisma.feedbackSubmission.findMany({
-                where: queryContext,
-                select: { createdAt: true, reviews: { select: { id: true } } }
-            })
-
             pastFeedbacks.forEach((f: any) => {
                 const day = format(new Date(f.createdAt), "yyyy-MM-dd");
                 const bucket = chartData.find(c => c.rawDate === day);

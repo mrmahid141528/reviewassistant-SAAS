@@ -16,6 +16,11 @@ export default async function CustomerReviewPage({
 
     if (!business) return notFound();
 
+    const [plan, campaign] = await Promise.all([
+        business.razorpayPlanId ? prisma.plan.findUnique({ where: { id: business.razorpayPlanId } }) : Promise.resolve(null),
+        prisma.campaign.findFirst({ where: { businessId: business.id } })
+    ]);
+
     let isExpired = false;
     let hasWatermark = false;
 
@@ -26,7 +31,6 @@ export default async function CustomerReviewPage({
         }
         hasWatermark = true; // Trials always have watermark
     } else {
-        const plan = await prisma.plan.findUnique({ where: { id: business.razorpayPlanId } });
         if (plan?.limits) {
             hasWatermark = (plan.limits as Record<string, any>).hasWatermark ?? false;
         }
@@ -47,7 +51,6 @@ export default async function CustomerReviewPage({
         )
     }
 
-    const campaign = await prisma.campaign.findFirst({ where: { businessId: business.id } });
     let questions: any[] = [];
 
     if (campaign) {
