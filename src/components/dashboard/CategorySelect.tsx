@@ -22,7 +22,7 @@ export default function CategorySelect({ defaultValue }: CategorySelectProps) {
     const [category, setCategory] = useState(initialCategory)
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 col-span-1 md:col-span-2">
+        <>
             <div className="space-y-2">
                 <Label htmlFor="category">Business Category *</Label>
                 <select
@@ -42,7 +42,7 @@ export default function CategorySelect({ defaultValue }: CategorySelectProps) {
             </div>
 
             {category === "Other" && (
-                <div className="space-y-2 md:col-start-2">
+                <div className="space-y-2">
                     <Label htmlFor="otherCategory">Please specify category *</Label>
                     <Input
                         suppressHydrationWarning
@@ -54,6 +54,6 @@ export default function CategorySelect({ defaultValue }: CategorySelectProps) {
                     />
                 </div>
             )}
-        </div>
+        </>
     )
 }
