@@ -11,7 +11,6 @@ const settingsNav = [
     { name: "AI Assistant", href: "/dashboard/settings/ai-assistant", icon: Sparkles },
     { name: "Notifications", href: "/dashboard/settings/notifications", icon: Bell },
     { name: "Team & Permissions", href: "/dashboard/settings/team", icon: Users },
-    { name: "Security", href: "/dashboard/settings/security", icon: Shield },
 ]
 
 export function SettingsNav({ role }: { role?: string }) {
