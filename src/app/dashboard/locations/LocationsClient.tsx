@@ -180,19 +180,19 @@ export default function LocationsClient({ locations, maxLocations, currentCount,
                                     )}
                                 </div>
 
-                                {/* Metrics Mock (As requested by user architectural blueprint) */}
+                                {/* Real Database Metrics */}
                                 <div className="flex-1 w-full flex items-center lg:justify-center gap-6 lg:gap-12 mt-4 lg:mt-0 lg:border-l border-border/60 lg:pl-10 h-full py-2">
                                     <div className="text-center">
                                         <p className="text-xs text-muted-foreground font-semibold mb-1 uppercase tracking-wider">Rating</p>
-                                        <p className="font-bold text-xl">⭐ 4.8</p>
+                                        <p className="font-bold text-xl">⭐ {loc.rating || '0.0'}</p>
                                     </div>
                                     <div className="text-center">
                                         <p className="text-xs text-muted-foreground font-semibold mb-1 uppercase tracking-wider">Scans</p>
-                                        <p className="font-bold text-xl">248</p>
+                                        <p className="font-bold text-xl">{loc.scans || 0}</p>
                                     </div>
                                     <div className="text-center">
                                         <p className="text-xs text-muted-foreground font-semibold mb-1 uppercase tracking-wider">Reviews</p>
-                                        <p className="font-bold text-xl">142</p>
+                                        <p className="font-bold text-xl">{loc.reviews || 0}</p>
                                     </div>
                                 </div>
 

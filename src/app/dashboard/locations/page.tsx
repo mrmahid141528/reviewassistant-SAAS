@@ -41,6 +41,53 @@ export default async function LocationsPage() {
 
     const activeLocationsCount = locations.filter(loc => loc.status === 'active').length;
 
+    // Fetch metrics for all locations in this business
+    const submissions = await prisma.feedbackSubmission.findMany({
+        where: { businessId: membership.businessId },
+        select: {
+            rating: true,
+            campaign: { select: { locationId: true } },
+            _count: { select: { reviews: true } }
+        }
+    });
+
+    // Calculate metrics per location
+    const locationStats: Record<string, { ratingSum: number, scans: number, reviews: number }> = {};
+
+    // Also track fallback metrics for "All Locations" / Location-Agnostic Campaigns
+    let mainLocStats = { ratingSum: 0, scans: 0, reviews: 0 };
+
+    submissions.forEach(sub => {
+        const locId = sub.campaign?.locationId;
+        const targetStat = locId ? (locationStats[locId] = locationStats[locId] || { ratingSum: 0, scans: 0, reviews: 0 }) : mainLocStats;
+
+        targetStat.ratingSum += sub.rating;
+        targetStat.scans += 1;
+        targetStat.reviews += sub._count.reviews;
+    });
+
+    const locationsWithMetrics = locations.map(loc => {
+        // If it's the main location, we also add the stats from location-agnostic campaigns to it (null locationId)
+        let stats = locationStats[loc.id] || { ratingSum: 0, scans: 0, reviews: 0 };
+
+        if (loc.isMain) {
+            stats = {
+                ratingSum: stats.ratingSum + mainLocStats.ratingSum,
+                scans: stats.scans + mainLocStats.scans,
+                reviews: stats.reviews + mainLocStats.reviews
+            };
+        }
+
+        const avgRating = stats.scans > 0 ? (stats.ratingSum / stats.scans).toFixed(1) : "0.0";
+
+        return {
+            ...loc,
+            rating: avgRating,
+            scans: stats.scans,
+            reviews: stats.reviews
+        };
+    });
+
     let maxLocations = 1;
     if (membership.business.razorpayPlanId) {
         const activePlan = await prisma.plan.findUnique({
@@ -58,7 +105,7 @@ export default async function LocationsPage() {
 
     return (
         <LocationsClient
-            locations={locations}
+            locations={locationsWithMetrics}
             maxLocations={maxLocations}
             currentCount={activeLocationsCount}
             businessSlug={membership.business.slug}
