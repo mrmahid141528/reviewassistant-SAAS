@@ -21,7 +21,7 @@ export function MainAnalyticsClient({ timeseries, recentFeedbacks, overallRating
         const rows = recentFeedbacks.map(f => [
             f.id,
             f.rating.toString(),
-            f.date,
+            `"${f.date}"`,
             `"${f.location}"`,
             f.hasGenerated ? 'Yes' : 'No'
         ]);
