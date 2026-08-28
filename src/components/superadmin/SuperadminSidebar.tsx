@@ -47,7 +47,7 @@ const systemNavItems = [
     { name: "Admins", href: "/superadmin/admins", icon: UserCog },
 ];
 
-export function SuperadminSidebar() {
+export function SuperadminSidebar({ className }: { className?: string }) {
     const pathname = usePathname();
 
     const renderLink = (item: any) => {
@@ -69,7 +69,7 @@ export function SuperadminSidebar() {
     };
 
     return (
-        <aside className="w-64 flex-shrink-0 border-r bg-white flex flex-col h-screen">
+        <aside className={cn("w-64 flex-shrink-0 border-r bg-white hidden md:flex flex-col h-screen", className)}>
             <div className="h-16 flex items-center px-6 border-b shrink-0">
                 <span className="font-bold text-lg text-slate-900 flex items-center gap-2">
                     <div className="h-6 w-6 bg-slate-900 rounded-md flex items-center justify-center">

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Star } from "lucide-react";
+import { Star, Menu } from "lucide-react";
+import { Sheet, SheetTrigger, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
 export function Header() {
     return (
@@ -40,6 +41,31 @@ export function Header() {
                             Get Started
                         </Button>
                     </Link>
+
+                    {/* Mobile Menu */}
+                    <Sheet>
+                        <SheetTrigger className="md:hidden flex h-9 w-9 items-center justify-center rounded-md hover:bg-slate-100 transition-colors">
+                            <Menu className="h-5 w-5" />
+                        </SheetTrigger>
+                        <SheetContent side="right" className="w-[85vw] sm:w-[350px]">
+                            <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                            <nav className="flex flex-col gap-6 mt-8">
+                                <Link href="/pricing" className="text-lg font-medium hover:text-primary transition-colors">
+                                    Pricing
+                                </Link>
+                                <Link href="/about-us" className="text-lg font-medium hover:text-primary transition-colors">
+                                    About Us
+                                </Link>
+                                <Link href="/contact-us" className="text-lg font-medium hover:text-primary transition-colors">
+                                    Contact Us
+                                </Link>
+                                <hr className="my-2 border-border/50" />
+                                <Link href="/login" className="text-lg font-medium hover:text-primary transition-colors">
+                                    Sign In
+                                </Link>
+                            </nav>
+                        </SheetContent>
+                    </Sheet>
                 </div>
             </div>
         </header>

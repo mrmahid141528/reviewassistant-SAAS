@@ -45,7 +45,7 @@ function NavLink({ item, pathname }: { item: any, pathname: string }) {
   );
 }
 
-export function Sidebar({ role }: { role?: string }) {
+export function Sidebar({ role, className }: { role?: string, className?: string }) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -63,7 +63,7 @@ export function Sidebar({ role }: { role?: string }) {
   });
 
   return (
-    <div className="flex h-full w-64 flex-col gap-6 border-r border-border bg-card p-4 shrink-0 hidden md:flex overflow-y-auto">
+    <div className={cn("flex h-full w-64 flex-col gap-6 border-r border-border bg-card p-4 shrink-0 hidden md:flex overflow-y-auto", className)}>
       <div className="flex items-center gap-2 px-2 pb-2 group cursor-pointer transition-transform duration-300 hover:scale-[1.02]">
         <div className="p-1.5 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
           <Store className="h-5 w-5 text-primary" />

@@ -72,7 +72,7 @@ export default async function DashboardLayout({
         <div className="flex min-h-screen bg-background">
             <Sidebar role={membership?.role} />
             <div className="flex flex-1 flex-col">
-                <Header userAvatar={userAvatar} userNameInitials={userNameInitials} />
+                <Header userAvatar={userAvatar} userNameInitials={userNameInitials} role={membership?.role} />
                 <main className="flex-1 overflow-y-auto p-4 md:p-8 flex flex-col">
                     {isExpired && (
                         <div className="mb-6 bg-red-50 border border-red-200 text-red-800 p-4 rounded-lg flex items-center justify-between shadow-sm">

@@ -2,11 +2,13 @@
 // Force Turbopack Cache Invalidation for Client Component Boundary
 
 import React from "react";
-import { Search, Bell, UserCircle } from "lucide-react";
+import { Search, Bell, UserCircle, Menu } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { SuperadminCommandPalette } from "./SuperadminCommandPalette";
+import { Sheet, SheetTrigger, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { SuperadminSidebar } from "./SuperadminSidebar";
 
 interface SuperadminHeaderProps {
     adminEmail?: string;
@@ -29,7 +31,21 @@ export function SuperadminHeader({ adminEmail = "Admin" }: SuperadminHeaderProps
     }, [])
 
     return (
-        <header className="h-16 flex items-center justify-between px-8 border-b bg-white shrink-0">
+        <header className="h-16 flex items-center justify-between px-4 sm:px-8 border-b bg-white shrink-0 gap-2">
+            {/* Mobile Sidebar Trigger */}
+            <Sheet>
+                <SheetTrigger className="md:hidden flex h-9 w-9 items-center justify-center rounded-md hover:bg-slate-100 transition-colors">
+                    <Menu className="h-5 w-5 text-slate-600" />
+                </SheetTrigger>
+                <SheetContent side="left" className="w-[280px] p-0 border-r-0">
+                    <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
+                    {/* Render the actual sidebar content inside the sheet for mobile */}
+                    <div className="w-full flex-shrink-0 bg-white flex flex-col h-full">
+                        <SuperadminSidebar className="flex md:flex w-full h-full border-r-0" />
+                    </div>
+                </SheetContent>
+            </Sheet>
+
             {/* Global Search */}
             <div className="flex-1 max-w-xl relative">
                 <Button
@@ -48,12 +64,12 @@ export function SuperadminHeader({ adminEmail = "Admin" }: SuperadminHeaderProps
             <SuperadminCommandPalette open={open} setOpen={setOpen} />
 
             {/* Right Actions */}
-            <div className="flex items-center gap-4 ml-4">
-                <Button variant="ghost" size="icon" className="text-slate-500 hover:text-slate-900 rounded-full hidden sm:flex">
+            <div className="flex items-center sm:gap-4 ml-2">
+                <Button variant="ghost" size="icon" className="text-slate-500 hover:text-slate-900 rounded-full flex">
                     <Bell className="h-5 w-5" />
                 </Button>
 
-                <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
+                <div className="flex items-center gap-3 pl-2 sm:pl-4 border-l border-slate-200">
                     <div className="flex flex-col items-end hidden sm:flex">
                         <span className="text-sm font-semibold text-slate-900 leading-tight">Superadmin</span>
                         <span className="text-xs text-slate-500 leading-tight">{adminEmail}</span>
