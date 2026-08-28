@@ -14,6 +14,7 @@ export default async function QrCodePage() {
 
     let locations: any[] = [];
     let campaigns: any[] = [];
+    let recentActivity: any[] = [];
     if (user) {
         const membership = await prisma.businessMember.findFirst({
             where: { userId: user.id },
@@ -27,12 +28,19 @@ export default async function QrCodePage() {
             })
             campaigns = await prisma.campaign.findMany({
                 where: { businessId: membership.businessId },
-                orderBy: { createdAt: 'desc' }
+                orderBy: { createdAt: 'desc' },
+                include: { _count: { select: { feedbackSubmissions: true } } }
+            })
+            recentActivity = await prisma.feedbackSubmission.findMany({
+                where: { businessId: membership.businessId },
+                orderBy: { submittedAt: 'desc' },
+                take: 3,
+                include: { campaign: { select: { name: true } } }
             })
         }
     }
 
     const publicReviewUrl = `${protocol}://${host}/review/${businessSlug}`;
 
-    return <QrClient publicReviewUrl={publicReviewUrl} locations={locations} campaigns={campaigns} />;
+    return <QrClient publicReviewUrl={publicReviewUrl} locations={locations} campaigns={campaigns} recentActivity={recentActivity} />;
 }

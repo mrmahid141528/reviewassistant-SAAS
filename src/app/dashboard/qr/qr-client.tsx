@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { createCampaignAction } from "./actions";
 
-export function QrClient({ publicReviewUrl, locations, campaigns }: { publicReviewUrl: string, locations: { id: string, name: string }[], campaigns: any[] }) {
+export function QrClient({ publicReviewUrl, locations, campaigns, recentActivity = [] }: { publicReviewUrl: string, locations: { id: string, name: string }[], campaigns: any[], recentActivity?: any[] }) {
 
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
@@ -244,14 +244,16 @@ export function QrClient({ publicReviewUrl, locations, campaigns }: { publicRevi
                                                             <Label className="text-xs font-semibold text-muted-foreground uppercase flex items-center mb-1.5">
                                                                 Customer Review Link
                                                             </Label>
-                                                            <div className="font-mono text-sm bg-background border px-3 py-2 rounded-md break-all">
-                                                                {campaignUrl}
+                                                            <div className="flex items-center gap-2 bg-background border rounded-md px-3 py-2 w-full">
+                                                                <div className="font-mono text-sm text-muted-foreground truncate flex-1 leading-none pt-0.5">
+                                                                    {campaignUrl}
+                                                                </div>
+                                                                <button onClick={() => copyToClipboard(campaignUrl)} className="text-muted-foreground hover:text-primary transition-colors cursor-pointer shrink-0 ml-2" title="Copy link">
+                                                                    <Copy className="w-4 h-4" />
+                                                                </button>
                                                             </div>
                                                         </div>
-                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-auto">
-                                                            <Button variant="secondary" className="w-full" onClick={() => copyToClipboard(campaignUrl)}>
-                                                                <Copy className="w-4 h-4 mr-2" /> Copy Link
-                                                            </Button>
+                                                        <div className="grid grid-cols-1 gap-3 mt-auto">
                                                             <Button variant="default" className="w-full" onClick={() => window.open(campaignUrl, '_blank')}>
                                                                 Test Flow <Navigation className="w-4 h-4 ml-2" />
                                                             </Button>
@@ -259,19 +261,15 @@ export function QrClient({ publicReviewUrl, locations, campaigns }: { publicRevi
                                                     </div>
                                                 </div>
 
-                                                {/* Simulated Stats */}
-                                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-8 mb-6 bg-background border rounded-xl p-4 sm:p-0 sm:border-none">
+                                                {/* Stats */}
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8 mb-6 bg-background border rounded-xl p-4 sm:p-0 sm:border-none">
                                                     <div>
-                                                        <div className="text-sm font-semibold text-muted-foreground mb-1">QR Scans</div>
-                                                        <div className="text-3xl font-bold tracking-tight">{Math.floor(Math.random() * 300)}</div>
+                                                        <div className="text-sm font-semibold text-muted-foreground mb-1">Feedback Sessions</div>
+                                                        <div className="text-3xl font-bold tracking-tight">{campaign._count?.feedbackSubmissions || 0}</div>
                                                     </div>
                                                     <div>
-                                                        <div className="text-sm font-semibold text-muted-foreground mb-1">Sessions</div>
-                                                        <div className="text-3xl font-bold tracking-tight">{Math.floor(Math.random() * 200)}</div>
-                                                    </div>
-                                                    <div>
-                                                        <div className="text-sm font-semibold text-muted-foreground mb-1">Reviews Generated</div>
-                                                        <div className="text-3xl font-bold tracking-tight text-primary">{Math.floor(Math.random() * 150)}</div>
+                                                        <div className="text-sm font-semibold text-muted-foreground mb-1">Conversion Rate</div>
+                                                        <div className="text-3xl font-bold tracking-tight text-primary">0%</div>
                                                     </div>
                                                 </div>
 
@@ -318,13 +316,13 @@ export function QrClient({ publicReviewUrl, locations, campaigns }: { publicRevi
                                         </div>
 
                                         <div className="flex w-full justify-between sm:contents mt-2 sm:mt-0">
-                                            <div className="sm:hidden text-xs text-muted-foreground uppercase font-semibold">Scans</div>
-                                            <div className="sm:col-span-2 sm:text-right font-mono text-sm">{Math.floor(Math.random() * 200)}</div>
+                                            <div className="sm:hidden text-xs text-muted-foreground uppercase font-semibold">Sessions</div>
+                                            <div className="sm:col-span-2 sm:text-right font-mono text-sm">--</div>
                                         </div>
 
                                         <div className="flex w-full justify-between sm:contents mt-1 sm:mt-0">
-                                            <div className="sm:hidden text-xs text-muted-foreground uppercase font-semibold">Reviews</div>
-                                            <div className="sm:col-span-2 sm:text-right font-mono text-sm">{Math.floor(Math.random() * 100)}</div>
+                                            <div className="sm:hidden text-xs text-muted-foreground uppercase font-semibold">Rate</div>
+                                            <div className="sm:col-span-2 sm:text-right font-mono text-sm">--</div>
                                         </div>
 
                                         <div className="absolute top-4 right-4 sm:static sm:col-span-1 sm:text-center">
@@ -342,27 +340,17 @@ export function QrClient({ publicReviewUrl, locations, campaigns }: { publicRevi
                     <div>
                         <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">Recent Activity</h3>
                         <div className="border rounded-xl bg-card p-5 space-y-4">
-                            <div className="flex justify-between items-center text-sm">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600"><QrCode className="w-4 h-4" /></div>
-                                    <div><span className="font-semibold">QR scanned</span> at {campaigns[0]?.name || "Main Campaign"}</div>
+                            {recentActivity && recentActivity.length > 0 ? recentActivity.map((activity) => (
+                                <div key={activity.id} className="flex justify-between items-center text-sm">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600"><QrCode className="w-4 h-4" /></div>
+                                        <div><span className="font-semibold">Review received</span> at {activity.campaign?.name || "Main Campaign"}</div>
+                                    </div>
+                                    <div className="text-muted-foreground flex items-center text-xs w-28 text-right justify-end"><Clock className="w-3.5 h-3.5 mr-1" /> {new Date(activity.submittedAt).toLocaleDateString()}</div>
                                 </div>
-                                <div className="text-muted-foreground flex items-center text-xs"><Clock className="w-3.5 h-3.5 mr-1" /> 2 min ago</div>
-                            </div>
-                            <div className="flex justify-between items-center text-sm">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600"><SparklesIcon /></div>
-                                    <div><span className="font-semibold">Review generated</span> by Customer</div>
-                                </div>
-                                <div className="text-muted-foreground flex items-center text-xs"><Clock className="w-3.5 h-3.5 mr-1" /> 5 min ago</div>
-                            </div>
-                            <div className="flex justify-between items-center text-sm">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600"><LinkIcon className="w-4 h-4" /></div>
-                                    <div><span className="font-semibold">Google review link clicked</span></div>
-                                </div>
-                                <div className="text-muted-foreground flex items-center text-xs"><Clock className="w-3.5 h-3.5 mr-1" /> 12 min ago</div>
-                            </div>
+                            )) : (
+                                <div className="text-center text-sm text-muted-foreground py-4">No recent activity detected.</div>
+                            )}
                         </div>
                     </div>
                 </TabsContent>
@@ -408,12 +396,17 @@ export function QrClient({ publicReviewUrl, locations, campaigns }: { publicRevi
                             <CardDescription>Customers first answer your questions and generate their review draft.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="flex flex-col sm:flex-row gap-2">
-                                <Input readOnly value={publicReviewUrl} className="font-mono bg-muted" />
-                                <div className="grid grid-cols-2 sm:flex sm:gap-2 gap-3 mt-2 sm:mt-0">
-                                    <Button className="w-full" onClick={() => copyToClipboard(publicReviewUrl)}><Copy className="w-4 h-4 mr-2" /> Copy Link</Button>
-                                    <Button className="w-full" variant="secondary" onClick={() => window.open(publicReviewUrl, '_blank')}><Navigation className="w-4 h-4 mr-2" /> Open</Button>
+                            <div className="flex items-center gap-2 bg-background border rounded-md px-3 py-2 w-full">
+                                <div className="font-mono text-sm text-foreground truncate flex-1 leading-none pt-0.5">
+                                    {publicReviewUrl}
                                 </div>
+                                <button onClick={() => copyToClipboard(publicReviewUrl)} className="text-muted-foreground hover:text-primary transition-colors cursor-pointer shrink-0 ml-2" title="Copy link">
+                                    <Copy className="w-4 h-4" />
+                                </button>
+                            </div>
+
+                            <div className="grid grid-cols-1 mt-2">
+                                <Button variant="secondary" className="w-full" onClick={() => window.open(publicReviewUrl, '_blank')}><Navigation className="w-4 h-4 mr-2" /> Open</Button>
                             </div>
 
                             <div className="pt-4 border-t mt-4">
@@ -435,13 +428,15 @@ export function QrClient({ publicReviewUrl, locations, campaigns }: { publicRevi
                             <CardDescription>Where customers publish their final review on Google. (Bypasses Smart UI)</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div className="flex flex-col sm:flex-row gap-2">
-                                <Input readOnly value={`https://g.page/r/xxxxx/review`} className="font-mono bg-muted text-muted-foreground" />
-                                <div className="grid grid-cols-2 sm:flex sm:gap-2 gap-3 mt-2 sm:mt-0">
-                                    <Button className="w-full" variant="outline" onClick={() => copyToClipboard(`https://g.page/r/xxxxx/review`)}><Copy className="w-4 h-4 mr-2" /> Copy Link</Button>
-                                    <Button className="w-full" variant="ghost" onClick={() => window.open(`https://g.page/r/xxxxx/review`, '_blank')}>Open</Button>
+                            <div className="flex items-center gap-2 bg-background border rounded-md px-3 py-2 w-full mb-3">
+                                <div className="font-mono text-sm text-muted-foreground truncate flex-1 leading-none pt-0.5">
+                                    https://g.page/r/xxxxx/review
                                 </div>
+                                <button onClick={() => copyToClipboard(`https://g.page/r/xxxxx/review`)} className="text-muted-foreground hover:text-primary transition-colors cursor-pointer shrink-0 ml-2" title="Copy link">
+                                    <Copy className="w-4 h-4" />
+                                </button>
                             </div>
+                            <Button className="w-full" variant="ghost" onClick={() => window.open(`https://g.page/r/xxxxx/review`, '_blank')}>Open</Button>
                         </CardContent>
                     </Card>
                 </TabsContent>
