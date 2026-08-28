@@ -35,45 +35,75 @@ export async function updateBusinessGeneral(formData: FormData) {
         let finalLogoUrl = membership.business.logoUrl;
         const logoFile = formData.get("logo") as File | null;
 
+        console.log("LOGO UPLOAD DEBUG - File received:", logoFile ? { name: logoFile.name, size: logoFile.size, type: logoFile.type } : "No file found");
+
+        let finalLogoBuffer: Buffer | null = null;
+        let finalMimeType: string | null = null;
+
         if (logoFile && logoFile.size > 0 && logoFile.name !== "undefined") {
-            const fileExt = logoFile.name.split('.').pop()
-            const fileName = `${membership.businessId}-${Date.now()}.${fileExt}`
-
-            // Bypass RLS using Admin Client since the user is already authenticated via our own checks
-            const { createClient: createSupabaseClient } = require('@supabase/supabase-js')
-            const supabaseAdmin = createSupabaseClient(
-                process.env.NEXT_PUBLIC_SUPABASE_URL!,
-                process.env.SUPABASE_SERVICE_ROLE_KEY!
-            )
-
             const arrayBuffer = await logoFile.arrayBuffer()
-            const buffer = Buffer.from(arrayBuffer)
-
-            // Check if bucket exists, create if not
-            const { data: bucketData, error: bucketError } = await supabaseAdmin.storage.getBucket('business-logos')
-            if (bucketError) {
-                await supabaseAdmin.storage.createBucket('business-logos', { public: true })
+            finalLogoBuffer = Buffer.from(arrayBuffer)
+            finalMimeType = logoFile.type;
+        } else {
+            // Mobile fallback: Safari DataTransfer drops files programmatically added
+            const base64Str = formData.get("logoBase64") as string | null;
+            if (base64Str) {
+                console.log("LOGO UPLOAD DEBUG - Falling back to base64 hidden string");
+                finalLogoBuffer = Buffer.from(base64Str, 'base64');
+                finalMimeType = (formData.get("logoMimeType") as string) || "image/jpeg";
             }
-
-            const { error: uploadError } = await supabaseAdmin.storage
-                .from('business-logos')
-                .upload(fileName, buffer, {
-                    upsert: true,
-                    contentType: logoFile.type
-                })
-
-            if (uploadError) {
-                console.error("Storage upload error:", uploadError)
-                return { error: "Failed to upload logo. Make sure 'business-logos' storage bucket exists and is public in Supabase." }
-            }
-
-            const { data: publicUrlData } = supabaseAdmin.storage
-                .from('business-logos')
-                .getPublicUrl(fileName)
-
-            finalLogoUrl = publicUrlData.publicUrl
         }
 
+        if (finalLogoBuffer && finalMimeType) {
+            try {
+                const fileExt = finalMimeType.split('/')[1] || 'jpg';
+                const fileName = `${membership.businessId}-${Date.now()}.${fileExt}`
+
+                console.log("LOGO UPLOAD DEBUG - Initializing Supabase Admin");
+                // Bypass RLS using Admin Client since the user is already authenticated via our own checks
+                const { createClient: createSupabaseClient } = require('@supabase/supabase-js')
+                const supabaseAdmin = createSupabaseClient(
+                    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                    process.env.SUPABASE_SERVICE_ROLE_KEY!
+                )
+
+                console.log("LOGO UPLOAD DEBUG - Buffer size:", finalLogoBuffer.length);
+
+                // Check if bucket exists, create if not
+                const { data: bucketData, error: bucketError } = await supabaseAdmin.storage.getBucket('business-logos')
+                if (bucketError) {
+                    console.log("LOGO UPLOAD DEBUG - Bucket not found, creating...", bucketError);
+                    await supabaseAdmin.storage.createBucket('business-logos', { public: true })
+                } else {
+                    console.log("LOGO UPLOAD DEBUG - Bucket exists", bucketData);
+                }
+
+                console.log("LOGO UPLOAD DEBUG - Uploading file to storage...");
+                const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+                    .from('business-logos')
+                    .upload(fileName, finalLogoBuffer, {
+                        upsert: true,
+                        contentType: finalMimeType
+                    })
+
+                if (uploadError) {
+                    console.error("LOGO UPLOAD DEBUG - Storage upload error:", uploadError)
+                    return { error: "Failed to upload logo. Make sure 'business-logos' storage bucket exists and is public in Supabase." }
+                }
+
+                const { data: publicUrlData } = supabaseAdmin.storage
+                    .from('business-logos')
+                    .getPublicUrl(fileName)
+
+                console.log("LOGO UPLOAD DEBUG - Public URL generated:", publicUrlData.publicUrl);
+                finalLogoUrl = publicUrlData.publicUrl
+            } catch (err: any) {
+                console.error("LOGO UPLOAD DEBUG - EXCEPTION during upload:", err);
+                return { error: "Exception during logo upload." }
+            }
+        }
+
+        console.log("LOGO UPLOAD DEBUG - Updating database with URL:", finalLogoUrl);
         await prisma.business.update({
             where: { id: membership.businessId },
             data: {

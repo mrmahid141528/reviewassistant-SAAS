@@ -7,6 +7,8 @@ export default function LogoUpload({ currentLogoUrl }: { currentLogoUrl?: string
     const [preview, setPreview] = useState<string | null>(null)
     const [isCropOpen, setIsCropOpen] = useState(false)
     const [uploadingImageSrc, setUploadingImageSrc] = useState<string | null>(null)
+    const [base64Data, setBase64Data] = useState<string>("")
+    const [mimeType, setMimeType] = useState<string>("")
     const inputRef = useRef<HTMLInputElement>(null)
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -24,12 +26,25 @@ export default function LogoUpload({ currentLogoUrl }: { currentLogoUrl?: string
 
     const handleCropComplete = (croppedFile: File) => {
         setPreview(URL.createObjectURL(croppedFile))
+        setMimeType(croppedFile.type || "image/jpeg")
 
-        // Update the hidden file input with the new cropped file
+        // Convert the cropped file to Base64 for reliable mobile form submission
+        const reader = new FileReader();
+        reader.readAsDataURL(croppedFile);
+        reader.onloadend = () => {
+            const base64String = (reader.result as string).split(',')[1];
+            setBase64Data(base64String);
+        }
+
+        // Keep standard file assignment as fallback for desktop
         if (inputRef.current) {
-            const dataTransfer = new DataTransfer()
-            dataTransfer.items.add(croppedFile)
-            inputRef.current.files = dataTransfer.files
+            try {
+                const dataTransfer = new DataTransfer()
+                dataTransfer.items.add(croppedFile)
+                inputRef.current.files = dataTransfer.files
+            } catch (e) {
+                console.warn("DataTransfer not supported, falling back to base64")
+            }
         }
     }
 
@@ -65,6 +80,9 @@ export default function LogoUpload({ currentLogoUrl }: { currentLogoUrl?: string
                         accept="image/png, image/jpeg, image/webp"
                         onChange={handleFileChange}
                     />
+                    {/* Reliable Mobile Fallback for the cropped image */}
+                    <input type="hidden" name="logoBase64" value={base64Data} suppressHydrationWarning />
+                    <input type="hidden" name="logoMimeType" value={mimeType} suppressHydrationWarning />
                 </label>
                 <p>PNG, JPG or WebP • Max 5MB</p>
             </div>
