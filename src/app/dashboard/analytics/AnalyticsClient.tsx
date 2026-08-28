@@ -57,19 +57,7 @@ export function MainAnalyticsClient({ timeseries, recentFeedbacks, overallRating
                 </Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="bg-gradient-to-br from-indigo-50 to-white border-indigo-100">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-indigo-900 flex items-center gap-2">
-                            <Sparkles className="w-4 h-4 text-indigo-500" /> AI Growth Insights
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-sm text-indigo-800">
-                            <strong>Summary:</strong> Based on the last 30 days, customers visiting the Main Location between 2 PM and 5 PM are 14% more likely to generate a 5-star review using the AI assistant. Ensure QR codes remain highly visible during peak hours.
-                        </p>
-                    </CardContent>
-                </Card>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                 <Card>
                     <CardHeader className="pb-2">
