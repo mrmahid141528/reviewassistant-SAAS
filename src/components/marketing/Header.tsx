@@ -15,17 +15,14 @@ export function Header({ brandSettings }: { brandSettings?: { platformName?: str
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-2 transition-transform hover:scale-[1.02]">
                     {brandSettings?.logoUrl ? (
-                        <div className="relative h-8 w-auto min-w-[32px]">
-                            <img src={brandSettings.logoUrl} alt="Platform Logo" className="h-full object-contain max-h-8" />
+                        <div className="flex items-center h-16 w-auto">
+                            <img src={brandSettings.logoUrl} alt="Platform Logo" className="h-full object-contain max-h-16 w-auto drop-shadow-sm" />
                         </div>
                     ) : (
                         <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
                             <Star className="h-5 w-5 text-primary fill-primary" />
                         </div>
                     )}
-                    <span className="text-xl font-bold tracking-tight text-foreground truncate max-w-[180px]">
-                        {brandSettings?.platformName || "ReviewAssistant"}
-                    </span>
                 </Link>
 
                 {/* Desktop Navigation Group */}

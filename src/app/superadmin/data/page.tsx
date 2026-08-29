@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Database, HardDrive, DatabaseZap, Download, Trash2, ShieldAlert } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Database } from "lucide-react";
 import prisma from "@/lib/prisma";
+import { DataControlsClient } from "./DataControlsClient";
 
 export const dynamic = "force-dynamic";
 
@@ -81,63 +81,11 @@ export default async function SuperAdminDataPage() {
                         </div>
                     </CardContent>
                 </Card>
-
-                {/* Exfiltration & Recovery Controls */}
-                <Card className="shadow-sm border-slate-200">
-                    <CardHeader className="border-b bg-slate-50/50">
-                        <CardTitle className="text-lg text-slate-800 flex items-center gap-2">
-                            <HardDrive className="h-5 w-5 text-slate-500" /> Export & Recovery
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-6 space-y-4">
-                        <Button className="w-full justify-start gap-3 h-12 bg-slate-900 rounded-lg hover:bg-slate-800 opacity-50 cursor-not-allowed">
-                            <Download className="h-4 w-4 text-emerald-400" />
-                            <div className="text-left">
-                                <div className="font-semibold text-sm text-white">Full Postgres Dump Export</div>
-                                <div className="text-[10px] text-slate-400">Not enabled in this environment.</div>
-                            </div>
-                        </Button>
-                        <Button variant="outline" className="w-full justify-start gap-3 h-12 rounded-lg border-slate-200 opacity-50 cursor-not-allowed">
-                            <DatabaseZap className="h-4 w-4 text-blue-500" />
-                            <div className="text-left">
-                                <div className="font-semibold text-sm text-slate-900">Trigger Manual Backup</div>
-                                <div className="text-[10px] text-slate-500">Requires internal CLI access.</div>
-                            </div>
-                        </Button>
-                    </CardContent>
-                </Card>
+                <div className="lg:col-span-1">
+                    {/* The client-side controls are grouped here */}
+                    <DataControlsClient />
+                </div>
             </div>
-
-            {/* Danger Zone */}
-            <Card className="border-rose-200 shadow-sm">
-                <CardHeader className="border-b border-rose-100 bg-rose-50/30">
-                    <CardTitle className="text-lg text-rose-800 flex items-center gap-2">
-                        <ShieldAlert className="h-5 w-5 text-rose-600" /> Danger Zone
-                    </CardTitle>
-                    <CardDescription className="text-rose-600/80">Irreversible destructive actions affecting the global platform.</CardDescription>
-                </CardHeader>
-                <CardContent className="p-6 bg-white space-y-6">
-                    <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between p-4 border border-rose-100 rounded-xl bg-orange-50/30">
-                        <div>
-                            <h4 className="font-bold text-slate-900 text-sm">Purge Orphaned Records</h4>
-                            <p className="text-xs text-slate-500 mt-1 max-w-sm">Permanently deletes data belonging to deleted tenants (soft-delete cleanup).</p>
-                        </div>
-                        <Button variant="outline" className="text-rose-600 border-rose-200 hover:bg-rose-50 hover:text-rose-700 bg-white" disabled>
-                            <Trash2 className="h-4 w-4 mr-2" /> Execute Purge
-                        </Button>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between p-4 border border-rose-100 rounded-xl bg-rose-50/50">
-                        <div>
-                            <h4 className="font-bold text-rose-900 text-sm">Wipe ALL Tenant Data</h4>
-                            <p className="text-xs text-rose-700 mt-1 max-w-sm">Wipes all business data, users, and campaigns securely. Retains Superadmin configs.</p>
-                        </div>
-                        <Button variant="destructive" className="bg-rose-600 hover:bg-rose-700 text-white shadow-xl" disabled>
-                            Factory Reset SaaS
-                        </Button>
-                    </div>
-                </CardContent>
-            </Card>
         </div>
     );
 }

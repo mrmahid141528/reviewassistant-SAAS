@@ -65,17 +65,16 @@ export function Sidebar({ role, className, onNavClick, brandSettings }: { role?:
 
   return (
     <div className={cn("flex h-full w-64 flex-col gap-6 border-r border-border bg-card p-4 shrink-0 hidden md:flex overflow-y-auto", className)}>
-      <div className="flex items-center gap-2 px-2 pb-2 group cursor-pointer transition-transform duration-300 hover:scale-[1.02]">
+      <div className="flex items-center gap-2 px-1 pb-4 pt-1 group cursor-pointer transition-transform duration-300 hover:scale-[1.02]">
         {brandSettings?.logoUrl ? (
-          <div className="relative h-6 w-auto min-w-[24px]">
-            <img src={brandSettings.logoUrl} alt="Platform Logo" className="h-full object-contain max-h-6" />
+          <div className="flex items-center h-16 w-full mb-1">
+            <img src={brandSettings.logoUrl} alt="Platform Logo" className="h-full object-contain max-h-16 w-auto" />
           </div>
         ) : (
           <div className="p-1.5 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
             <Store className="h-5 w-5 text-primary" />
           </div>
         )}
-        <span className="font-bold text-lg text-foreground truncate max-w-[140px]">{brandSettings?.platformName || "Review Assistant"}</span>
       </div>
 
       <nav className="space-y-1">

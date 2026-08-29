@@ -78,15 +78,14 @@ export function SuperadminSidebar({ className, onNavClick, brandSettings }: { cl
             <div className="h-16 flex items-center px-6 border-b shrink-0">
                 <span className="font-bold text-lg text-slate-900 flex items-center gap-2">
                     {brandSettings?.logoUrl ? (
-                        <div className="relative h-6 w-auto min-w-[24px]">
-                            <img src={brandSettings.logoUrl} alt="Platform Logo" className="h-full object-contain max-h-6" />
+                        <div className="flex items-center justify-start h-16 w-full -ml-3">
+                            <img src={brandSettings.logoUrl} alt="Platform Logo" className="h-full object-contain max-h-16 w-auto" />
                         </div>
                     ) : (
                         <div className="h-6 w-6 bg-slate-900 rounded-md flex items-center justify-center">
                             <ShieldAlert className="h-3 w-3 text-white" />
                         </div>
                     )}
-                    <span className="truncate max-w-[140px]">{brandSettings?.platformName || "SaaS Control"}</span>
                 </span>
             </div>
 
