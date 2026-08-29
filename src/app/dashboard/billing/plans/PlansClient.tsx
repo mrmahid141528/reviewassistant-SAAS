@@ -4,6 +4,7 @@ import { useState, useTransition } from "react"
 import Script from "next/script"
 import { Check, AlertTriangle } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { forceActivateFreeTrialSync } from "./actions"
 
 export default function PlansClient({ plans, activePlanId, currentLocationCount }: any) {
     const [isPending, startTransition] = useTransition()
@@ -18,60 +19,33 @@ export default function PlansClient({ plans, activePlanId, currentLocationCount 
 
     const currentPlan = plans.find((p: any) => p.id === activePlanId)
 
-    const handleUpgrade = (selectedPlanId: string, allowedLocations: number) => {
+    const handleUpgrade = (selectedPlanId: string, allowedLocations: number, price: number) => {
         if (currentLocationCount > allowedLocations && allowedLocations !== -1) {
             alert(`⚠️ You can't downgrade yet.\nYou currently have ${currentLocationCount} active locations, but this plan supports only ${allowedLocations}. Before downgrading, please deactivate ${currentLocationCount - allowedLocations} locations.`);
             return;
         }
 
-        setError(null)
-        setLoadingPlan(selectedPlanId)
-        startTransition(async () => {
-            try {
-                const res = await fetch("/api/razorpay/checkout", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ planId: selectedPlanId, cycle: billingCycle })
-                })
-
-                const data = await res.json()
-                if (!res.ok) throw new Error(data.error || "Failed to initiate checkout")
-
-                const { subscriptionId, testModeSwitched } = data;
-
-                if (testModeSwitched) {
-                    alert(`Developer Test-Mode Active: You have been upgraded instantly!`);
+        if (price === 0) {
+            setError(null)
+            setLoadingPlan(selectedPlanId)
+            startTransition(async () => {
+                const res = await forceActivateFreeTrialSync(selectedPlanId)
+                if (res.error) {
+                    setError(res.error)
+                } else {
+                    alert('Zero-cost Plan activated instantly!');
                     window.location.reload();
-                    return;
                 }
-
-                const options = {
-                    key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-                    subscription_id: subscriptionId,
-                    name: "Review Assistant SaaS",
-                    description: `Subscription Upgrade`,
-                    handler: function (response: any) {
-                        alert(`Payment successful! Payment ID: ${response.razorpay_payment_id}`)
-                        window.location.reload()
-                    },
-                    theme: { color: "#2563EB" }
-                }
-
-                // @ts-ignore
-                const rzp = new window.Razorpay(options)
-                rzp.open()
-
-            } catch (err: any) {
-                setError(err.message)
-            } finally {
                 setLoadingPlan(null)
-            }
-        })
+            })
+        } else {
+            // Redirect to the new Checkout UI
+            window.location.href = `/dashboard/billing/checkout/${selectedPlanId}?cycle=${billingCycle}`;
+        }
     }
 
     return (
         <div className="space-y-10 animate-in fade-in duration-500">
-            <Script src="https://checkout.razorpay.com/v1/checkout.js" />
 
             {error && (
                 <div className="bg-destructive/10 text-destructive text-sm font-bold p-4 rounded-xl border border-destructive/20 flex gap-2 items-start">
@@ -152,7 +126,7 @@ export default function PlansClient({ plans, activePlanId, currentLocationCount 
 
                                 <Button
                                     disabled={loadingPlan === plan.id || isCurrentPlan}
-                                    onClick={() => !isContactOnly && handleUpgrade(plan.id, planLimits.locations)}
+                                    onClick={() => !isContactOnly && handleUpgrade(plan.id, planLimits.locations, Number(price))}
                                     variant={isCurrentPlan ? "secondary" : isPopular ? "default" : "outline"}
                                     size="lg"
                                     className={`w-full font-bold h-12 rounded-xl transition-all ${isPopular && !isCurrentPlan ? 'shadow-[0_8px_20px_rgba(var(--primary-rgb),0.25)] hover:shadow-[0_8px_25px_rgba(var(--primary-rgb),0.35)]' : ''}`}

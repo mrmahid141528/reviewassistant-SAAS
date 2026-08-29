@@ -36,7 +36,8 @@ const platformNavItems = [
 ];
 
 const monetizationNavItems = [
-    { name: "Billing", href: "/superadmin/billing", icon: CreditCard },
+    { name: "Billing Hub", href: "/superadmin/billing", icon: CreditCard },
+    { name: "Payment Requests", href: "/superadmin/billing/requests", icon: DollarSign },
     { name: "Pricing Plans", href: "/superadmin/pricing", icon: DollarSign },
     { name: "Discounts & Coupons", href: "/superadmin/coupons", icon: Ticket },
 ];

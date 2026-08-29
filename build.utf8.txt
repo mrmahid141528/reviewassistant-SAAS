@@ -1,0 +1,33 @@
+﻿
+> saas@0.1.0 build
+> next build
+
+Γû▓ Next.js 16.3.1 (Turbopack)
+- Environments: .env.local, .env
+Γ£ô Running next.config.ts took 118ms
+- Experiments (use with caution):
+  ┬╖ serverActions
+
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 4.0s
+  Running TypeScript ...
+src/app/dashboard/billing/checkout/[planId]/CheckoutClient.tsx(34,31): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'SetStateAction<string | null>'.
+  Type 'undefined' is not assignable to type 'SetStateAction<string | null>'.
+node.exe : Failed to type 
+check.
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~
+    + CategoryInfo          : 
+    NotSpecified: (Failed to  
+   type check.:String) [],    
+ RemoteException
+    + FullyQualifiedErrorId : 
+    NativeCommandError
+ 
+

@@ -88,6 +88,7 @@ model Business {
   usageRecords        UsageRecord[]
   auditLogs           AuditLog[]
   couponRedemptions   CouponRedemption[]
+  orders              Order[]
 
   @@map("businesses")
 }
@@ -324,6 +325,7 @@ model Plan {
   updatedAt    DateTime @updatedAt @map("updated_at")
 
   subscriptions Subscription[]
+  orders        Order[]
 
   @@map("plans")
 }
@@ -366,6 +368,26 @@ model Payment {
   subscription Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
 
   @@map("payments")
+}
+
+model Order {
+  id            String   @id @default(uuid())
+  orderNumber   String   @unique @map("order_number")
+  businessId    String   @map("business_id")
+  planId        String   @map("plan_id")
+  amount        Decimal
+  tax           Decimal
+  total         Decimal
+  billingCycle  String   @map("billing_cycle")
+  status        String   @default("PENDING") // PENDING, COMPLETED, CANCELLED
+  paymentMethod String   @default("WHATSAPP") @map("payment_method")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  plan     Plan     @relation(fields: [planId], references: [id], onDelete: Restrict)
+
+  @@map("orders")
 }
 
 model UsageRecord {

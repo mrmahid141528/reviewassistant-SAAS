@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Activity, Banknote, CreditCard, DollarSign, Target, Receipt, TrendingUp, AlertCircle } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import BillingSettingsForm from "./BillingSettingsForm";
 
 export const dynamic = "force-dynamic";
 
@@ -107,6 +108,9 @@ export default async function SuperAdminBilling() {
                     </CardContent>
                 </Card>
             </div>
+
+            {/* Offline Billing Logic Control */}
+            <BillingSettingsForm />
 
             <div className="grid grid-cols-1 gap-6 animate-in fade-in slide-in-from-bottom-3 duration-500 delay-200 fill-mode-both">
                 <Card className="shadow-sm border-slate-200">
