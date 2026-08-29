@@ -37,7 +37,7 @@ export async function submitLogin(formData: FormData) {
 
     // 2. Check Lockdown mode
     const settings = await prisma.securitySetting.findFirst()
-    const isSuperadmin = email.toLowerCase() === "mrmahid141528@gmail.com"
+    const isSuperadmin = email.trim().toLowerCase() === "mrmahid141528@gmail.com"
     if (settings?.lockdownEnabled && !isSuperadmin) {
         return { error: 'System is currently in lockdown mode. Admin logins disabled temporarily.' }
     }
@@ -82,9 +82,9 @@ export async function submitLogin(formData: FormData) {
 
     revalidatePath('/dashboard', 'layout')
     if (isSuperadmin) {
-        redirect('/superadmin')
+        return { success: true, redirect: '/superadmin' }
     }
-    redirect('/dashboard')
+    return { success: true, redirect: '/dashboard' }
 }
 
 export async function submitSignup(formData: FormData) {

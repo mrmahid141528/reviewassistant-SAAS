@@ -6,7 +6,7 @@ import { Star, Menu } from "lucide-react";
 import { Sheet, SheetTrigger, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import React from "react";
 
-export function Header() {
+export function Header({ brandSettings }: { brandSettings?: { platformName?: string; logoUrl?: string | null; } }) {
     const [open, setOpen] = React.useState(false);
     return (
         <header className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
@@ -14,11 +14,17 @@ export function Header() {
 
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-2 transition-transform hover:scale-[1.02]">
-                    <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <Star className="h-5 w-5 text-primary fill-primary" />
-                    </div>
-                    <span className="text-xl font-bold tracking-tight text-foreground">
-                        ReviewAssistant
+                    {brandSettings?.logoUrl ? (
+                        <div className="relative h-8 w-auto min-w-[32px]">
+                            <img src={brandSettings.logoUrl} alt="Platform Logo" className="h-full object-contain max-h-8" />
+                        </div>
+                    ) : (
+                        <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <Star className="h-5 w-5 text-primary fill-primary" />
+                        </div>
+                    )}
+                    <span className="text-xl font-bold tracking-tight text-foreground truncate max-w-[180px]">
+                        {brandSettings?.platformName || "ReviewAssistant"}
                     </span>
                 </Link>
 

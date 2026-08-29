@@ -3,6 +3,7 @@ import { Header } from "@/components/dashboard/Header";
 import { createClient } from "@/lib/supabase/server";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import { getBrandSettings } from "@/lib/brand";
 
 export default async function DashboardLayout({
     children,
@@ -35,9 +36,10 @@ export default async function DashboardLayout({
         });
 
         if (dbUser.status === 'suspended' || (membership && membership.business.status === 'suspended')) {
+            const brandSettings = await getBrandSettings();
             return (
                 <div className="flex min-h-screen bg-background">
-                    <Sidebar role={membership?.role} />
+                    <Sidebar role={membership?.role} brandSettings={brandSettings} />
                     <div className="flex flex-1 flex-col">
                         <Header />
                         <main className="flex-1 overflow-y-auto p-4 md:p-8 flex items-center justify-center">
@@ -68,9 +70,11 @@ export default async function DashboardLayout({
         }
     }
 
+    const brandSettings = await getBrandSettings();
+
     return (
         <div className="flex min-h-screen bg-background">
-            <Sidebar role={membership?.role} />
+            <Sidebar role={membership?.role} brandSettings={brandSettings} />
             <div className="flex flex-1 flex-col">
                 <Header userAvatar={userAvatar} userNameInitials={userNameInitials} role={membership?.role} />
                 <main className="flex-1 overflow-y-auto p-4 md:p-8 flex flex-col">

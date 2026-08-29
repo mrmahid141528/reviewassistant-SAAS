@@ -20,13 +20,15 @@ import {
     Database,
     UserCog,
     LogOut,
-    HelpCircle
+    HelpCircle,
+    Palette
 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 
 const platformNavItems = [
     { name: "Overview", href: "/superadmin", icon: LayoutDashboard },
     { name: "Businesses", href: "/superadmin/businesses", icon: Building2 },
+    { name: "SaaS Branding", href: "/superadmin/branding", icon: Palette },
     { name: "Analytics", href: "/superadmin/analytics", icon: BarChart3 },
     { name: "Reviews", href: "/superadmin/reviews", icon: Star },
     { name: "QR Campaigns", href: "/superadmin/campaigns", icon: QrCode },
@@ -49,7 +51,7 @@ const systemNavItems = [
     { name: "Admins", href: "/superadmin/admins", icon: UserCog },
 ];
 
-export function SuperadminSidebar({ className, onNavClick }: { className?: string, onNavClick?: () => void }) {
+export function SuperadminSidebar({ className, onNavClick, brandSettings }: { className?: string, onNavClick?: () => void, brandSettings?: { platformName?: string, logoUrl?: string | null } }) {
     const pathname = usePathname();
 
     const renderLink = (item: any) => {
@@ -75,10 +77,16 @@ export function SuperadminSidebar({ className, onNavClick }: { className?: strin
         <aside className={cn("w-64 flex-shrink-0 border-r bg-white hidden md:flex flex-col h-screen", className)}>
             <div className="h-16 flex items-center px-6 border-b shrink-0">
                 <span className="font-bold text-lg text-slate-900 flex items-center gap-2">
-                    <div className="h-6 w-6 bg-slate-900 rounded-md flex items-center justify-center">
-                        <ShieldAlert className="h-3 w-3 text-white" />
-                    </div>
-                    SaaS Control
+                    {brandSettings?.logoUrl ? (
+                        <div className="relative h-6 w-auto min-w-[24px]">
+                            <img src={brandSettings.logoUrl} alt="Platform Logo" className="h-full object-contain max-h-6" />
+                        </div>
+                    ) : (
+                        <div className="h-6 w-6 bg-slate-900 rounded-md flex items-center justify-center">
+                            <ShieldAlert className="h-3 w-3 text-white" />
+                        </div>
+                    )}
+                    <span className="truncate max-w-[140px]">{brandSettings?.platformName || "SaaS Control"}</span>
                 </span>
             </div>
 

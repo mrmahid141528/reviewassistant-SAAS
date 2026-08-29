@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 import { toggleBusinessStatus, deleteBusiness, assignBusinessPlan } from "../actions";
-import { AdminActionButtons } from "../components/AdminActionButtons";
+import { BusinessRow } from "./BusinessRow";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ExternalLink, Filter, Building, User, Target, Search, Star } from "lucide-react";
 import Link from "next/link";
@@ -106,12 +106,11 @@ export default async function SuperAdminBusinesses(props: { searchParams?: Promi
                                     <th className="px-6 py-4 font-semibold text-slate-600 text-[13px] text-right">Campaigns</th>
                                     <th className="px-6 py-4 font-semibold text-slate-600 text-[13px] text-right">Reviews Gen</th>
                                     <th className="px-6 py-4 font-semibold text-slate-600 text-[13px]">Created On</th>
-                                    <th className="px-6 py-4 font-semibold text-slate-600 text-[13px] text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 {businesses.map(b => (
-                                    <tr key={b.id} className="hover:bg-slate-50 transition-colors group">
+                                    <BusinessRow key={b.id} id={b.id}>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
                                                 <div className="h-9 w-9 rounded-md bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
@@ -152,23 +151,11 @@ export default async function SuperAdminBusinesses(props: { searchParams?: Promi
                                         <td className="px-6 py-4 text-[13px] text-slate-500">
                                             {b.createdAt.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                                         </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <AdminActionButtons
-                                                id={b.id}
-                                                currentStatus={b.status}
-                                                type="business"
-                                                toggleAction={toggleBusinessStatus}
-                                                deleteAction={deleteBusiness}
-                                                assignPlanAction={assignBusinessPlan}
-                                                plans={activePlans}
-                                                currentPlanId={b.razorpayPlanId}
-                                            />
-                                        </td>
-                                    </tr>
+                                    </BusinessRow>
                                 ))}
                                 {businesses.length === 0 && (
                                     <tr>
-                                        <td colSpan={7} className="px-6 py-12 text-center text-slate-500 bg-slate-50/50">
+                                        <td colSpan={6} className="px-6 py-12 text-center text-slate-500 bg-slate-50/50">
                                             <Building className="h-8 w-8 mx-auto text-slate-300 mb-3" />
                                             <p className="font-medium text-slate-600">No businesses found</p>
                                             <p className="text-sm mt-1">Tenant records will appear here.</p>
@@ -181,16 +168,16 @@ export default async function SuperAdminBusinesses(props: { searchParams?: Promi
                         {/* Mobile Card List View (Option A) */}
                         <div className="md:hidden flex flex-col gap-4 p-4">
                             {businesses.map(b => (
-                                <div key={b.id} className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col">
+                                <Link key={b.id} href={`/superadmin/businesses/${b.id}`} className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col hover:border-slate-300 transition-colors">
                                     <div className="p-4 flex items-center justify-between border-b bg-slate-50/50 gap-2">
                                         <div className="flex items-center gap-3 min-w-0">
                                             <div className="h-10 w-10 rounded-md bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
                                                 <Building className="h-5 w-5" />
                                             </div>
                                             <div className="min-w-0">
-                                                <Link href={`/superadmin/businesses/${b.id}`} className="font-semibold text-[15px] text-slate-900 hover:text-primary transition-colors flex items-center gap-1.5 truncate">
-                                                    <span className="truncate">{b.name}</span> <ExternalLink className="h-3 w-3 shrink-0" />
-                                                </Link>
+                                                <div className="font-semibold text-[15px] text-slate-900 flex items-center gap-1.5 truncate">
+                                                    <span className="truncate">{b.name}</span> <ExternalLink className="h-3 w-3 shrink-0 text-slate-400" />
+                                                </div>
                                                 <p className="text-[11px] text-slate-500 font-mono mt-0.5 truncate">{b.slug}</p>
                                             </div>
                                         </div>
@@ -212,19 +199,7 @@ export default async function SuperAdminBusinesses(props: { searchParams?: Promi
                                             <span className="font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">{b._count.feedbackSubmissions.toLocaleString()}</span>
                                         </div>
                                     </div>
-                                    <div className="p-3 border-t bg-slate-50/80 flex justify-end">
-                                        <AdminActionButtons
-                                            id={b.id}
-                                            currentStatus={b.status}
-                                            type="business"
-                                            toggleAction={toggleBusinessStatus}
-                                            deleteAction={deleteBusiness}
-                                            assignPlanAction={assignBusinessPlan}
-                                            plans={activePlans}
-                                            currentPlanId={b.razorpayPlanId}
-                                        />
-                                    </div>
-                                </div>
+                                </Link>
                             ))}
                             {businesses.length === 0 && (
                                 <div className="py-12 text-center text-slate-500 border border-dashed rounded-xl">

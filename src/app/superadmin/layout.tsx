@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { SuperadminSidebar } from "@/components/superadmin/SuperadminSidebar";
 import { SuperadminHeader } from "@/components/superadmin/SuperadminHeader";
+import { getBrandSettings } from "@/lib/brand";
 
 const SUPER_ADMIN_EMAILS = [
     "mrmahid141528@gmail.com"
@@ -27,10 +28,12 @@ export default async function SuperAdminLayout({
         redirect("/dashboard");
     }
 
+    const brandSettings = await getBrandSettings();
+
     return (
         <div className="flex h-screen overflow-hidden bg-slate-50">
             {/* 16-Element SaaS Control Sidebar */}
-            <SuperadminSidebar />
+            <SuperadminSidebar brandSettings={brandSettings} />
 
             <div className="flex flex-1 flex-col overflow-hidden">
                 {/* Global Search Header */}

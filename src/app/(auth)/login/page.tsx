@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -14,6 +14,7 @@ import { Suspense } from 'react'
 
 function LoginContent() {
     const searchParams = useSearchParams()
+    const router = useRouter()
     const urlErrorMessage = searchParams.get('message')
     const [error, setError] = React.useState<string | null>(urlErrorMessage)
     const [isLoading, setIsLoading] = React.useState(false)
@@ -26,10 +27,14 @@ function LoginContent() {
             const res = await submitLogin(formData)
             if (res?.error) {
                 setError(res.error)
+                setIsLoading(false)
+            } else if (res?.redirect) {
+                router.push(res.redirect)
+                // Don't set isLoading to false here so the button stays spinning during navigation
             }
-        } catch (err) {
-            setError("Something went wrong. Please try again.")
-        } finally {
+        } catch (err: any) {
+            console.error(err);
+            setError(`Crash Error: ${err?.message || JSON.stringify(err)}`);
             setIsLoading(false)
         }
     }
