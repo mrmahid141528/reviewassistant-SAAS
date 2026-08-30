@@ -28,10 +28,23 @@ export async function approvePaymentRequest(orderId: string) {
             });
 
             if (sub) {
-                // Determine new dates if upgrading from an expired sub, but for now just activate
+                const start = new Date();
+                const end = new Date();
+                if (order.billingCycle === 'monthly') {
+                    end.setMonth(end.getMonth() + 1);
+                } else {
+                    end.setFullYear(end.getFullYear() + 1);
+                }
+
                 await tx.subscription.update({
                     where: { id: sub.id },
-                    data: { status: 'active', updatedAt: new Date() }
+                    data: {
+                        status: 'active',
+                        planId: order.planId,
+                        currentPeriodStart: start,
+                        currentPeriodEnd: end,
+                        updatedAt: new Date()
+                    }
                 });
             }
 
