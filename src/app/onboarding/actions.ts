@@ -86,6 +86,9 @@ export async function completeOnboarding(formData: FormData) {
                     }
                 }
             })
+        }, {
+            maxWait: 10000, // 10s max wait for a connection
+            timeout: 20000  // 20s max for the transaction itself
         })
 
         return { success: true, slug: slug }

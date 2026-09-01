@@ -18,7 +18,12 @@ const getIconClass = (slug: string) => {
 
 export default async function PublicPricingPage() {
     const plans = await prisma.plan.findMany({
-        where: { status: 'active' },
+        where: {
+            status: 'active',
+            name: {
+                not: 'Superadmin Override Trial'
+            }
+        },
         orderBy: { priceMonthly: 'asc' }
     });
 
@@ -79,7 +84,7 @@ export default async function PublicPricingPage() {
                                         ))}
                                     </ul>
 
-                                    <Link href={isContactOnly ? "mailto:sales@example.com" : "/login"}>
+                                    <Link href={isContactOnly ? "mailto:sales@example.com" : `/signup?plan=${plan.id}`}>
                                         <button
                                             className={`w-full py-2.5 rounded-xl font-medium text-sm transition-colors ${isContactOnly
                                                 ? 'bg-muted text-foreground border hover:bg-muted/80'
@@ -88,7 +93,7 @@ export default async function PublicPricingPage() {
                                                     : 'bg-background text-primary border border-primary/20 hover:bg-primary/5'
                                                 }`}
                                         >
-                                            {isContactOnly ? "Contact Sales" : "Start 7-Day Free Trial"}
+                                            {isContactOnly ? "Contact Sales" : `Choose ${plan.name}`}
                                         </button>
                                     </Link>
                                 </div>

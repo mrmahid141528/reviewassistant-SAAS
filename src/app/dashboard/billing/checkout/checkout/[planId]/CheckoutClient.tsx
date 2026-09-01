@@ -143,7 +143,7 @@ export default function CheckoutClient({ plan, plans, cycle, businessId, busines
                                         className="h-8 rounded-md border text-sm font-medium bg-background px-2 focus:ring-1 focus:ring-primary"
                                         value={plan.id}
                                         onChange={(e) => {
-                                            router.push(`/dashboard/billing/checkout/${e.target.value}?cycle=${cycle}`);
+                                            router.push(`/checkout/${e.target.value}?cycle=${cycle}`);
                                         }}
                                     >
                                         {plans?.map((p: any) => (

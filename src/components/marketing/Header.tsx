@@ -43,9 +43,9 @@ export function Header({ brandSettings }: { brandSettings?: { platformName?: str
                     <Link href="/login" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors hidden sm:block">
                         Sign In
                     </Link>
-                    <Link href="/login">
+                    <Link href="/signup">
                         <Button size="sm" className="rounded-xl px-6 text-sm font-semibold border-transparent shadow-sm hover:scale-[1.02] transition-all">
-                            Get Started
+                            Start Free Trial
                         </Button>
                     </Link>
 

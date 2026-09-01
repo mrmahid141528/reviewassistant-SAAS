@@ -17,6 +17,14 @@ export default function SignupPage() {
     const [password, setPassword] = React.useState('')
     const [confirmPassword, setConfirmPassword] = React.useState('')
 
+    React.useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const plan = params.get('plan');
+        if (plan) {
+            localStorage.setItem('intendedPlanId', plan);
+        }
+    }, [])
+
     async function handleSignup(formData: FormData) {
         if (password !== confirmPassword) {
             setError("Passwords do not match.")

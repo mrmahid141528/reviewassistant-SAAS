@@ -10,7 +10,7 @@ export async function approvePaymentRequest(orderId: string) {
 
     const SUPER_ADMIN_EMAILS = ["mrmahid141528@gmail.com"];
     if (!user || !user.email || !SUPER_ADMIN_EMAILS.includes(user.email.toLowerCase())) {
-        return { error: "Permission Denied: Superadmin access required." };
+        return { error: `Approval Failed: Permission Denied: Superadmin access required. (Debug: auth_user=${user?.email}, auth_error=${authError?.message})` };
     }
 
     try {

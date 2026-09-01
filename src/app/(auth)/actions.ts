@@ -94,6 +94,9 @@ export async function submitSignup(formData: FormData) {
     const email = formData.get('email') as string
     const password = formData.get('password') as string
 
+    console.log("Checking Supabase Env during Signup:");
+    console.log("URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
+
     const { data, error } = await supabase.auth.signUp({
         email,
         password,
