@@ -12,7 +12,6 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        // We assume the user has a business, let's find it.
         const membership = await prisma.businessMember.findFirst({
             where: { userId: user.id },
             include: { business: true }
@@ -25,40 +24,41 @@ export async function POST(req: NextRequest) {
         const business = membership.business;
 
         const body = await req.json();
-        const planId = body.planId; // The ID of the plan they clicked on the frontend
+        const { planId, cycle, total } = body;
 
-        if (!planId) {
-            return NextResponse.json({ error: "Plan ID is required" }, { status: 400 });
+        if (!planId || !total) {
+            return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
 
         const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
         const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
-        // Check if Razorpay keys exist strictly. If absent or "undefined" fallback string, return 500.
         if (!keyId || !keySecret || keyId === "undefined" || keySecret === "undefined" || keyId.trim() === "" || keySecret.trim() === "") {
             return NextResponse.json({
-                error: "Payment configuration is missing in the production environment."
+                error: "Payment configuration is missing."
             }, { status: 500 });
         }
 
-        // Initialize Razorpay SDK for Real Environment
         const instance = new Razorpay({
-            key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID as string,
-            key_secret: process.env.RAZORPAY_KEY_SECRET as string,
+            key_id: keyId,
+            key_secret: keySecret,
         });
 
-        // Create a subscription on Razorpay
-        const subscription = await instance.subscriptions.create({
-            plan_id: planId,
-            customer_notify: 1, // Razorpay sends emails automatically
-            total_count: 120,    // 10 years by default for recurring monthly
+        // Amount must be in the smallest currency unit (paise for INR)
+        const amountInPaise = Math.round(total * 100);
+
+        const order = await instance.orders.create({
+            amount: amountInPaise,
+            currency: "INR",
+            receipt: `receipt_${business.id.substring(0, 8)}_${Date.now()}`,
             notes: {
-                business_id: business.id // Crucial for parsing in the webhook later
+                business_id: business.id,
+                plan_id: planId,
+                cycle: cycle || 'monthly'
             }
         });
 
-        // Return the subscription ID so the frontend can open the checkout overlay
-        return NextResponse.json({ subscriptionId: subscription.id }, { status: 200 });
+        return NextResponse.json({ orderId: order.id, amount: amountInPaise, keyId }, { status: 200 });
     } catch (error: any) {
         console.error("Razorpay Checkout Error:", error);
         return NextResponse.json({ error: error.message }, { status: 500 });

@@ -46,6 +46,72 @@ export default function CheckoutClient({ plan, plans, cycle, businessId, busines
         }
     }
 
+    const loadRazorpayScript = () => {
+        return new Promise((resolve) => {
+            const script = document.createElement("script");
+            script.src = "https://checkout.razorpay.com/v1/checkout.js";
+            script.onload = () => resolve(true);
+            script.onerror = () => resolve(false);
+            document.body.appendChild(script);
+        });
+    };
+
+    const handleOnlinePayment = async () => {
+        setIsProcessing(true);
+        try {
+            const res = await fetch("/api/razorpay/checkout", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ planId: plan.id, cycle, total })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
+
+            const isLoaded = await loadRazorpayScript();
+            if (!isLoaded) throw new Error("Razorpay SDK failed to load");
+
+            const options = {
+                key: data.keyId,
+                amount: data.amount,
+                currency: "INR",
+                name: businessName,
+                description: `Subscription: ${plan.name} (${cycle})`,
+                order_id: data.orderId,
+                handler: async function (response: any) {
+                    setIsProcessing(true);
+                    const verifyRes = await fetch("/api/razorpay/verify", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            ...response,
+                            planId: plan.id,
+                            cycle
+                        })
+                    });
+                    if (verifyRes.ok) {
+                        alert("Payment successful! Plan upgraded.");
+                        router.push('/dashboard');
+                    } else {
+                        alert("Payment verification failed.");
+                        setIsProcessing(false);
+                    }
+                },
+                theme: { color: "#0f172a" }
+            };
+
+            const rzp = new (window as any).Razorpay(options);
+            rzp.on('payment.failed', function (response: any) {
+                alert("Payment Failed: " + response.error.description);
+            });
+            rzp.open();
+
+        } catch (e: any) {
+            alert(e.message || "Failed to initialize online payment");
+        } finally {
+            setIsProcessing(false);
+        }
+    }
+
     const handleWhatsAppPayment = async () => {
         setIsProcessing(true);
 
@@ -218,15 +284,29 @@ export default function CheckoutClient({ plan, plans, cycle, businessId, busines
 
                         <div className="space-y-4 w-full">
                             <Button
+                                onClick={handleOnlinePayment}
+                                disabled={isProcessing}
+                                className="w-full h-12 font-bold mb-2 transition-all shadow-[0_4px_14px_rgba(15,23,42,0.39)]"
+                            >
+                                {isProcessing ? 'Connecting gateway...' : 'Pay Securely Online (Razorpay)'}
+                            </Button>
+
+                            <div className="relative pb-2">
+                                <div className="absolute inset-0 flex items-center">
+                                    <span className="w-full border-t border-border/40" />
+                                </div>
+                                <div className="relative flex justify-center text-[10px] font-bold uppercase tracking-widest">
+                                    <span className="bg-card px-2 text-muted-foreground/60">OR MANUAL INVOICE</span>
+                                </div>
+                            </div>
+
+                            <Button
                                 onClick={handleWhatsAppPayment}
                                 disabled={isProcessing}
-                                className="w-full h-12 font-bold bg-[#25D366] text-white hover:bg-[#20bd5a] shadow-[0_4px_14px_rgba(37,211,102,0.39)] transition-all"
+                                variant="outline"
+                                className="w-full h-12 font-bold transition-all border-green-500/20 hover:bg-green-500/10 hover:text-green-600 text-green-700"
                             >
-                                {isProcessing ? 'Generating Order...' : (
-                                    <>
-                                        <Smartphone className="w-5 h-5 mr-2" /> Complete Payment on WhatsApp
-                                    </>
-                                )}
+                                <Smartphone className="w-4 h-4 mr-2" /> Request Manual Activation
                             </Button>
                             <p className="text-xs text-muted-foreground flex items-center justify-center">
                                 <ShieldCheck className="w-3 h-3 mr-1" /> Orders tracked securely

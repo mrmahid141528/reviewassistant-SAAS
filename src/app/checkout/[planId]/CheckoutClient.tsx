@@ -66,6 +66,72 @@ export default function CheckoutClient({ plan, plans, cycle, businessId, busines
         }
     }
 
+    const loadRazorpayScript = () => {
+        return new Promise((resolve) => {
+            const script = document.createElement("script");
+            script.src = "https://checkout.razorpay.com/v1/checkout.js";
+            script.onload = () => resolve(true);
+            script.onerror = () => resolve(false);
+            document.body.appendChild(script);
+        });
+    };
+
+    const handleOnlinePayment = async () => {
+        setIsProcessing(true);
+        try {
+            const res = await fetch("/api/razorpay/checkout", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ planId: plan.id, cycle, total })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
+
+            const isLoaded = await loadRazorpayScript();
+            if (!isLoaded) throw new Error("Razorpay SDK failed to load");
+
+            const options = {
+                key: data.keyId,
+                amount: data.amount,
+                currency: "INR",
+                name: billingDetails.billingName || businessName || "Subscription",
+                description: `Subscription: ${plan.name} (${cycle})`,
+                order_id: data.orderId,
+                handler: async function (response: any) {
+                    setIsProcessing(true);
+                    const verifyRes = await fetch("/api/razorpay/verify", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            ...response,
+                            planId: plan.id,
+                            cycle
+                        })
+                    });
+                    if (verifyRes.ok) {
+                        alert("Payment successful! Account activated.");
+                        router.push('/dashboard');
+                    } else {
+                        alert("Payment verification failed.");
+                        setIsProcessing(false);
+                    }
+                },
+                theme: { color: "#0f172a" }
+            };
+
+            const rzp = new (window as any).Razorpay(options);
+            rzp.on('payment.failed', function (response: any) {
+                alert("Payment Failed: " + response.error.description);
+            });
+            rzp.open();
+
+        } catch (e: any) {
+            alert(e.message || "Failed to initialize online payment");
+        } finally {
+            setIsProcessing(false);
+        }
+    }
+
     const handleWhatsAppPayment = async () => {
         setIsProcessing(true);
 
@@ -162,7 +228,7 @@ Thank you.`;
             const encodedMsg = encodeURIComponent(msgTemplate);
 
             // Open WhatsApp in new tab
-            const cleanPhone = adminPhone.replace(/\\D/g, '');
+            const cleanPhone = adminPhone.replace(/\D/g, '');
             const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedMsg}`;
             const newWin = window.open(whatsappUrl, '_blank');
             if (!newWin || newWin.closed || typeof newWin.closed === 'undefined') {
@@ -307,33 +373,20 @@ Thank you.`;
                             </div>
 
                             <div className="space-y-4">
-                                {[
-                                    { name: 'Razorpay', desc: 'Secure online payments', logo: '💳' },
-                                    { name: 'Cashfree', desc: 'Fast & secure payments', logo: '⚡' },
-                                    { name: 'PhonePe Payment Gateway', desc: 'UPI & Cards', logo: '📱' }
-                                ].map((gateway) => (
-                                    <div key={gateway.name} className="flex items-center justify-between border border-slate-200 bg-slate-50/50 p-4 rounded-[16px] opacity-70 grayscale">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 flex items-center justify-center text-xl bg-slate-200 rounded-xl">
-                                                {gateway.logo}
-                                            </div>
-                                            <div>
-                                                <h4 className="font-bold text-slate-900">{gateway.name}</h4>
-                                                <p className="text-[13px] text-slate-500 mt-0.5">{gateway.desc}</p>
-                                            </div>
-                                        </div>
-                                        <div className="bg-slate-200 text-slate-600 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">
-                                            Coming Soon
-                                        </div>
-                                    </div>
-                                ))}
+                                <Button
+                                    onClick={handleOnlinePayment}
+                                    disabled={isProcessing}
+                                    className="w-full h-14 font-extrabold text-[15px] bg-slate-900 text-white hover:bg-slate-800 shadow-[0_4px_14px_rgba(15,23,42,0.39)] transition-all rounded-xl"
+                                >
+                                    {isProcessing ? 'Connecting gateway...' : 'Pay Securely Online (Razorpay)'}
+                                </Button>
 
-                                <div className="relative py-4 my-2">
+                                <div className="relative py-2 my-2">
                                     <div className="absolute inset-0 flex items-center">
                                         <span className="w-full border-t border-slate-200" />
                                     </div>
                                     <div className="relative flex justify-center text-xs font-bold uppercase text-slate-400">
-                                        <span className="bg-white px-2">OR</span>
+                                        <span className="bg-white px-2">OR MANUAL INVOICE</span>
                                     </div>
                                 </div>
 
@@ -353,11 +406,12 @@ Thank you.`;
                                         <Button
                                             onClick={handleWhatsAppPayment}
                                             disabled={isProcessing}
-                                            className="w-full h-12 font-bold text-[15px] bg-[#25D366] text-white hover:bg-[#1EBE57] shadow-[0_4px_14px_rgba(37,211,102,0.25)] hover:shadow-[0_6px_20px_rgba(37,211,102,0.3)] transition-all rounded-xl"
+                                            variant="outline"
+                                            className="w-full h-12 border-emerald-500/30 text-emerald-700 bg-white hover:bg-emerald-50 font-bold text-[14px] transition-all rounded-xl shadow-sm"
                                         >
                                             {isProcessing ? 'Opening WhatsApp...' : (
                                                 <>
-                                                    <MessageCircle className="w-5 h-5 mr-2" /> Complete Payment via WhatsApp &rarr;
+                                                    <MessageCircle className="w-4 h-4 mr-2" /> Request Manual Activation
                                                 </>
                                             )}
                                         </Button>
