@@ -361,6 +361,9 @@ Thank you.`;
                                                 </>
                                             )}
                                         </Button>
+                                        <p className="text-[11px] text-slate-500 text-center mt-1">
+                                            By proceeding, you agree to our <a href="/legal/terms-of-service" target="_blank" className="underline hover:text-slate-800">Terms of Service</a> and <a href="/legal/refund-policy" target="_blank" className="underline hover:text-slate-800">Refund Policy</a>.
+                                        </p>
                                     </div>
                                 </div>
                             </div>

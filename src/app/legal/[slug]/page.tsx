@@ -5,9 +5,10 @@ import { ArrowLeft } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
-export default async function LegalPage({ params }: { params: { slug: string } }) {
+export default async function LegalPage({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = await params;
     const page = await prisma.legalPage.findUnique({
-        where: { slug: params.slug }
+        where: { slug }
     });
 
     if (!page || page.status !== 'published') {
