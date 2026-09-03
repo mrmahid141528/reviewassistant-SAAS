@@ -59,6 +59,7 @@ export function QuestionsClient({ initialQuestions, businessName, locations, cur
     const [newQuestionType, setNewQuestionType] = useState('Short Answer');
     const [newQuestionText, setNewQuestionText] = useState('');
     const [newQuestionRequired, setNewQuestionRequired] = useState(true);
+    const [newQuestionOptions, setNewQuestionOptions] = useState('Option 1, Option 2, Option 3');
 
     const handleAddQuestion = () => {
         if (!newQuestionText) return;
@@ -67,11 +68,12 @@ export function QuestionsClient({ initialQuestions, businessName, locations, cur
             question: newQuestionText,
             type: newQuestionType,
             required: newQuestionRequired,
-            options: newQuestionType === 'Multiple Choice' ? ["Option 1"] : []
+            options: newQuestionType === 'Multiple Choice' ? newQuestionOptions.split(',').map(s => s.trim()).filter(Boolean) : []
         };
         setQuestions([...questions, newQ]);
         setIsAddModalOpen(false);
         setNewQuestionText('');
+        setNewQuestionOptions('Option 1, Option 2, Option 3');
     };
 
     const handleLoadRecommended = () => {
@@ -177,6 +179,17 @@ export function QuestionsClient({ initialQuestions, businessName, locations, cur
                                         ))}
                                     </select>
                                 </div>
+                                {newQuestionType === 'Multiple Choice' && (
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">Choice Options (comma separated)</label>
+                                        <Input
+                                            placeholder="e.g. Excellent, Good, Average"
+                                            value={newQuestionOptions}
+                                            onChange={e => setNewQuestionOptions(e.target.value)}
+                                        />
+                                        <p className="text-[11px] text-muted-foreground">Separate each option with a comma.</p>
+                                    </div>
+                                )}
                                 <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border">
                                     <div className="space-y-0.5">
                                         <div className="text-sm font-medium">Require Answer</div>
