@@ -36,7 +36,7 @@ export function DashboardHeader({ userName, locations = [] }: DashboardHeaderPro
     return (
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 w-full">
             <div>
-                <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                <h1 suppressHydrationWarning className="text-2xl font-bold tracking-tight text-foreground">
                     {greeting()}, {userName} 👋
                 </h1>
                 <p className="text-muted-foreground mt-1 text-sm">
@@ -49,6 +49,7 @@ export function DashboardHeader({ userName, locations = [] }: DashboardHeaderPro
                     <div className="relative hidden sm:block">
                         <MapPin className="absolute left-2.5 top-2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
                         <select
+                            suppressHydrationWarning
                             className="appearance-none bg-card border rounded-md text-sm pl-8 pr-8 py-1.5 text-foreground font-medium outline-none focus:ring-1 focus:ring-primary cursor-pointer hover:bg-muted/50 transition-colors"
                             value={currentLocation}
                             onChange={(e) => updateFilter('locationId', e.target.value)}
@@ -64,6 +65,7 @@ export function DashboardHeader({ userName, locations = [] }: DashboardHeaderPro
 
                 <div className="relative hidden sm:block">
                     <select
+                        suppressHydrationWarning
                         className="appearance-none bg-card border rounded-md text-sm pl-3 pr-8 py-1.5 text-muted-foreground outline-none focus:ring-1 focus:ring-primary cursor-pointer hover:bg-muted/50 transition-colors"
                         value={currentRange}
                         onChange={(e) => updateFilter('range', e.target.value)}
@@ -77,7 +79,7 @@ export function DashboardHeader({ userName, locations = [] }: DashboardHeaderPro
                 </div>
 
                 <Link href="/dashboard/qr">
-                    <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm ml-1">
+                    <Button suppressHydrationWarning size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm ml-1">
                         <Plus className="mr-2 w-4 h-4" /> Create QR
                     </Button>
                 </Link>

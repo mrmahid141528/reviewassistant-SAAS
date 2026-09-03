@@ -15,6 +15,9 @@ export default async function QrCodePage() {
     let locations: any[] = [];
     let campaigns: any[] = [];
     let recentActivity: any[] = [];
+    let businessName = "Default Business";
+    let businessLogo = "";
+    let printSettings: any = {};
     if (user) {
         const membership = await prisma.businessMember.findFirst({
             where: { userId: user.id },
@@ -22,6 +25,10 @@ export default async function QrCodePage() {
         });
         if (membership?.business) {
             businessSlug = membership.business.slug;
+            businessName = membership.business.name;
+            businessLogo = membership.business.logoUrl || "";
+            printSettings = (membership.business.settings as any)?.printTemplate || {};
+
             locations = await prisma.businessLocation.findMany({
                 where: { businessId: membership.businessId },
                 select: { id: true, name: true, googlePlaceId: true }
@@ -42,5 +49,13 @@ export default async function QrCodePage() {
 
     const publicReviewUrl = `${protocol}://${host}/review/${businessSlug}`;
 
-    return <QrClient publicReviewUrl={publicReviewUrl} locations={locations} campaigns={campaigns} recentActivity={recentActivity} />;
+    return <QrClient
+        publicReviewUrl={publicReviewUrl}
+        locations={locations}
+        campaigns={campaigns}
+        recentActivity={recentActivity}
+        businessName={businessName}
+        businessLogo={businessLogo}
+        initialPrintSettings={printSettings}
+    />;
 }

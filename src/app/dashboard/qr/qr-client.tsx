@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
     Card,
     CardContent,
@@ -23,14 +24,21 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { createCampaignAction } from "./actions";
+import { PrintLayout, PrintTemplateType } from "@/components/print-templates/print-layout";
 
-export function QrClient({ publicReviewUrl, locations, campaigns, recentActivity = [] }: { publicReviewUrl: string, locations: { id: string, name: string }[], campaigns: any[], recentActivity?: any[] }) {
+export function QrClient({ publicReviewUrl, locations, campaigns, businessName, businessLogo, initialPrintSettings = {}, recentActivity = [] }: { publicReviewUrl: string, locations: { id: string, name: string }[], campaigns: any[], businessName: string, businessLogo: string, initialPrintSettings?: any, recentActivity?: any[] }) {
 
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
     const [isCreatedSuccess, setIsCreatedSuccess] = useState(false);
     const [printTargetUrl, setPrintTargetUrl] = useState(publicReviewUrl);
-    const [selectedPrintTemplate, setSelectedPrintTemplate] = useState("table-tent");
+    const [selectedPrintTemplate, setSelectedPrintTemplate] = useState<PrintTemplateType>("table-tent");
+
+    // Print Studio States
+    const [brandColor, setBrandColor] = useState(initialPrintSettings.brandColor || "#0f172a");
+    const [tagLine, setTagLine] = useState(initialPrintSettings.tagline || "Tagline Goes Here");
+    const [shortTitle, setShortTitle] = useState(initialPrintSettings.printTitle || "Enjoyed Your\nExperience?");
+    const [isSavingSettings, setIsSavingSettings] = useState(false);
 
     const openPrintModal = (url: string) => {
         setPrintTargetUrl(url);
@@ -90,7 +98,19 @@ export function QrClient({ publicReviewUrl, locations, campaigns, recentActivity
     }
 
     const triggerPrint = () => {
-        window.print();
+        // Temporarily mutate document.title so that the "Save as PDF" uses a clean, branded filename
+        const originalTitle = document.title;
+        document.title = `${businessName} AI Google Review QR Poster`;
+
+        // Wait a tiny bit for render, then print
+        setTimeout(() => {
+            window.print();
+
+            // Restore original title after print dialog closes
+            setTimeout(() => {
+                document.title = originalTitle;
+            }, 1000);
+        }, 100);
     }
 
     return (
@@ -228,34 +248,35 @@ export function QrClient({ publicReviewUrl, locations, campaigns, recentActivity
                                             <CardContent className="p-6">
                                                 <div className="flex items-center gap-2 mb-1">
                                                     <div className={`w-2.5 h-2.5 rounded-full ${campaign.status === 'active' ? 'bg-emerald-500' : 'bg-slate-400'}`}></div>
-                                                    <h3 className="text-xl font-bold">{campaign.name}</h3>
+                                                    <h3 className="text-xl font-black text-slate-800 tracking-tight">{businessName} <span className="text-muted-foreground text-sm font-medium ml-1.5 relative -top-[1px]">/ {campaign.name}</span></h3>
                                                 </div>
-                                                <p className="text-sm font-medium text-muted-foreground mb-6">
+                                                <p className="text-[13px] font-medium text-slate-500 mb-6 border-b pb-4">
                                                     Location: {locName}
                                                 </p>
 
-                                                <div className="flex flex-col md:flex-row gap-8 bg-muted/30 p-6 rounded-xl border">
-                                                    <div className="flex flex-col items-center bg-white p-4 rounded-xl border shadow-sm shrink-0">
-                                                        <QRCodeSVG id={qrId} value={campaignUrl} size={150} level="M" />
-                                                        <div className="mt-3 text-xs font-mono text-muted-foreground text-center">Scan to Review</div>
+                                                <div className="flex flex-col md:flex-row gap-8 bg-slate-50/50 p-6 rounded-2xl border items-center md:items-start">
+                                                    <div className="flex flex-col items-center bg-white p-4 rounded-xl border-2 shadow-sm shrink-0">
+                                                        <QRCodeSVG id={qrId} value={campaignUrl} size={220} level="H" />
+                                                        <div className="mt-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest text-center">Scan to Review</div>
                                                     </div>
-                                                    <div className="flex flex-col flex-1 pb-2">
-                                                        <div className="mb-4">
-                                                            <Label className="text-xs font-semibold text-muted-foreground uppercase flex items-center mb-1.5">
-                                                                Customer Review Link
+                                                    <div className="flex flex-col flex-1 pb-2 w-full md:max-w-xs md:mt-4">
+                                                        <div className="mb-6">
+                                                            <Label className="text-[11px] font-bold text-slate-500 uppercase flex items-center mb-2 tracking-wide">
+                                                                Customer Link
                                                             </Label>
-                                                            <div className="flex items-center gap-2 bg-background border rounded-md px-3 py-2 w-full overflow-hidden">
-                                                                <div className="font-mono text-sm text-muted-foreground truncate flex-1 min-w-0 leading-none pt-0.5">
-                                                                    {campaignUrl}
+                                                            <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 w-full shadow-sm hover:border-slate-300 transition-colors">
+                                                                <div className="font-mono text-xs text-slate-600 truncate flex-1 min-w-0" title={campaignUrl}>
+                                                                    {campaignUrl.replace(/^https?:\/\//, '')}
                                                                 </div>
-                                                                <button onClick={() => copyToClipboard(campaignUrl)} className="text-muted-foreground hover:text-primary transition-colors cursor-pointer shrink-0 ml-2" title="Copy link">
-                                                                    <Copy className="w-4 h-4" />
+                                                                <button onClick={() => copyToClipboard(campaignUrl)} className="text-slate-400 hover:text-emerald-600 transition-colors cursor-pointer shrink-0 ml-1 p-1 hover:bg-emerald-50 rounded" title="Copy link">
+                                                                    <Copy className="w-3.5 h-3.5" />
                                                                 </button>
                                                             </div>
                                                         </div>
-                                                        <div className="grid grid-cols-1 gap-3 mt-auto">
-                                                            <Button variant="default" className="w-full" onClick={() => window.open(campaignUrl, '_blank')}>
-                                                                Test Flow <Navigation className="w-4 h-4 ml-2" />
+                                                        <div className="mt-auto">
+                                                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1.5 block px-0.5">Actions</span>
+                                                            <Button variant="default" size="sm" className="w-max px-4 text-xs font-bold" onClick={() => window.open(campaignUrl, '_blank')}>
+                                                                <Navigation className="w-3.5 h-3.5 mr-1.5" /> Test Flow
                                                             </Button>
                                                         </div>
                                                     </div>
@@ -278,7 +299,7 @@ export function QrClient({ publicReviewUrl, locations, campaigns, recentActivity
                                                         <Download className="w-4 h-4 mr-2" /> Download PNG
                                                     </Button>
                                                     <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => openPrintModal(campaignUrl)}>
-                                                        <Printer className="w-4 h-4 mr-2" /> Print PDF
+                                                        <Printer className="w-4 h-4 mr-2" /> Print Template
                                                     </Button>
                                                     <div className="hidden sm:block flex-1"></div>
                                                     <Button variant="ghost" size="sm" className="w-full sm:w-auto text-muted-foreground font-medium">
@@ -378,7 +399,9 @@ export function QrClient({ publicReviewUrl, locations, campaigns, recentActivity
                                         </div>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-sm">
                                             <Button className="w-full" onClick={() => downloadQR(qrId, `${c.slug}-qr.png`)}><Download className="w-4 h-4 mr-2" /> Download</Button>
-                                            <Button className="w-full" variant="outline" onClick={() => openPrintModal(cUrl)}><Printer className="w-4 h-4 mr-2" /> Print PDF</Button>
+                                            <Link href="/dashboard/templates" className="w-full">
+                                                <Button className="w-full" variant="outline"><Printer className="w-4 h-4 mr-2" /> Order Flyer</Button>
+                                            </Link>
                                         </div>
                                     </div>
                                     <Button variant="ghost" size="icon" className="hidden md:flex"><MoreVertical className="w-5 h-5" /></Button>
@@ -447,25 +470,34 @@ export function QrClient({ publicReviewUrl, locations, campaigns, recentActivity
                 <style dangerouslySetInnerHTML={{
                     __html: `
                     @media print {
+                        html, body {
+                            margin: 0 !important;
+                            padding: 0 !important;
+                            height: 100vh !important;
+                            width: 100vw !important;
+                            overflow: hidden !important;
+                            background-color: white !important;
+                        }
                         body * {
-                            visibility: hidden;
+                            visibility: hidden; /* Do not use display: none, it breaks the modal render tree */
                         }
                         #print-section, #print-section * {
-                            visibility: visible;
-                        }
-                        #print-section {
-                            position: absolute;
-                            left: 0;
-                            top: 0;
-                            margin: 0;
-                            padding: 0;
-                            border: none !important;
-                            box-shadow: none !important;
+                            visibility: visible !important;
                             -webkit-print-color-adjust: exact !important;
                             print-color-adjust: exact !important;
                         }
+                        #print-section {
+                            position: fixed;
+                            left: 0;
+                            top: 0;
+                            width: 100vw;
+                            height: 100vh;
+                            display: flex;
+                            justify-content: flex-start;
+                            align-items: flex-start;
+                        }
                         @page {
-                            size: auto;
+                            size: ${selectedPrintTemplate === 'table-tent' ? '4.69in 6.77in' : selectedPrintTemplate === 'a5-portrait' ? 'A5 portrait' : 'A4 portrait'};
                             margin: 0mm;
                         }
                     }
@@ -478,16 +510,17 @@ export function QrClient({ publicReviewUrl, locations, campaigns, recentActivity
                     <div className="flex flex-col md:flex-row h-[85vh] md:h-[650px] max-h-[90vh]">
 
                         {/* Left Side: Previews Selection */}
-                        <div className="bg-muted p-6 flex flex-col w-full md:w-80 shrink-0 border-r overflow-y-auto">
+                        <div className="bg-muted p-6 flex flex-col w-full md:w-[360px] shrink-0 border-r overflow-y-auto">
                             <div>
-                                <h2 className="text-xl font-bold tracking-tight mb-1">Print Ready</h2>
-                                <p className="text-muted-foreground text-sm">Select a template to generate a high-resolution PDF for printing.</p>
+                                <h2 className="text-xl font-bold tracking-tight mb-1">Print Studio</h2>
+                                <p className="text-muted-foreground text-sm">Customize and generate premium physical prints.</p>
                             </div>
 
                             <div className="space-y-4 mt-6">
+                                <Label className="text-xs uppercase font-bold text-muted-foreground tracking-wider mb-2 block">1. Select Format</Label>
                                 <div
                                     onClick={() => setSelectedPrintTemplate('table-tent')}
-                                    className={`bg-card border-2 rounded-xl p-4 flex flex-col gap-3 cursor-pointer transition-all ${selectedPrintTemplate === 'table-tent' ? 'border-primary shadow-sm' : 'border-transparent shadow-sm hover:border-primary/30'}`}
+                                    className={`bg-card border-2 rounded-xl p-4 flex flex-col gap-2 cursor-pointer transition-all ${selectedPrintTemplate === 'table-tent' ? 'border-primary shadow-sm' : 'border-transparent shadow-sm hover:border-primary/30'}`}
                                 >
                                     <div className="flex items-start justify-between">
                                         <div className="font-bold text-sm flex items-center">Table Tent</div>
@@ -497,25 +530,67 @@ export function QrClient({ publicReviewUrl, locations, campaigns, recentActivity
                                 </div>
 
                                 <div
-                                    onClick={() => setSelectedPrintTemplate('a4-poster')}
-                                    className={`bg-card border-2 rounded-xl p-4 flex flex-col gap-3 cursor-pointer transition-all ${selectedPrintTemplate === 'a4-poster' ? 'border-primary shadow-sm' : 'border-transparent shadow-sm hover:border-primary/30'}`}
+                                    onClick={() => setSelectedPrintTemplate('a5-portrait')}
+                                    className={`bg-card border-2 rounded-xl p-4 flex flex-col gap-2 cursor-pointer transition-all ${selectedPrintTemplate === 'a5-portrait' ? 'border-primary shadow-sm' : 'border-transparent shadow-sm hover:border-primary/30'}`}
                                 >
                                     <div className="flex items-start justify-between">
-                                        <div className="font-bold text-sm flex items-center">A4 Poster / Flyer</div>
+                                        <div className="font-bold text-sm flex items-center">A5 Counter Poster</div>
+                                        {selectedPrintTemplate === 'a5-portrait' && <CheckCircle2 className="w-4 h-4 text-primary" />}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">Standard 148x210mm portrait</div>
+                                </div>
+
+                                <div
+                                    onClick={() => setSelectedPrintTemplate('a4-poster')}
+                                    className={`bg-card border-2 rounded-xl p-4 flex flex-col gap-2 cursor-pointer transition-all ${selectedPrintTemplate === 'a4-poster' ? 'border-primary shadow-sm' : 'border-transparent shadow-sm hover:border-primary/30'}`}
+                                >
+                                    <div className="flex items-start justify-between">
+                                        <div className="font-bold text-sm flex items-center">A4 Wall Poster</div>
                                         {selectedPrintTemplate === 'a4-poster' && <CheckCircle2 className="w-4 h-4 text-primary" />}
                                     </div>
                                     <div className="text-xs text-muted-foreground">Standard 8.5x11" portrait</div>
                                 </div>
+                            </div>
 
-                                <div
-                                    onClick={() => setSelectedPrintTemplate('business-card')}
-                                    className={`bg-card border-2 rounded-xl p-4 flex flex-col gap-3 cursor-pointer transition-all ${selectedPrintTemplate === 'business-card' ? 'border-primary shadow-sm' : 'border-transparent shadow-sm hover:border-primary/30'}`}
-                                >
-                                    <div className="flex items-start justify-between">
-                                        <div className="font-bold text-sm flex items-center">Business Card</div>
-                                        {selectedPrintTemplate === 'business-card' && <CheckCircle2 className="w-4 h-4 text-primary" />}
+                            <div className="space-y-4 mt-8 pt-6 border-t border-slate-200">
+                                <Label className="text-xs uppercase font-bold text-muted-foreground tracking-wider mb-2 block">2. Brand Customization</Label>
+
+                                <div className="space-y-2">
+                                    <Label className="text-xs">Brand Accent Color</Label>
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="color"
+                                            value={brandColor}
+                                            onChange={(e) => setBrandColor(e.target.value)}
+                                            className="w-10 h-10 p-1 border rounded cursor-pointer"
+                                        />
+                                        <Input
+                                            type="text"
+                                            value={brandColor}
+                                            onChange={(e) => setBrandColor(e.target.value)}
+                                            className="font-mono text-sm max-w-[120px]"
+                                        />
                                     </div>
-                                    <div className="text-xs text-muted-foreground">Standard 3.5x2" landscape</div>
+                                </div>
+
+                                <div className="space-y-2 pt-2">
+                                    <Label className="text-xs">Short Call-to-Action (Title)</Label>
+                                    <Input
+                                        value={shortTitle}
+                                        onChange={(e) => setShortTitle(e.target.value)}
+                                        placeholder="SCAN • ANSWER • REVIEW"
+                                        className="text-sm font-semibold"
+                                    />
+                                </div>
+
+                                <div className="space-y-2 pt-2">
+                                    <Label className="text-xs">Optional Tagline</Label>
+                                    <Input
+                                        value={tagLine}
+                                        onChange={(e) => setTagLine(e.target.value)}
+                                        placeholder="e.g. Best Coffee In Town"
+                                        className="text-sm"
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -524,57 +599,18 @@ export function QrClient({ publicReviewUrl, locations, campaigns, recentActivity
                         <div className="flex-1 bg-slate-50 flex flex-col relative w-full overflow-hidden">
 
                             {/* Inner scroll area for vertical & horizontal overflow */}
-                            <div className="flex-1 overflow-auto p-4 flex flex-col items-start min-h-0 sm:items-center sm:justify-start relative bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
+                            <div className="flex-1 overflow-auto p-8 flex flex-col min-h-0 items-center justify-start sm:justify-center relative bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] print:bg-white print:p-0">
 
                                 <div id="print-section">
-                                    {selectedPrintTemplate === 'table-tent' && (
-                                        <div className="relative">
-                                            <div className="w-64 bg-white border border-slate-200 shadow-xl rounded-md flex flex-col items-center p-8 text-center shrink-0">
-                                                <div className="flex justify-center text-amber-400 text-2xl tracking-widest mb-3">★★★★★</div>
-                                                <h3 className="font-black text-slate-900 text-xl leading-snug uppercase">Enjoyed your experience?</h3>
-
-                                                <div className="mt-8 mb-8 p-3 bg-white rounded-lg border-2 border-slate-200 mx-auto w-fit">
-                                                    <QRCodeSVG value={printTargetUrl} size={140} level="H" />
-                                                </div>
-
-                                                <p className="text-xs font-bold text-slate-600 uppercase tracking-widest text-center">
-                                                    Scan here to share<br />your feedback
-                                                </p>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {selectedPrintTemplate === 'a4-poster' && (
-                                        <div className="w-[400px] h-[550px] bg-white shadow-2xl border relative flex flex-col items-center justify-center p-12 shrink-0">
-                                            <div className="absolute top-0 left-0 right-0 h-4 bg-primary"></div>
-                                            <h1 className="text-5xl font-black text-slate-900 z-10 mb-2 mt-4 text-center leading-none">REVIEW US</h1>
-                                            <h2 className="text-base font-bold text-primary z-10 mb-12 uppercase tracking-widest text-center">On Google</h2>
-
-                                            <div className="p-4 bg-white shadow-sm border-4 border-slate-100 rounded-3xl z-10">
-                                                <QRCodeSVG value={printTargetUrl} size={220} level="H" />
-                                            </div>
-
-                                            <p className="text-center text-base font-semibold text-slate-500 mt-12 max-w-[280px]">
-                                                Open your camera and scan the code above to leave us a quick review.
-                                            </p>
-                                            <div className="flex gap-1.5 text-amber-400 text-3xl mt-8">★★★★★</div>
-                                        </div>
-                                    )}
-
-                                    {selectedPrintTemplate === 'business-card' && (
-                                        <div className="w-[420px] h-[240px] bg-white shadow-xl rounded-md border-2 border-slate-200 flex flex-row shrink-0 bg-gradient-to-br from-white to-slate-50">
-                                            <div className="w-1/2 p-6 flex flex-col items-start justify-center border-r">
-                                                <div className="flex text-amber-400 text-xl mb-3">★★★★★</div>
-                                                <h2 className="font-black text-slate-900 text-2xl leading-tight mb-2 uppercase tracking-tight">Love our<br />service?</h2>
-                                                <p className="text-xs text-slate-600 font-bold uppercase tracking-wider">Scan to review</p>
-                                            </div>
-                                            <div className="w-1/2 flex items-center justify-center bg-white p-6">
-                                                <div className="p-2 border-2 border-slate-100 rounded-xl shadow-sm">
-                                                    <QRCodeSVG value={printTargetUrl} size={130} level="M" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
+                                    <PrintLayout
+                                        templateType={selectedPrintTemplate}
+                                        businessName={businessName}
+                                        logoUrl={businessLogo}
+                                        brandColor={brandColor}
+                                        qrUrl={printTargetUrl}
+                                        shortTitle={shortTitle}
+                                        tagline={tagLine}
+                                    />
                                 </div>
                             </div>
 
@@ -584,7 +620,7 @@ export function QrClient({ publicReviewUrl, locations, campaigns, recentActivity
                                     <span className="font-semibold text-foreground tracking-wide">FORMAT: {selectedPrintTemplate.toUpperCase()}</span>
                                     <span>Ready for high-quality printing</span>
                                 </div>
-                                <Button onClick={triggerPrint}><Printer className="w-4 h-4 mr-2" /> Print PDF</Button>
+                                <Button onClick={triggerPrint}><Printer className="w-4 h-4 mr-2" /> Print Template</Button>
                             </div>
 
                         </div>

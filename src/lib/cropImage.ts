@@ -48,13 +48,13 @@ export async function getCroppedImg(
                 if (file) {
                     // Unique name to avoid browser caching
                     const timestamp = new Date().getTime();
-                    const finalFile = new File([file], `cropped-${timestamp}.jpg`, { type: "image/jpeg" })
+                    const finalFile = new File([file], `cropped-${timestamp}.png`, { type: "image/png" })
                     resolve(finalFile)
                 } else {
                     console.error("Canvas toBlob failed");
                     reject(new Error("Canvas is empty"))
                 }
-            }, 'image/jpeg', 1.0) // 1.0 Quality
+            }, 'image/png')
         })
     } catch (err) {
         console.error("Error in getCroppedImg utility:", err);

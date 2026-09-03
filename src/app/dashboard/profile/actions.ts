@@ -31,12 +31,12 @@ export async function updateProfile(formData: FormData) {
             const base64Str = formData.get("avatarBase64") as string | null;
             if (base64Str) {
                 finalAvatarBuffer = Buffer.from(base64Str, 'base64');
-                finalMimeType = (formData.get("avatarMimeType") as string) || "image/jpeg";
+                finalMimeType = (formData.get("avatarMimeType") as string) || "image/png";
             }
         }
 
         if (finalAvatarBuffer && finalMimeType) {
-            const fileExt = finalMimeType.split('/')[1] || 'jpg';
+            const fileExt = finalMimeType.split('/')[1] || 'png';
             const fileName = `user-${user.id}-${Date.now()}.${fileExt}`
 
             const { createClient: createSupabaseClient } = require('@supabase/supabase-js')

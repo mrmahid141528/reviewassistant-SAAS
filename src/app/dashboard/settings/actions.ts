@@ -50,13 +50,13 @@ export async function updateBusinessGeneral(formData: FormData) {
             if (base64Str) {
                 console.log("LOGO UPLOAD DEBUG - Falling back to base64 hidden string");
                 finalLogoBuffer = Buffer.from(base64Str, 'base64');
-                finalMimeType = (formData.get("logoMimeType") as string) || "image/jpeg";
+                finalMimeType = (formData.get("logoMimeType") as string) || "image/png";
             }
         }
 
         if (finalLogoBuffer && finalMimeType) {
             try {
-                const fileExt = finalMimeType.split('/')[1] || 'jpg';
+                const fileExt = finalMimeType.split('/')[1] || 'png';
                 const fileName = `${membership.businessId}-${Date.now()}.${fileExt}`
 
                 console.log("LOGO UPLOAD DEBUG - Initializing Supabase Admin");

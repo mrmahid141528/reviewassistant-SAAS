@@ -581,3 +581,14 @@ model PlatformSetting {
   @@map("platform_settings")
 }
 
+model DesignTemplate {
+  id        String   @id @default(uuid())
+  name      String
+  category  String   @default("all") // Restaurant, Cafe, Hotel, Salon, etc.
+  imageUrl  String   @map("image_url") @db.Text // Can store Base64, absolute paths, or SVG raw string data
+  status    String   @default("active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("design_templates")
+}

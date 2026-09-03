@@ -52,7 +52,7 @@ export function DashboardDateFilter() {
             <div className="flex items-center gap-2 bg-white border rounded-md px-2 py-0.5 shadow-sm">
                 <Filter className="w-4 h-4 text-muted-foreground" />
                 <Select value={range} onValueChange={handleRangeSelect}>
-                    <SelectTrigger className="w-[140px] border-none shadow-none focus-visible:ring-0 px-1 py-1 h-8 bg-transparent text-sm font-medium">
+                    <SelectTrigger suppressHydrationWarning className="w-[140px] border-none shadow-none focus-visible:ring-0 px-1 py-1 h-8 bg-transparent text-sm font-medium">
                         <SelectValue placeholder="Date Range" />
                     </SelectTrigger>
                     <SelectContent align="end">

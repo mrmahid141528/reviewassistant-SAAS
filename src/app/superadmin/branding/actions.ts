@@ -34,7 +34,7 @@ export async function updateBrandSettings(formData: FormData) {
             const base64Str = formData.get("logoBase64") as string | null;
             if (base64Str) {
                 finalLogoBuffer = Buffer.from(base64Str, 'base64');
-                finalMimeType = (formData.get("logoMimeType") as string) || "image/jpeg";
+                finalMimeType = (formData.get("logoMimeType") as string) || "image/png";
             }
         }
 

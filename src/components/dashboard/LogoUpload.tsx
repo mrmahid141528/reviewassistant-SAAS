@@ -26,7 +26,7 @@ export default function LogoUpload({ currentLogoUrl }: { currentLogoUrl?: string
 
     const handleCropComplete = (croppedFile: File) => {
         setPreview(URL.createObjectURL(croppedFile))
-        setMimeType(croppedFile.type || "image/jpeg")
+        setMimeType(croppedFile.type || "image/png")
 
         // Convert the cropped file to Base64 for reliable mobile form submission
         const reader = new FileReader();

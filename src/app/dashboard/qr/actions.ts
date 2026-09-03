@@ -32,3 +32,34 @@ export async function createCampaignAction(data: { name: string, locationId: str
         return { success: false, error: e.message }
     }
 }
+
+export async function savePrintSettingsAction(data: { brandColor: string, printTitle: string, tagline: string }) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { success: false, error: "Unauthorized" }
+
+    const membership = await prisma.businessMember.findFirst({ where: { userId: user.id }, include: { business: true } })
+    if (!membership) return { success: false, error: "Business not found" }
+
+    const currentSettings = (membership.business.settings as any) || {};
+
+    try {
+        await prisma.business.update({
+            where: { id: membership.businessId },
+            data: {
+                settings: {
+                    ...currentSettings,
+                    printTemplate: {
+                        brandColor: data.brandColor,
+                        printTitle: data.printTitle,
+                        tagline: data.tagline
+                    }
+                }
+            }
+        });
+        revalidatePath("/dashboard/qr");
+        return { success: true };
+    } catch (e: any) {
+        return { success: false, error: e.message }
+    }
+}

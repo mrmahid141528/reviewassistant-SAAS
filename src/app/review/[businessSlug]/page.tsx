@@ -11,7 +11,7 @@ export default async function CustomerReviewPage({
 
     const business = await prisma.business.findUnique({
         where: { slug: businessSlug },
-        select: { id: true, name: true, razorpayPlanId: true, createdAt: true }
+        select: { id: true, name: true, logoUrl: true, razorpayPlanId: true, createdAt: true }
     });
 
     if (!business) return notFound();
@@ -61,5 +61,5 @@ export default async function CustomerReviewPage({
         });
     }
 
-    return <ReviewClient businessName={business.name} initialQuestions={questions} hasWatermark={hasWatermark} />;
+    return <ReviewClient businessName={business.name} businessLogo={business.logoUrl} initialQuestions={questions} hasWatermark={hasWatermark} />;
 }
