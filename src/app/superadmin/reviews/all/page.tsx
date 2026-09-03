@@ -14,7 +14,7 @@ export default async function SuperadminAllReviewsPage() {
             customer: { select: { name: true, email: true } },
             campaign: { select: { name: true } },
             requests: { select: { clickedAt: true, status: true }, take: 1 },
-            reviews: { select: { id: true, status: true }, take: 1 }
+            reviews: { select: { id: true, status: true, provider: true, model: true }, take: 1 }
         }
     });
 
@@ -70,7 +70,15 @@ export default async function SuperadminAllReviewsPage() {
                                                 <div className="text-xs text-slate-500 mt-0.5">
                                                     Cust: {review.customer ? (review.customer.name || review.customer.email || "Anonymous") : "Anonymous"}
                                                 </div>
-                                                <div className="text-[10px] text-slate-400 font-mono mt-1">ID: {review.id.substring(0, 8)}...</div>
+                                                <div className="flex gap-2 items-center mt-1">
+                                                    <span className="text-[10px] text-slate-400 font-mono">ID: {review.id.substring(0, 8)}</span>
+                                                    {isGenerated && latestGenerated?.provider === "offline" && (
+                                                        <span className="text-[9px] uppercase font-bold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded">Mock Offline</span>
+                                                    )}
+                                                    {isGenerated && latestGenerated?.provider !== "offline" && (
+                                                        <span className="text-[9px] uppercase font-bold text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded">{latestGenerated?.model || 'Gemini'}</span>
+                                                    )}
+                                                </div>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-1">
@@ -146,7 +154,15 @@ export default async function SuperadminAllReviewsPage() {
                                                 <div className="text-xs text-slate-500 mt-0.5">
                                                     Cust: {review.customer ? (review.customer.name || review.customer.email || "Anonymous") : "Anonymous"}
                                                 </div>
-                                                <div className="text-[10px] text-slate-400 font-mono mt-1">ID: {review.id.substring(0, 8)}...</div>
+                                                <div className="flex gap-2 items-center mt-1">
+                                                    <span className="text-[10px] text-slate-400 font-mono">ID: {review.id.substring(0, 8)}</span>
+                                                    {isGenerated && latestGenerated?.provider === "offline" && (
+                                                        <span className="text-[9px] uppercase font-bold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded">Mock</span>
+                                                    )}
+                                                    {isGenerated && latestGenerated?.provider !== "offline" && (
+                                                        <span className="text-[9px] uppercase font-bold text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded">{((latestGenerated?.model as string) || 'AI').substring(0, 8)}..</span>
+                                                    )}
+                                                </div>
                                             </div>
                                             <div className="text-right">
                                                 <div className="flex items-center gap-1 justify-end">

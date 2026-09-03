@@ -66,7 +66,7 @@ export async function submitReviewDraft(rating: number, answers: object, busines
 
         const currentSettings = (campaign.settings as any) || {}
 
-        const draft = await generateGeminiReview(rating, business.name, qnaPairs, currentSettings, business.settings, skipAI);
+        const generatedResult = await generateGeminiReview(rating, business.name, qnaPairs, currentSettings, business.settings, skipAI);
 
         // Record submission in the database
         await prisma.feedbackSubmission.create({
@@ -78,7 +78,9 @@ export async function submitReviewDraft(rating: number, answers: object, busines
                 reviews: {
                     create: {
                         businessId: business.id,
-                        reviewText: draft,
+                        reviewText: generatedResult.text,
+                        provider: generatedResult.provider,
+                        model: generatedResult.model,
                         rating: rating,
                     }
                 }
@@ -89,7 +91,7 @@ export async function submitReviewDraft(rating: number, answers: object, busines
 
         const googleUrl = currentSettings.googleReviewUrl || ""
 
-        return { success: true, draft, googleUrl };
+        return { success: true, draft: generatedResult.text, googleUrl };
     } catch (error: unknown) {
         console.error(error);
         return { success: false, error: error instanceof Error ? error.message : 'Unknown error occurred' };
@@ -97,7 +99,7 @@ export async function submitReviewDraft(rating: number, answers: object, busines
 }
 
 async function generateGeminiReview(rating: number, businessName: string, qnaPairs: { question: string, answer: string }[], settings: any, businessSettings: any, skipAI: boolean) {
-    if (skipAI) return generateMockReviewOffline(rating, businessName);
+    if (skipAI) return { text: generateMockReviewOffline(rating, businessName), provider: "offline", model: "mock-offline" };
 
     const aiLanguage = settings?.aiLanguage || "English";
     const aiTone = settings?.aiTone || "Friendly & Natural";
@@ -131,7 +133,7 @@ ${customInstructions ? `- Special Instructions: ${customInstructions}` : ''}
 `;
 
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-    if (!GEMINI_API_KEY) return generateMockReviewOffline(rating, businessName);
+    if (!GEMINI_API_KEY) return { text: generateMockReviewOffline(rating, businessName), provider: "offline", model: "mock-offline" };
 
     try {
         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${GEMINI_API_KEY}`, {
@@ -148,12 +150,12 @@ ${customInstructions ? `- Special Instructions: ${customInstructions}` : ''}
 
         const generatedText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
-        if (generatedText) return generatedText.trim();
+        if (generatedText) return { text: generatedText.trim(), provider: "google", model: "gemini-3.6-flash" };
     } catch (e) {
         console.error("Gemini API Fetch Catch:", e);
     }
 
-    return generateMockReviewOffline(rating, businessName);
+    return { text: generateMockReviewOffline(rating, businessName), provider: "offline", model: "mock-offline" };
 }
 
 function generateMockReviewOffline(rating: number, businessName: string) {
