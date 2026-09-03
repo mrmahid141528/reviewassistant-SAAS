@@ -66,7 +66,7 @@ export async function submitReviewDraft(rating: number, answers: object, busines
 
         const currentSettings = (campaign.settings as any) || {}
 
-        const draft = await generateGeminiReview(rating, business.name, qnaPairs, currentSettings, skipAI);
+        const draft = await generateGeminiReview(rating, business.name, qnaPairs, currentSettings, business.settings, skipAI);
 
         // Record submission in the database
         await prisma.feedbackSubmission.create({
@@ -96,14 +96,26 @@ export async function submitReviewDraft(rating: number, answers: object, busines
     }
 }
 
-async function generateGeminiReview(rating: number, businessName: string, qnaPairs: { question: string, answer: string }[], settings: any, skipAI: boolean) {
+async function generateGeminiReview(rating: number, businessName: string, qnaPairs: { question: string, answer: string }[], settings: any, businessSettings: any, skipAI: boolean) {
     if (skipAI) return generateMockReviewOffline(rating, businessName);
 
     const aiLanguage = settings?.aiLanguage || "English";
-    const aiTone = settings?.aiTone || "Professional & Friendly";
+    const aiTone = settings?.aiTone || "Friendly & Natural";
+    const reviewLength = settings?.reviewLength || "Medium";
+    const customInstructions = settings?.additionalInstructions || "";
+    const writingStyle = Array.isArray(settings?.writingStyle) && settings.writingStyle.length > 0
+        ? settings.writingStyle.join(', ')
+        : "Natural sounding";
+    const aboutBusiness = businessSettings?.aboutBusiness || "";
+
+    const lengthInstruction =
+        reviewLength === "Short" ? "Keep it short, around 1 to 2 sentences." :
+            reviewLength === "Detailed" ? "Write a detailed review, around 4 to 6 sentences." :
+                "Keep it concise and natural, around 2 to 4 sentences.";
 
     const prompt = `
 You are an expert, authentic Google Review writer. Write a Google Review for a business named "${businessName}".
+${aboutBusiness ? `About this business: ${aboutBusiness}` : ''}
 The customer has given this business a rating of ${rating} out of 5 stars.
 Here are the customer's specific answers to questions about their experience:
 ${qnaPairs.map(pair => `Q: ${pair.question}\nA: ${pair.answer}`).join('\n\n')}
@@ -111,8 +123,10 @@ ${qnaPairs.map(pair => `Q: ${pair.question}\nA: ${pair.answer}`).join('\n\n')}
 Guidelines:
 - Write the review entirely from the perspective of the customer.
 - Tone: ${aiTone}
+- Style Constraints: ${writingStyle}
 - Language: ${aiLanguage}
-- Length: Keep it concise and natural, around 2 to 4 sentences.
+- Length: ${lengthInstruction}
+${customInstructions ? `- Special Instructions: ${customInstructions}` : ''}
 - VERY IMPORTANT: Do NOT include any introductory or concluding text (like "Here is a review" or "Here you go"). Output ONLY the exact text of the review.
 `;
 
