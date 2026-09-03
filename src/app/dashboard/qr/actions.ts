@@ -33,7 +33,7 @@ export async function createCampaignAction(data: { name: string, locationId: str
     }
 }
 
-export async function savePrintSettingsAction(data: { brandColor: string, printTitle: string, tagline: string }) {
+export async function savePrintSettingsAction(data: { brandColor?: string, printTitle?: string, tagline?: string, logoUrl?: string, businessName?: string }) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { success: false, error: "Unauthorized" }
@@ -47,12 +47,15 @@ export async function savePrintSettingsAction(data: { brandColor: string, printT
         await prisma.business.update({
             where: { id: membership.businessId },
             data: {
+                ...(data.businessName ? { name: data.businessName } : {}),
+                ...(data.logoUrl ? { logoUrl: data.logoUrl } : {}),
                 settings: {
                     ...currentSettings,
                     printTemplate: {
-                        brandColor: data.brandColor,
-                        printTitle: data.printTitle,
-                        tagline: data.tagline
+                        ...(currentSettings.printTemplate || {}),
+                        ...(data.brandColor ? { brandColor: data.brandColor } : {}),
+                        ...(data.printTitle ? { printTitle: data.printTitle } : {}),
+                        ...(data.tagline ? { tagline: data.tagline } : {}),
                     }
                 }
             }
