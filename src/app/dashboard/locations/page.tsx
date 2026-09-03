@@ -55,7 +55,7 @@ export default async function LocationsPage() {
     const locationStats: Record<string, { ratingSum: number, scans: number, reviews: number }> = {};
 
     // Also track fallback metrics for "All Locations" / Location-Agnostic Campaigns
-    let mainLocStats = { ratingSum: 0, scans: 0, reviews: 0 };
+    const mainLocStats = { ratingSum: 0, scans: 0, reviews: 0 };
 
     submissions.forEach(sub => {
         const locId = sub.campaign?.locationId;

@@ -59,7 +59,7 @@ export function QuestionsClient({ initialQuestions, businessName, locations, cur
     const [newQuestionType, setNewQuestionType] = useState('Short Answer');
     const [newQuestionText, setNewQuestionText] = useState('');
     const [newQuestionRequired, setNewQuestionRequired] = useState(true);
-    const [newQuestionOptions, setNewQuestionOptions] = useState('Option 1, Option 2, Option 3');
+    const [newQuestionOptions, setNewQuestionOptions] = useState<string[]>(['Option 1', 'Option 2']);
 
     const handleAddQuestion = () => {
         if (!newQuestionText) return;
@@ -68,12 +68,12 @@ export function QuestionsClient({ initialQuestions, businessName, locations, cur
             question: newQuestionText,
             type: newQuestionType,
             required: newQuestionRequired,
-            options: newQuestionType === 'Multiple Choice' ? newQuestionOptions.split(',').map(s => s.trim()).filter(Boolean) : []
+            options: newQuestionType === 'Multiple Choice' ? newQuestionOptions.filter(o => o.trim() !== '') : []
         };
         setQuestions([...questions, newQ]);
         setIsAddModalOpen(false);
         setNewQuestionText('');
-        setNewQuestionOptions('Option 1, Option 2, Option 3');
+        setNewQuestionOptions(['Option 1', 'Option 2']);
     };
 
     const handleLoadRecommended = () => {
@@ -180,14 +180,41 @@ export function QuestionsClient({ initialQuestions, businessName, locations, cur
                                     </select>
                                 </div>
                                 {newQuestionType === 'Multiple Choice' && (
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium">Choice Options (comma separated)</label>
-                                        <Input
-                                            placeholder="e.g. Excellent, Good, Average"
-                                            value={newQuestionOptions}
-                                            onChange={e => setNewQuestionOptions(e.target.value)}
-                                        />
-                                        <p className="text-[11px] text-muted-foreground">Separate each option with a comma.</p>
+                                    <div className="space-y-3">
+                                        <label className="text-sm font-medium">Choice Options</label>
+                                        {newQuestionOptions.map((opt, i) => (
+                                            <div key={i} className="flex gap-2">
+                                                <Input
+                                                    placeholder={`Option ${i + 1}`}
+                                                    value={opt}
+                                                    onChange={e => {
+                                                        const newOpts = [...newQuestionOptions];
+                                                        newOpts[i] = e.target.value;
+                                                        setNewQuestionOptions(newOpts);
+                                                    }}
+                                                />
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => {
+                                                        if (newQuestionOptions.length > 1) {
+                                                            setNewQuestionOptions(newQuestionOptions.filter((_, idx) => idx !== i));
+                                                        }
+                                                    }}
+                                                    className="self-center shrink-0"
+                                                >
+                                                    <Trash2 className="w-4 h-4 text-red-500" />
+                                                </Button>
+                                            </div>
+                                        ))}
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setNewQuestionOptions([...newQuestionOptions, `Option ${newQuestionOptions.length + 1}`])}
+                                            className="w-full mt-2 border-dashed"
+                                        >
+                                            <Plus className="w-4 h-4 mr-2" /> Add Option
+                                        </Button>
                                     </div>
                                 )}
                                 <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border">

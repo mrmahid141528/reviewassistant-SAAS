@@ -2,12 +2,16 @@ import prisma from "@/lib/prisma";
 import ReviewClient from "./ReviewClient";
 import { notFound } from "next/navigation";
 
-export default async function CustomerReviewPage({
-    params
-}: {
-    params: Promise<{ businessSlug: string }>
-}) {
-    const { businessSlug } = await params;
+export default async function CustomerReviewPage(
+    props: {
+        params: Promise<{ businessSlug: string }>;
+        searchParams: Promise<{ [key: string]: string | undefined }>;
+    }
+) {
+    const searchParams = await props.searchParams;
+    const params = await props.params;
+    const { businessSlug } = params;
+    const campaignId = searchParams.campaign || null;
 
     const business = await prisma.business.findUnique({
         where: { slug: businessSlug },
@@ -18,7 +22,7 @@ export default async function CustomerReviewPage({
 
     const [plan, campaign] = await Promise.all([
         business.razorpayPlanId ? prisma.plan.findUnique({ where: { id: business.razorpayPlanId } }) : Promise.resolve(null),
-        prisma.campaign.findFirst({ where: { businessId: business.id } })
+        campaignId ? prisma.campaign.findUnique({ where: { id: campaignId } }) : prisma.campaign.findFirst({ where: { businessId: business.id } })
     ]);
 
     let isExpired = false;
