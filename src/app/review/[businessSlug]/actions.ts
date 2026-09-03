@@ -134,18 +134,23 @@ ${customInstructions ? `- Special Instructions: ${customInstructions}` : ''}
     if (!GEMINI_API_KEY) return generateMockReviewOffline(rating, businessName);
 
     try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${GEMINI_API_KEY}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         });
 
         const data = await res.json();
+
+        if (data.error) {
+            console.error("Gemini API Error from Server:", data.error.message);
+        }
+
         const generatedText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
         if (generatedText) return generatedText.trim();
     } catch (e) {
-        console.error("Gemini API Error:", e);
+        console.error("Gemini API Fetch Catch:", e);
     }
 
     return generateMockReviewOffline(rating, businessName);
