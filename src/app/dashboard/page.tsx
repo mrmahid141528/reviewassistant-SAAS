@@ -57,7 +57,7 @@ export default async function DashboardOverviewPage(props: { searchParams: Promi
 
             locations = await prisma.businessLocation.findMany({
                 where: { businessId: bizId },
-                select: { id: true, name: true }
+                select: { id: true, name: true, reviewLink: true, isMain: true }
             })
 
             // Determine Date Bounds
@@ -163,7 +163,7 @@ export default async function DashboardOverviewPage(props: { searchParams: Promi
         <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500 pb-10">
 
             <DashboardHeader userName={userName} locations={locations} />
-            <OnboardingProgressTracker business={businessObj || {}} dbUser={dbUser || {}} />
+            <OnboardingProgressTracker business={businessObj || {}} dbUser={dbUser || {}} locations={locations} />
 
             <KPIGrid metrics={{
                 scans: qrScans,

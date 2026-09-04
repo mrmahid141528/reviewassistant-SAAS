@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { addBusinessLocation, deleteBusinessLocation, setMainLocation, toggleLocationStatus } from "./actions"
+import { addBusinessLocation, deleteBusinessLocation, setMainLocation, toggleLocationStatus, editBusinessLocation } from "./actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -20,6 +20,10 @@ type LocationClientProps = {
 
 export default function LocationsClient({ locations, maxLocations, currentCount, businessSlug }: LocationClientProps) {
     const [open, setOpen] = useState(false);
+    const [editOpen, setEditOpen] = useState(false);
+    const [editingLocation, setEditingLocation] = useState<any>(null);
+    const [editLoading, setEditLoading] = useState(false);
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [step, setStep] = useState(1);
@@ -102,6 +106,34 @@ export default function LocationsClient({ locations, maxLocations, currentCount,
         setOpen(false);
         setStep(1);
         setFormData({ name: '', phone: '', address: '', city: '', state: '', postalCode: '', country: 'India', reviewLink: '' });
+    }
+
+    const openEdit = (loc: any) => {
+        setEditingLocation({
+            id: loc.id,
+            name: loc.name || '',
+            phone: loc.phone || '',
+            address: loc.address || '',
+            city: loc.city || '',
+            state: loc.state || '',
+            postalCode: loc.postalCode || '',
+            country: loc.country || 'India',
+            reviewLink: loc.reviewLink || ''
+        });
+        setEditOpen(true);
+    }
+
+    const onSaveEdit = async () => {
+        setEditLoading(true);
+        try {
+            await editBusinessLocation(editingLocation.id, editingLocation);
+            setEditOpen(false);
+            setEditingLocation(null);
+        } catch (err: any) {
+            alert(err.message);
+        } finally {
+            setEditLoading(false);
+        }
     }
 
     return (
@@ -206,7 +238,7 @@ export default function LocationsClient({ locations, maxLocations, currentCount,
                                             <MoreVertical className="h-5 w-5" />
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end" className="w-52 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)]">
-                                            <DropdownMenuItem className="py-2.5 font-medium flex gap-2 cursor-pointer">
+                                            <DropdownMenuItem className="py-2.5 font-medium flex gap-2 cursor-pointer" onClick={() => openEdit(loc)}>
                                                 <Edit className="h-4 w-4 opacity-70" /> Edit Details
                                             </DropdownMenuItem>
                                             {!loc.isMain && (
@@ -370,6 +402,44 @@ export default function LocationsClient({ locations, maxLocations, currentCount,
                             </div>
                         )}
                     </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* EDIT LOCATION DIALOG */}
+            <Dialog open={editOpen} onOpenChange={(val) => { if (!val) { setEditOpen(false); setEditingLocation(null); } }}>
+                <DialogContent className="sm:max-w-[500px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] rounded-[2rem]">
+                    <DialogHeader>
+                        <DialogTitle className="text-xl">Edit Location</DialogTitle>
+                        <DialogDescription>Update the details and Google Review URL for this branch.</DialogDescription>
+                    </DialogHeader>
+                    {editingLocation && (
+                        <div className="space-y-4 pt-4">
+                            <div className="space-y-2">
+                                <Label>Location Name</Label>
+                                <Input value={editingLocation.name} onChange={e => setEditingLocation({ ...editingLocation, name: e.target.value })} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Google Review URL</Label>
+                                <Input value={editingLocation.reviewLink} onChange={e => setEditingLocation({ ...editingLocation, reviewLink: e.target.value })} placeholder="https://g.page/r/..." />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Contact Phone</Label>
+                                    <Input value={editingLocation.phone} onChange={e => setEditingLocation({ ...editingLocation, phone: e.target.value })} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>City</Label>
+                                    <Input value={editingLocation.city} onChange={e => setEditingLocation({ ...editingLocation, city: e.target.value })} />
+                                </div>
+                            </div>
+                            <div className="flex gap-3 justify-end pt-4">
+                                <Button variant="outline" onClick={() => setEditOpen(false)}>Cancel</Button>
+                                <Button onClick={onSaveEdit} disabled={editLoading}>
+                                    {editLoading ? 'Saving...' : 'Save Changes'}
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                 </DialogContent>
             </Dialog>
         </div>

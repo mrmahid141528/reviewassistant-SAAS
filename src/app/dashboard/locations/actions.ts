@@ -195,3 +195,36 @@ export async function toggleLocationStatus(id: string, currentStatus: string) {
     revalidatePath("/dashboard/locations");
     return { success: true };
 }
+
+export async function editBusinessLocation(id: string, updateData: any) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error("Unauthorized")
+
+    const membership = await prisma.businessMember.findFirst({
+        where: { userId: user.id }
+    })
+    if (!membership) throw new Error("Unauthorized")
+
+    const location = await prisma.businessLocation.findUnique({ where: { id } });
+    if (!location || location.businessId !== membership.businessId) {
+        throw new Error("Unauthorized or not found");
+    }
+
+    await prisma.businessLocation.update({
+        where: { id },
+        data: {
+            name: updateData.name,
+            phone: updateData.phone,
+            address: updateData.address,
+            city: updateData.city,
+            state: updateData.state,
+            postalCode: updateData.postalCode,
+            country: updateData.country,
+            reviewLink: updateData.reviewLink,
+        }
+    });
+
+    revalidatePath("/dashboard/locations");
+    return { success: true };
+}

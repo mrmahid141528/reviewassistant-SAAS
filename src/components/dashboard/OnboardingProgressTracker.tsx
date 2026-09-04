@@ -7,9 +7,10 @@ import { Progress } from '@/components/ui/progress';
 interface OnboardingProgressTrackerProps {
     business: any;
     dbUser: any;
+    locations?: any[];
 }
 
-export function OnboardingProgressTracker({ business, dbUser }: OnboardingProgressTrackerProps) {
+export function OnboardingProgressTracker({ business, dbUser, locations = [] }: OnboardingProgressTrackerProps) {
     const businessSettings = business?.settings && typeof business.settings === 'object' ? business.settings : {};
 
     // Checklist Definition
@@ -29,6 +30,14 @@ export function OnboardingProgressTracker({ business, dbUser }: OnboardingProgre
             icon: Building2,
             isComplete: !!business?.category,
             link: '/dashboard/settings/business'
+        },
+        {
+            id: 'review_link',
+            label: 'Add Google Review URL',
+            category: 'business',
+            icon: Building2,
+            isComplete: locations.some(l => !!l.reviewLink),
+            link: '/dashboard/locations'
         },
         {
             id: 'biz_phone',
