@@ -21,7 +21,8 @@ import {
     UserCog,
     LogOut,
     HelpCircle,
-    Palette
+    Palette,
+    Key
 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 
@@ -47,6 +48,7 @@ const systemNavItems = [
     { name: "Audit Logs", href: "/superadmin/audit", icon: History },
     { name: "Notifications", href: "/superadmin/notifications", icon: Bell },
     { name: "System", href: "/superadmin/system", icon: Settings },
+    { name: "API Keys", href: "/superadmin/system/api-keys", icon: Key },
     { name: "Legal", href: "/superadmin/pages", icon: FileText },
     { name: "Data Control", href: "/superadmin/data", icon: Database },
     { name: "Admins", href: "/superadmin/admins", icon: UserCog },

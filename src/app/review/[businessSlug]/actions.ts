@@ -132,11 +132,20 @@ ${customInstructions ? `- Special Instructions: ${customInstructions}` : ''}
 - VERY IMPORTANT: Do NOT include any introductory or concluding text (like "Here is a review" or "Here you go"). Output ONLY the exact text of the review.
 `;
 
-    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-    if (!GEMINI_API_KEY) return { text: generateMockReviewOffline(rating, businessName), provider: "offline", model: "mock-offline" };
+    let apiKey = process.env.GEMINI_API_KEY;
+    try {
+        const dbKey = await prisma.platformApiKey.findFirst({
+            where: { provider: { equals: "gemini", mode: "insensitive" }, status: "active" }
+        });
+        if (dbKey && dbKey.key) apiKey = dbKey.key;
+    } catch (e) {
+        // Fallback safely if schema isn't fully propagated yet
+    }
+
+    if (!apiKey) return { text: generateMockReviewOffline(rating, businessName), provider: "offline", model: "mock-offline" };
 
     try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${GEMINI_API_KEY}`, {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })

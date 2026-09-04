@@ -9,7 +9,9 @@ import {
     TicketPercent,
     ExternalLink,
     Search,
-    Loader2
+    Loader2,
+    ShieldAlert,
+    Key
 } from "lucide-react"
 
 import {
@@ -44,6 +46,12 @@ export function SuperadminCommandPalette({ open, setOpen }: { open: boolean, set
 
         setLoading(true)
         const delayBounceFn = setTimeout(async () => {
+            const systemLinks = [
+                { title: "Security Settings", href: "/superadmin/security", icon: ShieldAlert, description: "Manage platform security policies" },
+                { title: "Audit & Compliance", href: "/superadmin/audit", icon: ShieldAlert, description: "Review immutable security audit logs" },
+                { title: "API Keys & Connections", href: "/superadmin/system/api-keys", icon: Key, description: "Manage AI and provider integrations" },
+                { title: "Data Control", href: "/superadmin/data", icon: ShieldAlert, description: "Manage tenant data operations" },
+            ];
             try {
                 const res = await fetch(`/api/superadmin/search?q=${encodeURIComponent(query)}`)
                 const data = await res.json()
