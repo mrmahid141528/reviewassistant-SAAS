@@ -5,14 +5,20 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { updatePlan, archivePlan, seedPlans } from "./actions"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Banknote, Check, Target, CreditCard, LayoutTemplate, MoreHorizontal, Settings, Info, AlertTriangle } from "lucide-react"
+import { updatePlan, archivePlan, seedPlans, updateTrialDuration } from "./actions"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
+import { Banknote, Check, Target, CreditCard, LayoutTemplate, MoreHorizontal, Settings, Info, AlertTriangle, Calendar, Save } from "lucide-react"
 
-export function PricingClient({ plans, stats }: { plans: any[], stats: any }) {
+export function PricingClient({ plans, stats, trialDuration = 7 }: { plans: any[], stats: any, trialDuration?: number }) {
     const [editingPlan, setEditingPlan] = useState<any>(null)
     const [compareMode, setCompareMode] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
+
+    // Global Settings State
+    const [editingTrial, setEditingTrial] = useState(false)
+    const [localTrialDuration, setLocalTrialDuration] = useState(trialDuration)
+    const [applyTarget, setApplyTarget] = useState("all") // all | active | new
+    const [isSavingTrial, setIsSavingTrial] = useState(false)
 
     // Form state
     const [formData, setFormData] = useState<any>({})
@@ -95,6 +101,21 @@ export function PricingClient({ plans, stats }: { plans: any[], stats: any }) {
             alert("An error occurred trying to update the plan.")
         }
         setIsSaving(false)
+    }
+
+    const saveTrialConfig = async () => {
+        setIsSavingTrial(true)
+        try {
+            const res = await updateTrialDuration(localTrialDuration, applyTarget)
+            if (res.success) {
+                alert(`Global Free Trial Duration updated successfully! Targeted Rule: ${applyTarget}`)
+                setEditingTrial(false)
+            }
+        } catch (e) {
+            console.error(e)
+            alert("An error occurred trying to update the free trial configuration.")
+        }
+        setIsSavingTrial(false)
     }
 
     const handleArchive = async (id: string, subscribersCount: number) => {
@@ -180,6 +201,46 @@ export function PricingClient({ plans, stats }: { plans: any[], stats: any }) {
                     </CardContent>
                 </Card>
             </div>
+
+            {/* Global Settings */}
+            {!compareMode && (
+                <div className="mb-8">
+                    <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">Platform Settings</h2>
+                    <Card className="shadow-sm border-slate-200 bg-gradient-to-br from-slate-50 to-white max-w-xl">
+                        <CardHeader className="pb-3 border-b border-slate-100 flex flex-row items-center gap-4 space-y-0">
+                            <div className="bg-blue-100 p-2.5 rounded-xl shrink-0">
+                                <Calendar className="h-5 w-5 text-blue-700" />
+                            </div>
+                            <div className="flex-1">
+                                <CardTitle className="text-base text-slate-900">Global Free Trial Duration</CardTitle>
+                                <CardDescription className="text-xs">
+                                    Define the number of days a newly registered business can use the platform for free before requiring a paid subscription.
+                                </CardDescription>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="pt-6">
+                            <div className="flex items-center justify-between">
+                                <div className="space-y-1">
+                                    <div className="flex items-end gap-2">
+                                        <span className="text-3xl font-bold text-slate-800">{trialDuration}</span>
+                                        <span className="text-sm font-medium text-slate-500 mb-1">Days</span>
+                                    </div>
+                                    <p className="text-xs text-slate-400 font-medium">Platform default allowance</p>
+                                </div>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setEditingTrial(true)}
+                                    className="border-blue-200 text-blue-700 hover:bg-blue-50"
+                                >
+                                    <Settings className="h-3.5 w-3.5 mr-2" />
+                                    Configure Trial
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            )}
 
             {/* Plan Cards Display */}
             {!compareMode ? (
@@ -409,6 +470,74 @@ export function PricingClient({ plans, stats }: { plans: any[], stats: any }) {
                             <Button type="button" variant="outline" onClick={() => setEditingPlan(null)} className="flex-1 font-semibold rounded-xl" disabled={isSaving}>Discard Changes</Button>
                             <Button type="button" className="flex-1 font-semibold rounded-xl bg-primary shadow-sm" onClick={saveChanges} disabled={isSaving}>
                                 {isSaving ? "Saving Configuration..." : "Save Pricing Configuration"}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Trial Settings Modal */}
+            {editingTrial && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                    <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl relative overflow-hidden">
+                        <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-900">Define Trial Configuration</h3>
+                                <p className="text-xs text-slate-500 font-medium flex items-center gap-1 mt-1">Platform-wide Default</p>
+                            </div>
+                            <button onClick={() => setEditingTrial(false)} className="h-8 w-8 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-500 hover:text-slate-900 shadow-sm" disabled={isSavingTrial}>✕</button>
+                        </div>
+
+                        <div className="p-6 space-y-6 bg-white">
+                            <div>
+                                <Label className="text-[13px] font-bold text-slate-700">Trial Period (Days)</Label>
+                                <div className="flex items-center gap-3 mt-1.5">
+                                    <Input
+                                        type="number"
+                                        min="0"
+                                        className="w-24 font-mono font-bold text-slate-800 text-center"
+                                        value={localTrialDuration}
+                                        onChange={(e) => setLocalTrialDuration(parseInt(e.target.value) || 0)}
+                                    />
+                                    <span className="text-sm font-medium text-slate-500 whitespace-nowrap">
+                                        days from creation
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="space-y-3">
+                                <Label className="text-[13px] font-bold text-slate-700">Deployment Target</Label>
+
+                                <label className={`flex gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${applyTarget === 'all' ? 'bg-blue-50 border-blue-200 text-blue-900' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}`}>
+                                    <input type="radio" name="target" value="all" className="mt-1 accent-blue-600" checked={applyTarget === 'all'} onChange={(e) => setApplyTarget(e.target.value)} />
+                                    <div>
+                                        <div className="font-bold text-sm">All Businesses (Global Override)</div>
+                                        <div className="text-xs mt-0.5 opacity-80 leading-relaxed">Overrides specific exceptions. Reactivates older businesses if increased.</div>
+                                    </div>
+                                </label>
+
+                                <label className={`flex gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${applyTarget === 'active' ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}`}>
+                                    <input type="radio" name="target" value="active" className="mt-1 accent-emerald-600" checked={applyTarget === 'active'} onChange={(e) => setApplyTarget(e.target.value)} />
+                                    <div>
+                                        <div className="font-bold text-sm">Active & Trialing Only</div>
+                                        <div className="text-xs mt-0.5 opacity-80 leading-relaxed">Propagates to current users who haven't expired yet. Does not rescue expired accounts.</div>
+                                    </div>
+                                </label>
+
+                                <label className={`flex gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${applyTarget === 'new' ? 'bg-slate-100 border-slate-300 text-slate-900' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}`}>
+                                    <input type="radio" name="target" value="new" className="mt-1 accent-slate-600" checked={applyTarget === 'new'} onChange={(e) => setApplyTarget(e.target.value)} />
+                                    <div>
+                                        <div className="font-bold text-sm">New Businesses Only</div>
+                                        <div className="text-xs mt-0.5 opacity-80 leading-relaxed">Modifies the platform default for future signups. Current users keep their current limits.</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div className="p-4 border-t border-slate-100 flex gap-3 bg-slate-50/50">
+                            <Button variant="outline" className="flex-1" onClick={() => setEditingTrial(false)} disabled={isSavingTrial}>Cancel</Button>
+                            <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={saveTrialConfig} disabled={isSavingTrial}>
+                                {isSavingTrial ? "Saving Config..." : "Deploy Configuration"}
                             </Button>
                         </div>
                     </div>

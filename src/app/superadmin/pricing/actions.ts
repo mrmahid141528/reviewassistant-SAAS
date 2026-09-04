@@ -109,3 +109,74 @@ export async function seedPlans() {
     revalidatePath("/superadmin/pricing");
     return { success: true };
 }
+
+export async function getTrialDuration() {
+    const config = await prisma.platformSetting.findUnique({
+        where: { key: "FREE_TRIAL_CONFIG" }
+    });
+
+    let duration = 7;
+    if (config?.value) {
+        const val = config.value as any;
+        if (typeof val === "object" && val.durationDays !== undefined) {
+            duration = Number(val.durationDays);
+        }
+    }
+    return duration;
+}
+
+export async function updateTrialDuration(days: number, target: string) {
+    await checkAdmin();
+
+    // Fetch old config to know the current state before we override it
+    const oldGlobalLimit = await getTrialDuration();
+
+    await prisma.platformSetting.upsert({
+        where: { key: "FREE_TRIAL_CONFIG" },
+        update: { value: { durationDays: days } },
+        create: {
+            key: "FREE_TRIAL_CONFIG",
+            value: { durationDays: days }
+        }
+    });
+
+    // Process overriding logic based on the target setting
+    const allBusinesses = await prisma.business.findMany({ select: { id: true, createdAt: true, settings: true, razorpayPlanId: true } });
+
+    for (const b of allBusinesses) {
+        let currentSettings = b.settings && typeof b.settings === 'object' ? { ...(b.settings as any) } : {};
+        let needsUpdate = false;
+
+        if (target === "all") {
+            if ("freeTrialDays" in currentSettings) {
+                delete currentSettings.freeTrialDays;
+                needsUpdate = true;
+            }
+        } else if (target === "active") {
+            const currentOverride = currentSettings.freeTrialDays;
+            const limit = currentOverride !== undefined ? currentOverride : oldGlobalLimit;
+            const daysSinceCreated = (Date.now() - b.createdAt.getTime()) / (1000 * 60 * 60 * 24);
+            const isCurrentlyExpired = !b.razorpayPlanId && daysSinceCreated > limit;
+
+            if (!isCurrentlyExpired) {
+                // Explicitly lock in the new trial duration for currently eligible accounts
+                currentSettings.freeTrialDays = days;
+                needsUpdate = true;
+            }
+        } else if (target === "new") {
+            // Lock in ALL existing businesses to their previous limit so they are unaffected by the new global change
+            const currentOverride = currentSettings.freeTrialDays;
+            if (currentOverride === undefined) {
+                currentSettings.freeTrialDays = oldGlobalLimit;
+                needsUpdate = true;
+            }
+        }
+
+        if (needsUpdate) {
+            await prisma.business.update({ where: { id: b.id }, data: { settings: currentSettings } });
+        }
+    }
+
+    revalidatePath("/superadmin/pricing");
+    return { success: true };
+}

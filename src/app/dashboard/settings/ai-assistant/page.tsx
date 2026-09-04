@@ -79,14 +79,14 @@ export default async function AIAssistantPage() {
                     <CardContent className="space-y-8">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
-                                <Label htmlFor="aiLanguage">Output Language *</Label>
+                                <Label htmlFor="aiLanguage">Extra Output Language (English is default)</Label>
                                 <select
                                     id="aiLanguage"
                                     name="aiLanguage"
                                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background disabled:cursor-not-allowed disabled:opacity-50"
                                     defaultValue={aiLanguage}
                                 >
-                                    {LANGUAGES.map(lang => (
+                                    {["None", "Hindi", "Bengali", "Tamil", "Telugu", "Gujarati", "Marathi", "Kannada", "Malayalam", "Punjabi"].map(lang => (
                                         <option key={lang} value={lang}>{lang}</option>
                                     ))}
                                 </select>

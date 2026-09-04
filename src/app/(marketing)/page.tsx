@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Star, Zap, MessageSquare, QrCode, CheckCircle2 } from "lucide-react";
+import { getTrialDuration } from "@/app/superadmin/pricing/actions";
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const trialDuration = await getTrialDuration();
+
   return (
     <div className="min-h-screen bg-background font-sans selection:bg-primary/20 overflow-x-hidden">
 
@@ -25,7 +28,7 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full md:w-auto">
             <Link href="/login">
               <Button size="lg" className="w-full sm:w-auto rounded-xl px-8 h-14 text-base font-semibold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all">
-                Start 7-Day Free Trial
+                Start {trialDuration}-Day Free Trial
               </Button>
             </Link>
             <Link href="#features">

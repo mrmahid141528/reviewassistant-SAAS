@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { getBrandSettings } from "@/lib/brand";
+import { getTrialDuration } from "@/app/superadmin/pricing/actions";
 
 export default async function DashboardLayout({
     children,
@@ -63,8 +64,14 @@ export default async function DashboardLayout({
 
         const b = membership.business;
         if (!b.razorpayPlanId) {
+            let trialLimit = await getTrialDuration();
+            const bSettings = b.settings as any;
+            if (bSettings && typeof bSettings === 'object' && typeof bSettings.freeTrialDays === 'number') {
+                trialLimit = bSettings.freeTrialDays;
+            }
+
             const daysSinceCreated = (Date.now() - b.createdAt.getTime()) / (1000 * 60 * 60 * 24);
-            if (daysSinceCreated > 7) {
+            if (daysSinceCreated > trialLimit) {
                 isExpired = true;
             }
         }

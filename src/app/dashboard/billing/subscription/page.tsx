@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import SubscriptionClient from "./SubscriptionClient"
+import { getTrialDuration } from "@/app/superadmin/pricing/actions";
 
 export default async function SubscriptionPage() {
     const supabase = await createClient();
@@ -16,27 +17,37 @@ export default async function SubscriptionPage() {
 
     if (!membership) redirect("/dashboard");
 
-    const subscription = await prisma.subscription.findFirst({
-        where: { businessId: membership.businessId, status: "active" },
+    const latestSubscription = await prisma.subscription.findFirst({
+        where: { businessId: membership.businessId },
         include: { plan: true },
         orderBy: { currentPeriodEnd: 'desc' }
     });
 
-    const activePlanId = subscription?.planId || null;
-    const daysSinceCreated = Math.floor((Date.now() - membership.business.createdAt.getTime()) / (1000 * 60 * 60 * 24));
-    let isExpired = false;
+    const isActiveRow = latestSubscription?.status === "active";
+    const daysSinceCreated = (Date.now() - membership.business.createdAt.getTime()) / (1000 * 60 * 60 * 24);
+    let trialLimit = await getTrialDuration();
+    const bSettings = membership.business.settings as any;
+    if (bSettings && typeof bSettings === 'object' && typeof bSettings.freeTrialDays === 'number') {
+        trialLimit = bSettings.freeTrialDays;
+    }
 
-    if (!activePlanId && daysSinceCreated > 7) {
+    let isExpired = false;
+    if (!isActiveRow && daysSinceCreated > trialLimit) {
         isExpired = true;
     }
 
-    const serializedSubscription = subscription ? JSON.parse(JSON.stringify(subscription)) : null;
+    const hasPreviousPaid = !!latestSubscription; // If they ever had any subscription record, we assume they had a paid sub.
+    const activeSubscription = isActiveRow ? latestSubscription : null;
+
+    const serializedSubscription = activeSubscription ? JSON.parse(JSON.stringify(activeSubscription)) : null;
 
     return (
         <SubscriptionClient
             subscription={serializedSubscription as any}
             isExpired={isExpired}
             daysSinceCreated={daysSinceCreated}
+            hasPreviousPaid={hasPreviousPaid}
+            trialLimit={trialLimit}
         />
     )
 }

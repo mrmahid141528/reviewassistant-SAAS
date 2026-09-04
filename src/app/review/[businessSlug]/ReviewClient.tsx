@@ -17,7 +17,7 @@ export default function ReviewClient({ businessName, businessLogo, initialQuesti
     const [rating, setRating] = useState<number>(0);
     const [answers, setAnswers] = useState<Record<string, string>>({});
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-    const [generatedReview, setGeneratedReview] = useState("");
+    const [generatedDrafts, setGeneratedDrafts] = useState<string[]>([]);
     const [googleUrl, setGoogleUrl] = useState("");
 
     const handleFinishQuestions = async (finalRating = rating) => {
@@ -27,7 +27,7 @@ export default function ReviewClient({ businessName, businessLogo, initialQuesti
             const result = await submitReviewDraft(finalRating, answers, slug);
 
             if (result.success && result.draft) {
-                setGeneratedReview(result.draft);
+                setGeneratedDrafts(result.drafts || [result.draft]);
                 setGoogleUrl(result.googleUrl || "");
                 setStep("RESULT");
             } else {
@@ -40,8 +40,8 @@ export default function ReviewClient({ businessName, businessLogo, initialQuesti
         }
     };
 
-    const copyAndContinue = () => {
-        navigator.clipboard.writeText(generatedReview);
+    const copyAndContinue = (draftText: string) => {
+        navigator.clipboard.writeText(draftText);
         if (googleUrl) {
             let finalUrl = googleUrl.trim();
             if (!/^https?:\/\//i.test(finalUrl)) {
@@ -286,18 +286,48 @@ export default function ReviewClient({ businessName, businessLogo, initialQuesti
                             </div>
                         </div>
 
-                        <Textarea
-                            value={generatedReview}
-                            onChange={(e) => setGeneratedReview(e.target.value)}
-                            className="flex-1 min-h-[220px] max-h-[300px] text-[16px] p-5 resize-none rounded-2xl bg-white border-slate-200 shadow-sm font-medium text-slate-700 focus-visible:ring-emerald-500 mb-6 leading-relaxed"
-                        />
+                        <div className="flex-1 overflow-y-auto mb-6 space-y-4 pr-1">
+                            {generatedDrafts.map((draft, idx) => {
+                                // Extract the language prefix if it looks like "Language:" or "Language (Roman):" for styling
+                                let textContent = draft;
+                                let tag = "";
+                                if (draft.includes(":\n")) {
+                                    const parts = draft.split(":\n");
+                                    tag = parts[0];
+                                    textContent = parts.slice(1).join(":\n").trim();
+                                }
+
+                                return (
+                                    <div
+                                        key={idx}
+                                        onClick={() => copyAndContinue(textContent)}
+                                        className="relative p-5 bg-white border border-slate-200 rounded-2xl shadow-sm hover:border-[#10B981] hover:ring-1 hover:ring-[#10B981] cursor-pointer transition-all text-left group overflow-hidden"
+                                    >
+                                        {tag && (
+                                            <span className="inline-block px-2.5 py-1 bg-slate-100 text-slate-600 font-bold text-[11px] rounded-md mb-2 uppercase tracking-wider">
+                                                {tag}
+                                            </span>
+                                        )}
+                                        <p className="text-[15px] font-medium text-slate-700 leading-relaxed pr-14 whitespace-pre-wrap">
+                                            {textContent}
+                                        </p>
+                                        <div className="absolute top-1/2 -translate-y-1/2 right-4 flex flex-col items-center gap-1.5 opacity-80 sm:opacity-40 group-hover:opacity-100 group-hover:scale-110 transition-all">
+                                            <div className="bg-[#10B981]/15 p-2.5 rounded-full shadow-sm">
+                                                <Copy className="h-5 w-5 text-[#10B981]" />
+                                            </div>
+                                            <span className="text-[9px] font-bold text-[#10B981] tracking-wide w-full text-center">COPY<br />& GO</span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
 
                         <div className="mt-auto space-y-4 pb-4">
                             <button
-                                onClick={copyAndContinue}
-                                className="w-full bg-[#10B981] text-white font-bold text-[17px] rounded-2xl py-[18px] flex items-center justify-center gap-2 shadow-[0_10px_25px_rgba(16,185,129,0.3)] transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                                onClick={() => handleFinishQuestions(rating)}
+                                className="w-full bg-slate-900 text-white font-bold text-[16px] rounded-2xl py-[16px] flex items-center justify-center gap-2 shadow-[0_10px_25px_rgba(15,23,42,0.3)] transition-transform hover:scale-[1.02] active:scale-[0.98]"
                             >
-                                <Copy className="h-5 w-5" /> Copy & Continue to Google
+                                Regenerate Draft
                             </button>
 
                             <button
