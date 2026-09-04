@@ -46,14 +46,19 @@ export async function submitReviewDraft(rating: number, answers: object, busines
         }
 
         // Auto-provision campaign if missing
-        let campaign = await prisma.campaign.findFirst({ where: { businessId: business.id } });
+        let campaign = await prisma.campaign.findFirst({
+            where: { businessId: business.id },
+            include: { location: true }
+        });
+
         if (!campaign) {
             campaign = await prisma.campaign.create({
                 data: {
                     businessId: business.id,
                     name: "Review Campaign",
                     slug: "main-campaign"
-                }
+                },
+                include: { location: true }
             });
         }
 
@@ -89,7 +94,28 @@ export async function submitReviewDraft(rating: number, answers: object, busines
 
         await new Promise(resolve => setTimeout(resolve, 1500));
 
-        const googleUrl = currentSettings.googleReviewUrl || ""
+        let googleUrl = currentSettings.googleReviewUrl || "";
+
+        // Use Campaign's linked Location Review Link if available
+        if (campaign.location?.reviewLink) {
+            googleUrl = campaign.location.reviewLink;
+        } else {
+            // Fallback 1: Main Location
+            const mainLoc = await prisma.businessLocation.findFirst({
+                where: { businessId: business.id, isMain: true }
+            });
+            if (mainLoc?.reviewLink) {
+                googleUrl = mainLoc.reviewLink;
+            } else {
+                // Fallback 2: Any location with a review link
+                const anyLoc = await prisma.businessLocation.findFirst({
+                    where: { businessId: business.id, reviewLink: { not: null } }
+                });
+                if (anyLoc?.reviewLink) {
+                    googleUrl = anyLoc.reviewLink;
+                }
+            }
+        }
 
         return { success: true, draft: generatedResult.text, googleUrl };
     } catch (error: unknown) {
