@@ -43,7 +43,11 @@ export default function ReviewClient({ businessName, businessLogo, initialQuesti
     const copyAndContinue = () => {
         navigator.clipboard.writeText(generatedReview);
         if (googleUrl) {
-            window.location.href = googleUrl;
+            let finalUrl = googleUrl.trim();
+            if (!/^https?:\/\//i.test(finalUrl)) {
+                finalUrl = 'https://' + finalUrl;
+            }
+            window.location.href = finalUrl;
         } else {
             alert("Review copied! (No Google link configured by the business)");
         }
