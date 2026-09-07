@@ -10,7 +10,7 @@ import { AtomLoader } from "@/components/ui/atom-loader";
 
 type FlowState = "WELCOME" | "QUESTIONS" | "GENERATING" | "RESULT";
 
-export default function ReviewClient({ businessName, businessCategory, businessLogo, initialQuestions = [], hasWatermark = false }: { businessName: string, businessCategory?: string | null, businessLogo?: string | null, initialQuestions?: any[], hasWatermark?: boolean }) {
+export default function ReviewClient({ businessName, businessCategory, businessLogo, initialQuestions = [], hasWatermark = false, platformName = "Google Review Assistant" }: { businessName: string, businessCategory?: string | null, businessLogo?: string | null, initialQuestions?: any[], hasWatermark?: boolean, platformName?: string }) {
     const params = useParams();
     const slug = params?.businessSlug as string;
 
@@ -348,7 +348,7 @@ export default function ReviewClient({ businessName, businessCategory, businessL
 
             {hasWatermark && (
                 <footer className="w-full py-5 text-center text-xs font-medium text-slate-400 bg-transparent relative z-10">
-                    Trusted by <span className="font-bold text-slate-600">Google Review Assistant</span>
+                    Trusted by <a href="/" target="_blank" rel="noopener noreferrer" className="font-bold text-slate-600 hover:text-[#6366F1] transition-colors">{platformName}</a>
                 </footer>
             )}
         </div>

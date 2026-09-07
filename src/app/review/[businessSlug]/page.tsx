@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import ReviewClient from "./ReviewClient";
 import { notFound } from "next/navigation";
 import { getTrialDuration } from "@/app/superadmin/pricing/actions";
+import { getBrandSettings } from "@/lib/brand";
 
 export default async function CustomerReviewPage(
     props: {
@@ -92,5 +93,7 @@ export default async function CustomerReviewPage(
         });
     }
 
-    return <ReviewClient businessName={business.name} businessCategory={business.category} businessLogo={business.logoUrl} initialQuestions={questions} hasWatermark={hasWatermark} />;
+    const brandSettings = await getBrandSettings();
+
+    return <ReviewClient businessName={business.name} businessCategory={business.category} businessLogo={business.logoUrl} initialQuestions={questions} hasWatermark={hasWatermark} platformName={brandSettings.platformName} />;
 }
