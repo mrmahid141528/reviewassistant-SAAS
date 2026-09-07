@@ -60,7 +60,7 @@ export default function LocationsClient({ locations, maxLocations, currentCount,
             await addBusinessLocation(fd);
 
             // Go to final success step
-            setStep(4);
+            setStep(3);
         } catch (err: any) {
             setError(err.message || "Failed to add location");
         } finally {
@@ -276,8 +276,8 @@ export default function LocationsClient({ locations, maxLocations, currentCount,
 
             {/* ADD LOCATION WIZARD */}
             <Dialog open={open} onOpenChange={(val) => !val ? resetWizard() : setOpen(true)}>
-                <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden border-0 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] rounded-[2rem]">
-                    <div className="bg-muted/30 p-6 border-b border-border text-center relative overflow-hidden">
+                <DialogContent className="w-[95vw] sm:max-w-[500px] p-0 overflow-hidden border-0 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] rounded-2xl sm:rounded-[2rem]">
+                    <div className="bg-muted/30 p-5 sm:p-6 border-b border-border text-center relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-1 bg-muted">
                             <div className="h-full bg-primary transition-all duration-500" style={{ width: `${(step / 4) * 100}%` }} />
                         </div>
@@ -287,12 +287,11 @@ export default function LocationsClient({ locations, maxLocations, currentCount,
                         <p className="text-sm font-medium text-muted-foreground mt-1">
                             {step === 1 && "Step 1: Location details"}
                             {step === 2 && "Step 2: Physical address"}
-                            {step === 3 && "Step 3: Connect Google Reviews"}
-                            {step === 4 && "Successfully linked and generated QR"}
+                            {step === 3 && "Successfully linked and generated QR"}
                         </p>
                     </div>
 
-                    <div className="p-8">
+                    <div className="p-5 sm:p-8">
                         {error && (
                             <div className="bg-destructive/10 text-destructive text-sm font-bold p-4 mb-6 rounded-xl border border-destructive/20 flex gap-2 items-start">
                                 <Trash2 className="h-5 w-5 shrink-0" /> {error}
@@ -345,41 +344,6 @@ export default function LocationsClient({ locations, maxLocations, currentCount,
                                 </div>
                                 <div className="flex gap-3 pt-6">
                                     <Button variant="outline" size="lg" className="w-1/3 font-bold h-12" onClick={onPrevStep}>Back</Button>
-                                    <Button size="lg" className="w-2/3 font-bold h-12 shadow-md hover:scale-[1.02] transition-transform" onClick={onNextStep}>
-                                        Continue <ChevronRight className="h-5 w-5 ml-1" />
-                                    </Button>
-                                </div>
-                            </div>
-                        )}
-
-                        {step === 3 && (
-                            <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
-                                <div className="space-y-3">
-                                    <Label className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Google Review Link *</Label>
-                                    <p className="text-sm text-foreground/80 font-medium">Link specific to {formData.name}</p>
-                                    <Input className="h-12 border-border bg-background shadow-sm font-medium" placeholder="https://g.page/r/abcdefghij/review" value={formData.reviewLink} onChange={(e) => setFormData({ ...formData, reviewLink: e.target.value })} />
-                                </div>
-
-                                {formData.reviewLink.includes('g.page') ? (
-                                    <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 flex gap-3 text-green-700 dark:text-green-400">
-                                        <SearchCheck className="h-6 w-6 mt-0.5" />
-                                        <div>
-                                            <p className="font-bold text-sm">Valid Google Business Link</p>
-                                            <p className="text-xs font-medium opacity-80 mt-1">This link will route customers appropriately.</p>
-                                        </div>
-                                    </div>
-                                ) : formData.reviewLink.length > 5 ? (
-                                    <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 flex gap-3 text-amber-700 dark:text-amber-400">
-                                        <SearchCheck className="h-6 w-6 mt-0.5" />
-                                        <div>
-                                            <p className="font-bold text-sm">Verifying format...</p>
-                                            <p className="text-xs font-medium opacity-80 mt-1">Make sure you paste the exact link from Google Profile.</p>
-                                        </div>
-                                    </div>
-                                ) : null}
-
-                                <div className="flex gap-3 pt-6">
-                                    <Button variant="outline" size="lg" className="w-1/3 font-bold h-12" onClick={onPrevStep}>Back</Button>
                                     <Button size="lg" className="w-2/3 font-bold h-12 shadow-md hover:scale-[1.02] transition-transform" disabled={loading} onClick={onSubmit}>
                                         {loading ? "Creating..." : "Create Location"}
                                     </Button>
@@ -387,7 +351,9 @@ export default function LocationsClient({ locations, maxLocations, currentCount,
                             </div>
                         )}
 
-                        {step === 4 && (
+
+
+                        {step === 3 && (
                             <div className="text-center space-y-6 animate-in slide-in-from-bottom-6 duration-700 zoom-in-95">
                                 <div className="h-24 w-24 bg-green-500/10 rounded-full mx-auto flex items-center justify-center">
                                     <Check className="h-10 w-10 text-green-500 stroke-[3px]" />
@@ -407,7 +373,7 @@ export default function LocationsClient({ locations, maxLocations, currentCount,
 
             {/* EDIT LOCATION DIALOG */}
             <Dialog open={editOpen} onOpenChange={(val) => { if (!val) { setEditOpen(false); setEditingLocation(null); } }}>
-                <DialogContent className="sm:max-w-[500px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] rounded-[2rem]">
+                <DialogContent className="w-[95vw] sm:max-w-[500px] p-5 sm:p-6 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] rounded-2xl sm:rounded-[2rem]">
                     <DialogHeader>
                         <DialogTitle className="text-xl">Edit Location</DialogTitle>
                         <DialogDescription>Update the details and Google Review URL for this branch.</DialogDescription>
@@ -417,10 +383,6 @@ export default function LocationsClient({ locations, maxLocations, currentCount,
                             <div className="space-y-2">
                                 <Label>Location Name</Label>
                                 <Input value={editingLocation.name} onChange={e => setEditingLocation({ ...editingLocation, name: e.target.value })} />
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Google Review URL</Label>
-                                <Input value={editingLocation.reviewLink} onChange={e => setEditingLocation({ ...editingLocation, reviewLink: e.target.value })} placeholder="https://g.page/r/..." />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">

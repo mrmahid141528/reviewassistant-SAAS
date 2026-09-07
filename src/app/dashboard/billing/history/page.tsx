@@ -1,8 +1,9 @@
 import prisma from "@/lib/prisma"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import { Download, History } from "lucide-react"
+import { History } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import DownloadInvoiceButton from "./DownloadInvoiceButton"
 
 export default async function BillingHistoryPage() {
     const supabase = await createClient();
@@ -12,7 +13,7 @@ export default async function BillingHistoryPage() {
 
     const membership = await prisma.businessMember.findFirst({
         where: { userId: user.id },
-        select: { businessId: true }
+        select: { businessId: true, business: { select: { name: true } } }
     });
 
     if (!membership) redirect("/dashboard");
@@ -57,14 +58,12 @@ export default async function BillingHistoryPage() {
                                             {inv.currency === 'USD' ? '$' : '₹'}{Number(inv.amount)}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-bold uppercase ${inv.status.toLowerCase() === 'paid' || inv.status.toLowerCase() === 'successful' ? 'bg-green-500/10 text-green-700 dark:text-green-400' : 'bg-destructive/10 text-destructive'}`}>
+                                            <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-bold uppercase ${['paid', 'successful', 'success'].includes(inv.status.toLowerCase()) ? 'bg-green-500/10 text-green-700 dark:text-green-400' : 'bg-destructive/10 text-destructive'}`}>
                                                 {inv.status}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right">
-                                            <Button variant="ghost" size="sm" className="h-8 gap-2 font-semibold text-primary/80 hover:text-primary">
-                                                PDF <Download className="h-4 w-4" />
-                                            </Button>
+                                            <DownloadInvoiceButton invoice={inv} businessName={membership.business?.name || "Business"} />
                                         </td>
                                     </tr>
                                 ))}

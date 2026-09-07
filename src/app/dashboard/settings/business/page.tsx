@@ -25,11 +25,11 @@ export default async function BusinessSettingsPage() {
     const { data: { user } } = await supabase.auth.getUser()
 
     let businessName = "My Business"
-    let websiteUrl = ""
     let email = ""
     let phone = ""
     let category = ""
     let description = ""
+    let googleReviewUrl = ""
     let logoUrl: string | null = null;
 
     if (user) {
@@ -39,14 +39,14 @@ export default async function BusinessSettingsPage() {
         })
         if (membership?.business) {
             businessName = membership.business.name
-            websiteUrl = membership.business.websiteUrl || ""
             email = membership.business.email || ""
             phone = membership.business.phone || ""
             category = membership.business.category || ""
 
             const settings = membership.business.settings as any;
-            if (settings && settings.description) {
-                description = settings.description;
+            if (settings) {
+                if (settings.description) description = settings.description;
+                if (settings.googleReviewUrl) googleReviewUrl = settings.googleReviewUrl;
             }
             logoUrl = membership.business.logoUrl;
         }
@@ -78,9 +78,11 @@ export default async function BusinessSettingsPage() {
                         <CategorySelect defaultValue={category} />
                     </div>
 
+
+
                     <div className="space-y-2">
-                        <Label htmlFor="websiteUrl">Website (Optional)</Label>
-                        <Input suppressHydrationWarning id="websiteUrl" name="websiteUrl" placeholder="https://..." defaultValue={websiteUrl} />
+                        <Label htmlFor="googleReviewUrl">Google Review URL</Label>
+                        <Input suppressHydrationWarning id="googleReviewUrl" name="googleReviewUrl" placeholder="https://g.page/r/..." defaultValue={googleReviewUrl} />
                     </div>
 
                     <div className="space-y-2">

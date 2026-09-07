@@ -25,12 +25,18 @@ export async function updateBusinessGeneral(formData: FormData) {
         }
 
         const description = formData.get("description") as string || null;
+        const googleReviewUrl = formData.get("googleReviewUrl") as string || null;
 
         const currentSettings = membership.business.settings && typeof membership.business.settings === "object"
             ? { ...(membership.business.settings as any) }
             : {};
 
         currentSettings.description = description;
+        if (googleReviewUrl) {
+            currentSettings.googleReviewUrl = googleReviewUrl;
+        } else {
+            delete currentSettings.googleReviewUrl;
+        }
 
         let finalLogoUrl = membership.business.logoUrl;
         const logoFile = formData.get("logo") as File | null;
@@ -111,7 +117,6 @@ export async function updateBusinessGeneral(formData: FormData) {
                 slug: newSlug,
                 category: finalCategory,
                 logoUrl: finalLogoUrl,
-                websiteUrl: formData.get("websiteUrl") as string || null,
                 phone: formData.get("phone") as string || null,
                 email: formData.get("email") as string || null,
                 settings: currentSettings,

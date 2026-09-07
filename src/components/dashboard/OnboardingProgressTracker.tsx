@@ -36,8 +36,8 @@ export function OnboardingProgressTracker({ business, dbUser, locations = [] }: 
             label: 'Add Google Review URL',
             category: 'business',
             icon: Building2,
-            isComplete: locations.some(l => !!l.reviewLink),
-            link: '/dashboard/locations'
+            isComplete: !!businessSettings?.googleReviewUrl || locations.some(l => !!l.reviewLink),
+            link: '/dashboard/settings/business'
         },
         {
             id: 'biz_phone',

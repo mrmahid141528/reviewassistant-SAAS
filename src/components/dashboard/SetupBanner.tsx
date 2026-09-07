@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, Play, QrCode } from 'lucide-react';
+import Link from 'next/link';
 
 interface SetupBannerProps {
     businessName: string;
@@ -19,9 +20,11 @@ export function SetupBanner({ businessName, isSetupComplete }: SetupBannerProps)
                         Connect your Google Review link to start collecting reviews.
                     </p>
                 </div>
-                <Button className="bg-amber-600 hover:bg-amber-700 text-white shrink-0">
-                    Connect Google
-                </Button>
+                <Link href="/dashboard/settings/business" className="w-full md:w-auto mt-2 md:mt-0">
+                    <Button className="w-full md:w-auto bg-amber-600 hover:bg-amber-700 text-white shrink-0">
+                        Connect Google
+                    </Button>
+                </Link>
             </div>
         )
     }

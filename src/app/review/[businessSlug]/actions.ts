@@ -99,14 +99,12 @@ export async function submitReviewDraft(rating: number, answers: object, busines
             }
         });
 
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
-        let googleUrl = currentSettings.googleReviewUrl || "";
+        let googleUrl = currentSettings.googleReviewUrl || (business.settings as any)?.googleReviewUrl || "";
 
         // Use Campaign's linked Location Review Link if available
-        if (campaign.location?.reviewLink) {
+        if (!googleUrl && campaign.location?.reviewLink) {
             googleUrl = campaign.location.reviewLink;
-        } else {
+        } else if (!googleUrl) {
             // Fallback 1: Main Location
             const mainLoc = await prisma.businessLocation.findFirst({
                 where: { businessId: business.id, isMain: true }
@@ -193,71 +191,31 @@ ${extraLanguage} (Roman Script):
 
     if (!apiKey) return { text: generateMockReviewOffline(rating, businessName), provider: "offline", model: "mock-offline" };
 
-    let attempts = 0;
-    while (attempts < 2) {
-        attempts++;
-        try {
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-            });
-
-            const data = await res.json();
-
-            if (data.error) {
-                console.error("Gemini API Error from Server:", data.error.message);
-                break; // Exit loop on actual API failure
-            }
-
-            const generatedText = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-
-            if (generatedText) {
-                // Validation Step
-                const isValid = await validateReviewAuthenticity(generatedText, qnaPairs, apiKey);
-                if (isValid || attempts === 2) {
-                    return { text: generatedText, provider: "google", model: "gemini-3.6-flash" };
-                }
-                console.log(`Review Validation failed on attempt ${attempts}. Regenerating...`);
-            }
-        } catch (e) {
-            console.error("Gemini API Fetch Catch:", e);
-            break;
-        }
-    }
-
-    return { text: generateMockReviewOffline(rating, businessName), provider: "offline", model: "mock-offline" };
-}
-
-async function validateReviewAuthenticity(generatedText: string, qnaPairs: { question: string, answer: string }[], apiKey: string): Promise<boolean> {
-    const prompt = `
-You are a strict data validation bot. Analyze this Review Draft based strictly on the Customer Input.
-
-Customer Input:
-${qnaPairs.map(p => `- Aspect: ${p.question} | Answer: ${p.answer}`).join('\n')}
-
-Review Draft: "${generatedText}"
-
-Task: Reply with exactly "PASS" or "FAIL".
-Rules to FAIL:
-1. The draft mentions specific facts, items, names, or services NOT mentioned in the Customer Input.
-2. The draft sounds overly promotional using clichés (e.g., "highly recommend", "top-notch") not present in the input.
-3. The draft is substantially longer or exaggerates the experience beyond what the customer provided.
-Otherwise, reply with "PASS".
-`;
     try {
         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         });
+
         const data = await res.json();
-        const result = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-        return result === "PASS";
+
+        if (data.error) {
+            console.error("Gemini API Error from Server:", data.error.message);
+        } else {
+            const generatedText = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+            if (generatedText) {
+                return { text: generatedText, provider: "google", model: "gemini-3.6-flash" };
+            }
+        }
     } catch (e) {
-        return true; // fail-open if validation API fails
+        console.error("Gemini API Fetch Catch:", e);
     }
+
+    return { text: generateMockReviewOffline(rating, businessName), provider: "offline", model: "mock-offline" };
 }
+
+
 
 function generateMockReviewOffline(rating: number, businessName: string) {
     if (rating >= 4) {

@@ -17,7 +17,6 @@ type WizardData = {
     businessName: string
     category: string
     phone: string
-    website: string
     address: string
     city: string
     state: string
@@ -46,7 +45,6 @@ export function OnboardingClient({ brandSettings }: OnboardingClientProps) {
         businessName: '',
         category: '',
         phone: '',
-        website: '',
         address: '',
         city: '',
         state: '',
@@ -169,15 +167,9 @@ export function OnboardingClient({ brandSettings }: OnboardingClientProps) {
                         </div>
                     </div>
 
-                    <div className="grid gap-6 sm:grid-cols-2">
-                        <div className="space-y-2">
-                            <Label htmlFor="phone">Business Phone</Label>
-                            <Input id="phone" value={data.phone} onChange={(e) => updateData({ phone: e.target.value })} placeholder="+1 (555) 000-0000" />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="website">Website (Optional)</Label>
-                            <Input id="website" value={data.website} onChange={(e) => updateData({ website: e.target.value })} placeholder="https://example.com" />
-                        </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="phone">Business Phone</Label>
+                        <Input id="phone" value={data.phone} onChange={(e) => updateData({ phone: e.target.value })} placeholder="+1 (555) 000-0000" />
                     </div>
 
                     <div className="pt-4 border-t border-border">

@@ -22,42 +22,135 @@ import {
     LogOut,
     HelpCircle,
     Palette,
-    Key
+    Key,
+    ChevronDown
 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
+import React, { useState, useEffect } from "react";
 
 const platformNavItems = [
     { name: "Overview", href: "/superadmin", icon: LayoutDashboard },
     { name: "Businesses", href: "/superadmin/businesses", icon: Building2 },
-    { name: "SaaS Branding", href: "/superadmin/branding", icon: Palette },
-    { name: "Analytics", href: "/superadmin/analytics", icon: BarChart3 },
-    { name: "Reviews", href: "/superadmin/reviews", icon: Star },
-    { name: "QR Campaigns", href: "/superadmin/campaigns", icon: QrCode },
-    { name: "Support Hub", href: "/superadmin/support", icon: HelpCircle },
+    {
+        name: "Platform Content",
+        icon: Palette,
+        subItems: [
+            { name: "SaaS Branding", href: "/superadmin/branding" },
+            { name: "Support Hub", href: "/superadmin/support" },
+        ]
+    },
+    {
+        name: "Analytics & Data",
+        icon: BarChart3,
+        subItems: [
+            { name: "Superadmin Analytics", href: "/superadmin/analytics" },
+            { name: "Platform Reviews", href: "/superadmin/reviews" },
+            { name: "QR Campaigns", href: "/superadmin/campaigns" },
+        ]
+    }
 ];
 
 const monetizationNavItems = [
-    { name: "Billing Hub", href: "/superadmin/billing", icon: CreditCard },
-    { name: "Payment Requests", href: "/superadmin/billing/requests", icon: DollarSign },
-    { name: "Pricing Plans", href: "/superadmin/pricing", icon: DollarSign },
-    { name: "Discounts & Coupons", href: "/superadmin/coupons", icon: Ticket },
+    {
+        name: "Monetization",
+        icon: CreditCard,
+        subItems: [
+            { name: "Billing Hub", href: "/superadmin/billing" },
+            { name: "Payment Requests", href: "/superadmin/billing/requests" },
+            { name: "Pricing Plans", href: "/superadmin/pricing" },
+            { name: "Discounts & Coupons", href: "/superadmin/coupons" },
+        ]
+    }
 ];
 
 const systemNavItems = [
-    { name: "Security", href: "/superadmin/security", icon: ShieldAlert },
-    { name: "Audit Logs", href: "/superadmin/audit", icon: History },
+    {
+        name: "System Settings",
+        icon: Settings,
+        subItems: [
+            { name: "General System", href: "/superadmin/system" },
+            { name: "API Keys", href: "/superadmin/system/api-keys" },
+            { name: "Legal Pages", href: "/superadmin/pages" },
+        ]
+    },
+    {
+        name: "Security & Control",
+        icon: ShieldAlert,
+        subItems: [
+            { name: "Security Audit", href: "/superadmin/security" },
+            { name: "Audit Logs", href: "/superadmin/audit" },
+            { name: "Data Control", href: "/superadmin/data" },
+        ]
+    },
     { name: "Notifications", href: "/superadmin/notifications", icon: Bell },
-    { name: "System", href: "/superadmin/system", icon: Settings },
-    { name: "API Keys", href: "/superadmin/system/api-keys", icon: Key },
-    { name: "Legal", href: "/superadmin/pages", icon: FileText },
-    { name: "Data Control", href: "/superadmin/data", icon: Database },
     { name: "Admins", href: "/superadmin/admins", icon: UserCog },
 ];
 
 export function SuperadminSidebar({ className, onNavClick, brandSettings }: { className?: string, onNavClick?: () => void, brandSettings?: { platformName?: string, logoUrl?: string | null } }) {
     const pathname = usePathname();
+    const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
+
+    useEffect(() => {
+        const newOpenMenus = { ...openMenus };
+        let changed = false;
+
+        [...platformNavItems, ...monetizationNavItems, ...systemNavItems].forEach(item => {
+            if (item.subItems?.some(s => pathname === s.href || pathname.startsWith(`${s.href}/`))) {
+                if (!newOpenMenus[item.name]) {
+                    newOpenMenus[item.name] = true;
+                    changed = true;
+                }
+            }
+        });
+
+        if (changed) setOpenMenus(newOpenMenus);
+    }, [pathname]);
 
     const renderLink = (item: any) => {
+        if (item.subItems) {
+            const isOpen = openMenus[item.name] || false;
+            const hasActiveChild = item.subItems.some((s: any) => pathname === s.href || pathname.startsWith(`${s.href}/`));
+
+            return (
+                <div key={item.name} className="flex flex-col gap-1 w-full relative">
+                    <button
+                        onClick={() => setOpenMenus(prev => ({ ...prev, [item.name]: !isOpen }))}
+                        className={cn(
+                            buttonVariants({ variant: "ghost" }),
+                            "w-full justify-between gap-3 h-9 text-[13px] font-medium transition-colors cursor-pointer",
+                            hasActiveChild ? "bg-slate-100 text-slate-900 shadow-sm" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                        )}
+                    >
+                        <div className="flex items-center gap-3">
+                            <item.icon className={cn("h-4 w-4 shrink-0", hasActiveChild ? "text-slate-900" : "text-slate-500")} />
+                            <span className="truncate">{item.name}</span>
+                        </div>
+                        <ChevronDown className={cn("h-4 w-4 text-slate-400 transition-transform duration-200 shrink-0", isOpen && "rotate-180")} />
+                    </button>
+
+                    <div className={cn("flex flex-col gap-1 overflow-hidden transition-all duration-300 ml-5 pl-2 border-l border-slate-200", isOpen ? "max-h-[500px] opacity-100 mt-1" : "max-h-0 opacity-0")}>
+                        {item.subItems.map((sub: any) => {
+                            const isSubActive = pathname === sub.href;
+                            return (
+                                <Link
+                                    key={sub.name}
+                                    href={sub.href}
+                                    onClick={onNavClick}
+                                    className={cn(
+                                        buttonVariants({ variant: "ghost" }),
+                                        "w-full justify-start h-8 text-[12px] font-medium transition-colors",
+                                        isSubActive ? "bg-slate-900 text-white hover:bg-slate-800 hover:text-white shadow-sm" : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                                    )}
+                                >
+                                    <span className="truncate">{sub.name}</span>
+                                </Link>
+                            )
+                        })}
+                    </div>
+                </div>
+            )
+        }
+
         const isActive = pathname === item.href;
         return (
             <Link

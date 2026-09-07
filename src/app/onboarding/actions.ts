@@ -16,7 +16,6 @@ export async function completeOnboarding(formData: FormData) {
         const businessName = formData.get('businessName') as string || 'My Business'
         const category = formData.get('category') as string || 'Other'
         const phone = formData.get('phone') as string
-        const website = formData.get('website') as string
         const address = formData.get('address') as string
         const city = formData.get('city') as string
         const state = formData.get('state') as string
@@ -38,7 +37,6 @@ export async function completeOnboarding(formData: FormData) {
                     slug,
                     category,
                     phone,
-                    websiteUrl: website,
                     settings: {
                         aiPreferences: {
                             language: aiLanguage,

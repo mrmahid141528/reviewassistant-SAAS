@@ -25,15 +25,15 @@ export function RecentActivity({ activities }: RecentActivityProps) {
                                     {a.type === 'generated' && <div className="bg-emerald-100 p-1.5 rounded-full"><Star className="w-4 h-4 text-emerald-600" /></div>}
                                     {a.type === 'clicked' && <div className="bg-indigo-100 p-1.5 rounded-full"><LinkIcon className="w-4 h-4 text-indigo-600" /></div>}
                                 </div>
-                                <div className="flex-1">
-                                    <div className="flex justify-between w-full items-center">
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex justify-between w-full items-center gap-2">
                                         <p className="text-sm font-medium text-foreground">
                                             {a.type === 'scan' && 'QR code scanned'}
                                             {a.type === 'session' && 'Session started'}
                                             {a.type === 'generated' && 'Review generated'}
                                             {a.type === 'clicked' && 'Google link clicked'}
                                         </p>
-                                        <span className="text-xs text-muted-foreground">{a.timeLabel}</span>
+                                        <span className="text-xs text-muted-foreground shrink-0">{a.timeLabel}</span>
                                     </div>
                                     <p className="text-xs text-muted-foreground mt-0.5">
                                         {a.type === 'scan' && 'Main Store QR'}
