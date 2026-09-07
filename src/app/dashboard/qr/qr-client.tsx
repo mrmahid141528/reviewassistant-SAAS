@@ -114,7 +114,7 @@ export function QrClient({ publicReviewUrl, locations, campaigns, businessName, 
     }
 
     return (
-        <div className="space-y-8 max-w-5xl w-full min-w-0 mx-auto animate-in fade-in pb-10">
+        <div className="space-y-8 max-w-5xl w-full min-w-0 mx-auto animate-in fade-in pb-10 overflow-hidden sm:overflow-visible px-2 sm:px-0">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b pb-6">
                 <div>
@@ -246,9 +246,9 @@ export function QrClient({ publicReviewUrl, locations, campaigns, businessName, 
                                                 <Button variant="ghost" size="icon" className="text-muted-foreground"><MoreVertical className="w-5 h-5" /></Button>
                                             </div>
                                             <CardContent className="p-6">
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <div className={`w-2.5 h-2.5 rounded-full ${campaign.status === 'active' ? 'bg-emerald-500' : 'bg-slate-400'}`}></div>
-                                                    <h3 className="text-xl font-black text-slate-800 tracking-tight">{businessName} <span className="text-muted-foreground text-sm font-medium ml-1.5 relative -top-[1px]">/ {campaign.name}</span></h3>
+                                                <div className="flex items-start gap-2 mb-1">
+                                                    <div className={`w-2.5 h-2.5 rounded-full mt-2 shrink-0 ${campaign.status === 'active' ? 'bg-emerald-500' : 'bg-slate-400'}`}></div>
+                                                    <h3 className="text-xl font-black text-slate-800 tracking-tight break-words min-w-0">{businessName} <span className="text-muted-foreground text-sm font-medium ml-1.5 inline-block">/ {campaign.name}</span></h3>
                                                 </div>
                                                 <p className="text-[13px] font-medium text-slate-500 mb-6 border-b pb-4">
                                                     Location: {locName}
@@ -259,13 +259,13 @@ export function QrClient({ publicReviewUrl, locations, campaigns, businessName, 
                                                         <QRCodeSVG id={qrId} value={campaignUrl} size={180} level="H" className="max-w-full h-auto" />
                                                         <div className="mt-3 sm:mt-4 text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-widest text-center">Scan to Review</div>
                                                     </div>
-                                                    <div className="flex flex-col flex-1 pb-2 w-full md:max-w-xs md:mt-4">
-                                                        <div className="mb-6">
-                                                            <Label className="text-[11px] font-bold text-slate-500 uppercase flex items-center mb-2 tracking-wide">
+                                                    <div className="flex flex-col flex-1 pb-2 w-full min-w-0 md:max-w-xs md:mt-4">
+                                                        <div className="mb-6 w-full min-w-0">
+                                                            <Label className="text-[11px] font-bold text-slate-500 uppercase flex items-center mb-2 tracking-wide break-words">
                                                                 Customer Link
                                                             </Label>
-                                                            <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 w-full shadow-sm hover:border-slate-300 transition-colors">
-                                                                <div className="font-mono text-xs text-slate-600 truncate flex-1 min-w-0" title={campaignUrl}>
+                                                            <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 w-full min-w-0 shadow-sm hover:border-slate-300 transition-colors">
+                                                                <div className="font-mono text-[10px] sm:text-xs text-slate-600 truncate flex-1 min-w-0" title={campaignUrl}>
                                                                     {campaignUrl.replace(/^https?:\/\//, '')}
                                                                 </div>
                                                                 <button onClick={() => copyToClipboard(campaignUrl)} className="text-slate-400 hover:text-emerald-600 transition-colors cursor-pointer shrink-0 ml-1 p-1 hover:bg-emerald-50 rounded" title="Copy link">
@@ -419,8 +419,8 @@ export function QrClient({ publicReviewUrl, locations, campaigns, businessName, 
                             <CardDescription>Customers first answer your questions and generate their review draft.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="flex items-center gap-2 bg-background border rounded-md px-3 py-2 w-full overflow-hidden">
-                                <div className="font-mono text-sm text-foreground truncate flex-1 min-w-0 leading-none pt-0.5">
+                            <div className="flex items-center gap-2 bg-background border rounded-md px-3 py-2 w-full min-w-0 overflow-hidden">
+                                <div className="font-mono text-[10px] sm:text-sm text-foreground truncate flex-1 min-w-0 leading-none pt-0.5">
                                     {publicReviewUrl}
                                 </div>
                                 <button onClick={() => copyToClipboard(publicReviewUrl)} className="text-muted-foreground hover:text-primary transition-colors cursor-pointer shrink-0 ml-2" title="Copy link">
@@ -451,8 +451,8 @@ export function QrClient({ publicReviewUrl, locations, campaigns, businessName, 
                             <CardDescription>Where customers publish their final review on Google. (Bypasses Smart UI)</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div className="flex items-center gap-2 bg-background border rounded-md px-3 py-2 w-full mb-3 overflow-hidden">
-                                <div className="font-mono text-sm text-muted-foreground truncate flex-1 min-w-0 leading-none pt-0.5">
+                            <div className="flex items-center gap-2 bg-background border rounded-md px-3 py-2 w-full min-w-0 mb-3 overflow-hidden">
+                                <div className="font-mono text-[10px] sm:text-sm text-muted-foreground truncate flex-1 min-w-0 leading-none pt-0.5">
                                     https://g.page/r/xxxxx/review
                                 </div>
                                 <button onClick={() => copyToClipboard(`https://g.page/r/xxxxx/review`)} className="text-muted-foreground hover:text-primary transition-colors cursor-pointer shrink-0 ml-2" title="Copy link">
