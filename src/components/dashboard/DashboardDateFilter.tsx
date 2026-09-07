@@ -48,7 +48,7 @@ export function DashboardDateFilter() {
     };
 
     return (
-        <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
+        <div className="flex flex-wrap sm:flex-nowrap items-end sm:items-center gap-2 justify-end">
             <div className="flex items-center gap-2 bg-white border rounded-md px-2 py-0.5 shadow-sm">
                 <Filter className="w-4 h-4 text-muted-foreground" />
                 <Select value={range} onValueChange={handleRangeSelect}>
@@ -65,7 +65,7 @@ export function DashboardDateFilter() {
             </div>
 
             {range === 'custom' && (
-                <div className="flex items-center gap-2 bg-white p-1 rounded-md border shadow-sm animate-in fade-in zoom-in-95">
+                <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 bg-white p-1 rounded-md border shadow-sm animate-in fade-in zoom-in-95 mt-2 sm:mt-0">
                     <Input
                         type="date"
                         value={from}

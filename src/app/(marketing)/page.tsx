@@ -116,9 +116,9 @@ export default async function LandingPage() {
               </Link>
             </div>
 
-            <div className="mt-8 flex items-center gap-6 text-sm font-medium text-primary-foreground/70 relative z-10">
-              <span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4" /> No Credit Card Required</span>
-              <span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4" /> Cancel Anytime</span>
+            <div className="mt-8 flex flex-col sm:flex-row items-center gap-4 sm:gap-6 text-sm font-medium text-primary-foreground/70 relative z-10">
+              <span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 shrink-0" /> No Credit Card Required</span>
+              <span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 shrink-0" /> Cancel Anytime</span>
             </div>
           </div>
         </section>
