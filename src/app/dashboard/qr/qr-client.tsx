@@ -114,7 +114,7 @@ export function QrClient({ publicReviewUrl, locations, campaigns, businessName, 
     }
 
     return (
-        <div className="space-y-8 max-w-5xl animate-in fade-in pb-10">
+        <div className="space-y-8 max-w-5xl w-full min-w-0 mx-auto animate-in fade-in pb-10">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b pb-6">
                 <div>
@@ -130,7 +130,7 @@ export function QrClient({ publicReviewUrl, locations, campaigns, businessName, 
 
             {/* Create Campaign Modal */}
             <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-                <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
+                <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto rounded-xl">
                     {!isCreatedSuccess ? (
                         <>
                             <DialogHeader>
@@ -216,7 +216,7 @@ export function QrClient({ publicReviewUrl, locations, campaigns, businessName, 
 
             {/* Main Content Tabs */}
             <Tabs defaultValue="campaigns" className="w-full">
-                <TabsList className="flex overflow-x-auto w-full sm:inline-flex sm:w-auto p-1 touch-pan-x justify-start">
+                <TabsList className="flex overflow-x-auto w-full sm:inline-flex sm:w-auto p-1 touch-pan-x justify-start no-scrollbar max-w-full">
                     <TabsTrigger value="campaigns" className="flex-1 shrink-0 min-w-[110px] whitespace-nowrap">Campaigns</TabsTrigger>
                     <TabsTrigger value="qrcodes" className="flex-1 shrink-0 min-w-[110px] whitespace-nowrap">QR Codes</TabsTrigger>
                     <TabsTrigger value="links" className="flex-1 shrink-0 min-w-[110px] whitespace-nowrap">Review Links</TabsTrigger>
@@ -254,10 +254,10 @@ export function QrClient({ publicReviewUrl, locations, campaigns, businessName, 
                                                     Location: {locName}
                                                 </p>
 
-                                                <div className="flex flex-col md:flex-row gap-8 bg-slate-50/50 p-6 rounded-2xl border items-center md:items-start">
-                                                    <div className="flex flex-col items-center bg-white p-4 rounded-xl border-2 shadow-sm shrink-0">
-                                                        <QRCodeSVG id={qrId} value={campaignUrl} size={220} level="H" />
-                                                        <div className="mt-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest text-center">Scan to Review</div>
+                                                <div className="flex flex-col md:flex-row gap-6 bg-slate-50/50 p-4 sm:p-6 rounded-2xl border items-center md:items-start overflow-hidden">
+                                                    <div className="flex flex-col items-center bg-white p-3 sm:p-4 rounded-xl border-2 shadow-sm shrink-0 max-w-full">
+                                                        <QRCodeSVG id={qrId} value={campaignUrl} size={180} level="H" className="max-w-full h-auto" />
+                                                        <div className="mt-3 sm:mt-4 text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-widest text-center">Scan to Review</div>
                                                     </div>
                                                     <div className="flex flex-col flex-1 pb-2 w-full md:max-w-xs md:mt-4">
                                                         <div className="mb-6">
@@ -388,11 +388,11 @@ export function QrClient({ publicReviewUrl, locations, campaigns, businessName, 
                         const qrId = `qr-tab-${c.id}`;
                         return (
                             <Card key={c.id}>
-                                <CardContent className="p-6 flex flex-col md:flex-row items-center gap-8">
-                                    <div className="bg-white p-6 border rounded-xl shadow-sm">
-                                        <QRCodeSVG id={qrId} value={cUrl} size={150} level="M" />
+                                <CardContent className="p-4 sm:p-6 flex flex-col md:flex-row items-center gap-6 overflow-hidden">
+                                    <div className="bg-white p-4 sm:p-6 border rounded-xl shadow-sm shrink-0 max-w-full">
+                                        <QRCodeSVG id={qrId} value={cUrl} size={140} level="M" className="max-w-full h-auto" />
                                     </div>
-                                    <div className="flex-1 space-y-6 w-full">
+                                    <div className="flex-1 space-y-6 w-full min-w-0">
                                         <div>
                                             <h3 className="text-xl font-bold">{c.name} QR</h3>
                                             <p className="text-muted-foreground text-sm font-medium mt-1">{locObj ? locObj.name : "All Locations"} • Active Campaign</p>
@@ -434,8 +434,8 @@ export function QrClient({ publicReviewUrl, locations, campaigns, businessName, 
 
                             <div className="pt-4 border-t mt-4">
                                 <h4 className="text-sm font-semibold mb-3 flex items-center">Share Campaign <Share2 className="w-4 h-4 ml-2 text-muted-foreground" /></h4>
-                                <div className="flex flex-wrap gap-2">
-                                    <Button variant="outline" className="bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 border-[#25D366]/30" onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(`Hi! Thanks for visiting. Please leave us a review here: ${publicReviewUrl}`)}`, '_blank')}>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                    <Button variant="outline" className="w-full bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 border-[#25D366]/30" onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(`Hi! Thanks for visiting. Please leave us a review here: ${publicReviewUrl}`)}`, '_blank')}>
                                         <MessageCircle className="w-4 h-4 mr-2" /> WhatsApp
                                     </Button>
                                     <Button variant="outline"><MessageCircle className="w-4 h-4 mr-2" /> SMS</Button>
