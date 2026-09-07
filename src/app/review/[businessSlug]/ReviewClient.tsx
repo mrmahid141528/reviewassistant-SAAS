@@ -6,6 +6,7 @@ import { Store, Star, ArrowRight, Loader2, Copy, Clock, Lock } from "lucide-reac
 import { useParams } from "next/navigation";
 import { Textarea } from "@/components/ui/textarea";
 import { submitReviewDraft } from './actions';
+import { AtomLoader } from "@/components/ui/atom-loader";
 
 type FlowState = "WELCOME" | "QUESTIONS" | "GENERATING" | "RESULT";
 
@@ -263,13 +264,12 @@ export default function ReviewClient({ businessName, businessCategory, businessL
 
                 {step === "GENERATING" && (
                     <div className="flex-1 flex flex-col items-center justify-center text-center w-full animate-in fade-in zoom-in-95 duration-500">
-                        <div className="w-24 h-24 bg-white rounded-full shadow-lg flex items-center justify-center mb-6 relative border border-slate-100">
-                            <div className="absolute inset-0 border-4 border-indigo-100 rounded-full animate-ping opacity-20"></div>
-                            <Loader2 className="h-10 w-10 animate-spin text-[#6366F1]" />
+                        <div className="mb-6 flex justify-center w-full">
+                            <AtomLoader className="w-32 h-32 md:w-40 md:h-40" />
                         </div>
-                        <h2 className="text-2xl font-extrabold text-slate-900 mb-2">Writing your review...</h2>
+                        <h2 className="text-2xl font-extrabold text-[#0D0B3D] mb-2">Generating AI Review...</h2>
                         <p className="text-[15px] font-medium text-slate-500 max-w-[280px]">
-                            We're using your answers to craft a natural, high-quality review.
+                            Crafting a personalized Google review based on your feedback.
                         </p>
                     </div>
                 )}
