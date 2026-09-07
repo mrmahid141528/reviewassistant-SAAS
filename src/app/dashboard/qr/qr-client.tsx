@@ -114,7 +114,7 @@ export function QrClient({ publicReviewUrl, locations, campaigns, businessName, 
     }
 
     return (
-        <div className="space-y-8 max-w-5xl w-full min-w-0 mx-auto animate-in fade-in pb-10 overflow-hidden sm:overflow-visible px-2 sm:px-0">
+        <div className="space-y-8 max-w-full w-full min-w-0 mx-auto animate-in fade-in pb-10 overflow-x-hidden sm:overflow-visible">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b pb-6">
                 <div>
@@ -215,9 +215,9 @@ export function QrClient({ publicReviewUrl, locations, campaigns, businessName, 
             </Dialog>
 
             {/* Main Content Tabs */}
-            <Tabs defaultValue="campaigns" className="w-full">
-                <TabsList className="flex overflow-x-auto w-full sm:inline-flex sm:w-auto p-1 touch-pan-x justify-start no-scrollbar max-w-full">
-                    <TabsTrigger value="campaigns" className="flex-1 shrink-0 min-w-[110px] whitespace-nowrap">Campaigns</TabsTrigger>
+            <Tabs defaultValue="campaigns" className="w-full max-w-full overflow-x-hidden sm:overflow-visible min-w-0">
+                <TabsList className="flex overflow-x-auto overflow-y-hidden w-full sm:inline-flex sm:w-auto p-1 touch-pan-x justify-start no-scrollbar max-w-full border shadow-sm rounded-lg sm:border-none sm:shadow-none bg-muted/50">
+                    <TabsTrigger value="campaigns" className="flex-1 shrink-0 min-w-[120px] whitespace-nowrap">Campaigns</TabsTrigger>
                     <TabsTrigger value="qrcodes" className="flex-1 shrink-0 min-w-[110px] whitespace-nowrap">QR Codes</TabsTrigger>
                     <TabsTrigger value="links" className="flex-1 shrink-0 min-w-[110px] whitespace-nowrap">Review Links</TabsTrigger>
                 </TabsList>
@@ -255,8 +255,8 @@ export function QrClient({ publicReviewUrl, locations, campaigns, businessName, 
                                                 </p>
 
                                                 <div className="flex flex-col md:flex-row gap-6 bg-slate-50/50 p-4 sm:p-6 rounded-2xl border items-center md:items-start overflow-hidden">
-                                                    <div className="flex flex-col items-center bg-white p-3 sm:p-4 rounded-xl border-2 shadow-sm shrink-0 max-w-full">
-                                                        <QRCodeSVG id={qrId} value={campaignUrl} size={180} level="H" className="max-w-full h-auto" />
+                                                    <div className="flex flex-col items-center bg-white p-3 sm:p-4 rounded-xl border-2 shadow-sm shrink-0 w-full sm:w-max max-w-full overflow-hidden">
+                                                        <QRCodeSVG id={qrId} value={campaignUrl} size={180} level="H" style={{ width: '100%', maxWidth: '180px', height: 'auto' }} />
                                                         <div className="mt-3 sm:mt-4 text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-widest text-center">Scan to Review</div>
                                                     </div>
                                                     <div className="flex flex-col flex-1 pb-2 w-full min-w-0 md:max-w-xs md:mt-4">
@@ -283,7 +283,7 @@ export function QrClient({ publicReviewUrl, locations, campaigns, businessName, 
                                                 </div>
 
                                                 {/* Stats */}
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8 mb-6 bg-background border rounded-xl p-4 sm:p-0 sm:border-none">
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-8 mb-6 bg-background border rounded-xl p-4 sm:p-0 sm:border-none w-full overflow-hidden">
                                                     <div>
                                                         <div className="text-sm font-semibold text-muted-foreground mb-1">Feedback Sessions</div>
                                                         <div className="text-3xl font-bold tracking-tight">{campaign._count?.feedbackSubmissions || 0}</div>
@@ -389,8 +389,8 @@ export function QrClient({ publicReviewUrl, locations, campaigns, businessName, 
                         return (
                             <Card key={c.id}>
                                 <CardContent className="p-4 sm:p-6 flex flex-col md:flex-row items-center gap-6 overflow-hidden">
-                                    <div className="bg-white p-4 sm:p-6 border rounded-xl shadow-sm shrink-0 max-w-full">
-                                        <QRCodeSVG id={qrId} value={cUrl} size={140} level="M" className="max-w-full h-auto" />
+                                    <div className="bg-white p-4 sm:p-6 border rounded-xl shadow-sm shrink-0 w-full sm:w-max max-w-full overflow-hidden flex justify-center">
+                                        <QRCodeSVG id={qrId} value={cUrl} size={140} level="M" style={{ width: '100%', maxWidth: '140px', height: 'auto' }} />
                                     </div>
                                     <div className="flex-1 space-y-6 w-full min-w-0">
                                         <div>
