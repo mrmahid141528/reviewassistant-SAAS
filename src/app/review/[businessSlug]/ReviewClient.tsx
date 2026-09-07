@@ -9,7 +9,7 @@ import { submitReviewDraft } from './actions';
 
 type FlowState = "WELCOME" | "QUESTIONS" | "GENERATING" | "RESULT";
 
-export default function ReviewClient({ businessName, businessLogo, initialQuestions = [], hasWatermark = false }: { businessName: string, businessLogo?: string | null, initialQuestions?: any[], hasWatermark?: boolean }) {
+export default function ReviewClient({ businessName, businessCategory, businessLogo, initialQuestions = [], hasWatermark = false }: { businessName: string, businessCategory?: string | null, businessLogo?: string | null, initialQuestions?: any[], hasWatermark?: boolean }) {
     const params = useParams();
     const slug = params?.businessSlug as string;
 
