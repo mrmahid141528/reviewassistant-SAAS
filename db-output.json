@@ -1,0 +1,204 @@
+[
+  {
+    "id": "f665d321-93b6-4689-9f04-abb74503d557",
+    "name": "Default Review Flow",
+    "settings": {
+      "googleReviewUrl": null
+    }
+  },
+  {
+    "id": "95227224-c71b-40ca-a750-734e124c0714",
+    "name": "Review Campaign",
+    "settings": {
+      "aiTone": "Professional & Friendly",
+      "aiLanguage": "Hinglish (Hindi written in English)",
+      "googleReviewUrl": "https://g.page/r/Cd5vnaWYzhzEEBM/review"
+    }
+  },
+  {
+    "id": "bd9e07c3-a606-4f54-ba6e-4bd519740747",
+    "name": "Main Review Campaign",
+    "settings": {
+      "googleReviewUrl": "https://g.page/r/Cd5vnaWYzhzEEBM/review"
+    }
+  },
+  {
+    "id": "90a5e05a-7aa8-4475-91c3-80e1f5d835b2",
+    "name": "Default Review Flow",
+    "settings": {
+      "googleReviewUrl": "https://g.page/r/Cd5vnaWYzhzEEBM/review"
+    }
+  },
+  {
+    "id": "a491a8c0-c43e-42b6-ad10-76e458097715",
+    "name": "table 5 Review Campaign",
+    "settings": {
+      "type": "both"
+    }
+  },
+  {
+    "id": "b70bf841-64c6-40ea-893a-3bf4bb1ba74d",
+    "name": "Default Review Flow",
+    "settings": {
+      "googleReviewUrl": null
+    }
+  },
+  {
+    "id": "25e5bd83-db01-407e-a77b-a5c3f2f5dda3",
+    "name": "Default Review Flow",
+    "settings": {
+      "aiTone": "Warm & Personal",
+      "aiLanguage": "English",
+      "reviewLength": "Medium",
+      "writingStyle": [
+        "Natural sounding",
+        "Mention specific experience"
+      ],
+      "googleReviewUrl": "https://g.page/r/Cd5vnaWYzhzEEBI/review",
+      "additionalInstructions": ""
+    }
+  },
+  {
+    "id": "a47bc03d-3fbc-4aad-8c6f-ed71139b2af8",
+    "name": "Default Review Flow",
+    "settings": {
+      "googleReviewUrl": null
+    }
+  },
+  {
+    "id": "e6449765-8707-46d3-9de0-5048aa4c6b8d",
+    "name": "Default Review Flow",
+    "settings": {
+      "googleReviewUrl": null
+    }
+  },
+  {
+    "id": "9b373eec-7735-433f-b8da-21575bd17dd5",
+    "name": "Default Review Flow",
+    "settings": {
+      "googleReviewUrl": null
+    }
+  },
+  {
+    "id": "d8b744f9-a88c-4ff3-b862-29ee92007e24",
+    "name": "Default Review Flow",
+    "settings": {
+      "googleReviewUrl": null
+    }
+  },
+  {
+    "id": "2c280d27-e33b-483f-9d09-6240ab46ea1c",
+    "name": "Default Review Flow",
+    "settings": {
+      "googleReviewUrl": null
+    }
+  },
+  {
+    "id": "d10f6055-345d-4337-9487-be955189de2f",
+    "name": "Default Review Flow",
+    "settings": {
+      "googleReviewUrl": null
+    }
+  },
+  {
+    "id": "e2f30622-1e56-486a-9b9a-d421dfacbe46",
+    "name": "Default Review Flow",
+    "settings": {
+      "googleReviewUrl": null
+    }
+  },
+  {
+    "id": "0deb8b27-36ed-4f50-bd85-780c7408beac",
+    "name": "Default Review Flow",
+    "settings": {
+      "googleReviewUrl": null
+    }
+  },
+  {
+    "id": "20677b8d-bbee-4ecb-9403-cf98695dc436",
+    "name": "Default Review Flow",
+    "settings": {
+      "googleReviewUrl": null
+    }
+  },
+  {
+    "id": "6ceaa9d3-88b7-449c-8fce-6cdb723823f1",
+    "name": "Default Review Flow",
+    "settings": {
+      "googleReviewUrl": null
+    }
+  },
+  {
+    "id": "98d7a3d0-17b3-44dc-9271-c0ee9c9527c6",
+    "name": "Default Review Flow",
+    "settings": {
+      "googleReviewUrl": null
+    }
+  },
+  {
+    "id": "6a6667cc-d711-49b9-9698-2377598b172b",
+    "name": "Default Review Flow",
+    "settings": {
+      "googleReviewUrl": null
+    }
+  },
+  {
+    "id": "8069f875-bbe5-45b6-a867-110bc843d328",
+    "name": "Default Review Flow",
+    "settings": {
+      "googleReviewUrl": null
+    }
+  },
+  {
+    "id": "fd1abaa8-b5bc-45fa-b800-5a52bef5662f",
+    "name": "Default Review Flow",
+    "settings": {
+      "googleReviewUrl": null
+    }
+  },
+  {
+    "id": "ac0cb632-2db5-4392-8c60-34572fa8317d",
+    "name": "Default Review Flow",
+    "settings": {
+      "googleReviewUrl": null
+    }
+  },
+  {
+    "id": "22728520-e468-46c8-9ca6-a8333c0773d4",
+    "name": "Default Review Flow",
+    "settings": {
+      "googleReviewUrl": null
+    }
+  },
+  {
+    "id": "a1052ec8-b437-4f45-add3-8b99a7a17b78",
+    "name": "Default Review Flow",
+    "settings": {
+      "googleReviewUrl": null
+    }
+  },
+  {
+    "id": "1cd3d6e4-06c0-40aa-addd-e631cd8d1fb0",
+    "name": "Default Review Flow",
+    "settings": {
+      "googleReviewUrl": null
+    }
+  },
+  {
+    "id": "be52d860-c845-4b9d-a31d-134eb89680a2",
+    "name": "Default Review Flow",
+    "settings": {
+      "aiTone": "Friendly & Natural",
+      "aiLanguage": "Hindi",
+      "reviewLength": "Medium",
+      "writingStyle": [
+        "Natural sounding",
+        "Avoid exaggerated claims",
+        "Keep customer wording",
+        "Mention specific experience"
+      ],
+      "googleReviewUrl": null,
+      "additionalInstructions": "Write this review exactly like a real customer typing quickly on their mobile phone. Use simple, everyday, casual language. Do NOT use formal, robotic, or overly polished words (e.g., avoid 'impeccable', 'exceptional', 'delve', 'utmost', 'game-changer', or 'highly recommend'). Keep sentences varied, conversational, and straight to the point. It is okay to use casual phrasing and slight informality. Base the draft strictly on the provided feedback without adding unnecessary fluff or long introductions."
+    }
+  }
+]

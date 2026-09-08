@@ -201,7 +201,11 @@ export async function updateAIAssistantSettings(formData: FormData) {
         if (!membership) return { error: "No membership found" }
 
         // Update Campaign settings (AI defaults)
-        let campaign = await prisma.campaign.findFirst({ where: { businessId: membership.businessId } })
+        let campaign = await prisma.campaign.findFirst({
+            where: { businessId: membership.businessId },
+            orderBy: { createdAt: 'asc' }
+        })
+
         if (!campaign) {
             campaign = await prisma.campaign.create({
                 data: { businessId: membership.businessId, name: "Main Review Campaign", slug: "main-campaign" }

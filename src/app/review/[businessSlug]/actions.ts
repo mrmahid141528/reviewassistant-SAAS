@@ -159,10 +159,10 @@ ${writingStyle.length > 0 ? `- Writing Style constraints: ${writingStyle.join(",
 ${additionalInstructions ? `- Target Instructions: ${additionalInstructions}` : ''}
 
 Customer Input / Experience Details:
-${qnaPairs.map(pair => `- Aspect: ${pair.question}\n  Customer's Experience/Answer: ${pair.answer}`).join('\n')}
+${qnaPairs.length > 0 ? qnaPairs.map(pair => `- Aspect: ${pair.question}\n  Customer's Experience/Answer: ${pair.answer}`).join('\n') : "No detailed feedback provided. The customer ONLY left a star rating."}
 
 CRITICAL INSTRUCTIONS (MUST FOLLOW STRICTLY):
-1. **NO HALLUCINATION**: Use ONLY the information provided by the customer in their answers. Never invent products, services, staff names, prices, locations, emotions, or specific events.
+1. **NO HALLUCINATION**: Use ONLY the information provided in the Customer Input. If the Customer Input says "No detailed feedback provided", you MUST generate a realistic, generic review that perfectly aligns with the star rating without inventing specific products, services, staff names, or events. If input IS provided, stick entirely to it.
 2. **NO EXAGGERATION**: Do not manufacture praise or exaggerate.
 3. **PRESERVE TRUE SENTIMENT**: Accurately reflect the customer's true sentiment (positive, neutral, or negative) based solely on their input. Do not force it to be overly positive.
 4. **STYLE & TONE**: Apply the Tone and Writing Style constraints provided by the business owner above. However, the review must still sound like a natural expression from a real customer.
