@@ -133,6 +133,13 @@ async function generateGeminiReview(rating: number, businessName: string, qnaPai
     if (skipAI) return { text: generateMockReviewOffline(rating, businessName), provider: "offline", model: "mock-offline" };
 
     const aiLanguage = settings?.aiLanguage || "Auto-detect";
+    const aiTone = settings?.aiTone || "Friendly & Natural";
+    const targetLength = settings?.reviewLength || "Medium";
+    const writingStyle = settings?.writingStyle || [];
+    const additionalInstructions = settings?.additionalInstructions || "";
+    const aboutBusiness = businessSettings?.aboutBusiness || "";
+
+    let lengthInstruction = "";
     if (targetLength === "Short") lengthInstruction = "Keep it extremely concise (1 to 2 short sentences).";
     else if (targetLength === "Long") lengthInstruction = "Write a highly detailed and comprehensive review (3+ sentences).";
     else lengthInstruction = "Keep it natural and balanced (around 2 to 3 sentences).";
