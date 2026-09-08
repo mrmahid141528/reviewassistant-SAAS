@@ -132,16 +132,7 @@ export async function submitReviewDraft(rating: number, answers: object, busines
 async function generateGeminiReview(rating: number, businessName: string, qnaPairs: { question: string, answer: string }[], settings: any, businessSettings: any, skipAI: boolean) {
     if (skipAI) return { text: generateMockReviewOffline(rating, businessName), provider: "offline", model: "mock-offline" };
 
-    const aiLanguage = settings?.aiLanguage || "None";
-    const aiTone = settings?.aiTone || "Friendly & Natural";
-    const targetLength = settings?.reviewLength || "Medium";
-    const writingStyle = settings?.writingStyle || [];
-    const additionalInstructions = settings?.additionalInstructions || "";
-    const aboutBusiness = businessSettings?.aboutBusiness || "";
-
-    const extraLanguage = (aiLanguage && aiLanguage !== "None" && aiLanguage !== "Auto-detect") ? aiLanguage : null;
-
-    let lengthInstruction = "";
+    const aiLanguage = settings?.aiLanguage || "Auto-detect";
     if (targetLength === "Short") lengthInstruction = "Keep it extremely concise (1 to 2 short sentences).";
     else if (targetLength === "Long") lengthInstruction = "Write a highly detailed and comprehensive review (3+ sentences).";
     else lengthInstruction = "Keep it natural and balanced (around 2 to 3 sentences).";
@@ -167,7 +158,7 @@ CRITICAL INSTRUCTIONS (MUST FOLLOW STRICTLY):
 3. **PRESERVE TRUE SENTIMENT**: Accurately reflect the customer's true sentiment (positive, neutral, or negative) based solely on their input. Do not force it to be overly positive.
 4. **STYLE & TONE**: Apply the Tone and Writing Style constraints provided by the business owner above. However, the review must still sound like a natural expression from a real customer.
 5. **YOUR FORMAT**: Output ONLY the raw text requested without quotes or introductory conversational text.
-6. **LANGUAGE**: Write the review in ${extraLanguage ? extraLanguage : 'English'}.
+6. **LANGUAGE**: ${aiLanguage === "Auto-detect" ? "Write the review in the same language that the customer used in their input. If no input is provided, default to the language of the business name." : `Write the review STRICTLY in ${aiLanguage}.`}
 7. **LENGTH**: ${lengthInstruction}
 `;
 

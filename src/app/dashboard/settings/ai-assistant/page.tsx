@@ -86,7 +86,7 @@ export default async function AIAssistantPage() {
                                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background disabled:cursor-not-allowed disabled:opacity-50"
                                     defaultValue={aiLanguage}
                                 >
-                                    {["None", "Hindi", "Bengali", "Tamil", "Telugu", "Gujarati", "Marathi", "Kannada", "Malayalam", "Punjabi"].map(lang => (
+                                    {LANGUAGES.map(lang => (
                                         <option key={lang} value={lang}>{lang}</option>
                                     ))}
                                 </select>
