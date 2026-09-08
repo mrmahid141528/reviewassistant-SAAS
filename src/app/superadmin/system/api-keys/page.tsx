@@ -2,6 +2,8 @@ import { getPlatformApiKeys } from "./actions";
 import { Key } from "lucide-react";
 import ApiKeysClient from "./ApiKeysClient";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
     title: "System API Keys | SaaS Control",
 };

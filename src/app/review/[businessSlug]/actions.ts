@@ -122,12 +122,7 @@ export async function submitReviewDraft(rating: number, answers: object, busines
             }
         }
 
-        let drafts = [generatedResult.text];
-        if (generatedResult.text && generatedResult.text.includes('|||')) {
-            drafts = generatedResult.text.split('|||').map((t: string) => t.trim()).filter(Boolean);
-        }
-
-        return { success: true, draft: generatedResult.text, drafts, googleUrl };
+        return { success: true, draft: generatedResult.text, drafts: [generatedResult.text], googleUrl };
     } catch (error: unknown) {
         console.error(error);
         return { success: false, error: error instanceof Error ? error.message : 'Unknown error occurred' };
@@ -138,17 +133,18 @@ async function generateGeminiReview(rating: number, businessName: string, qnaPai
     if (skipAI) return { text: generateMockReviewOffline(rating, businessName), provider: "offline", model: "mock-offline" };
 
     const aiLanguage = settings?.aiLanguage || "None";
+    const aiTone = settings?.aiTone || "Friendly & Natural";
+    const targetLength = settings?.reviewLength || "Medium";
+    const writingStyle = settings?.writingStyle || [];
+    const additionalInstructions = settings?.additionalInstructions || "";
     const aboutBusiness = businessSettings?.aboutBusiness || "";
 
     const extraLanguage = (aiLanguage && aiLanguage !== "None" && aiLanguage !== "Auto-detect") ? aiLanguage : null;
 
-    // Dynamically decide the target length based on strictly the input volume
-    const totalInputWords = qnaPairs.reduce((acc, pair) => acc + (pair.answer.match(/\S+/g)?.length || 0), 0);
-    const lengthInstruction = totalInputWords < 5
-        ? "Keep it extremely concise (1 or 2 very short sentences) matching their minimal input."
-        : totalInputWords < 20
-            ? "Keep it natural and concise (around 2 sentences)."
-            : "Write a complete review naturally reflecting their detailed input, but do not invent extra details.";
+    let lengthInstruction = "";
+    if (targetLength === "Short") lengthInstruction = "Keep it extremely concise (1 to 2 short sentences).";
+    else if (targetLength === "Long") lengthInstruction = "Write a highly detailed and comprehensive review (3+ sentences).";
+    else lengthInstruction = "Keep it natural and balanced (around 2 to 3 sentences).";
 
     const prompt = `
 You are a customer-experience writing assistant. Your job is to transform the customer's mapped experience into a natural-sounding Google review.
@@ -157,59 +153,105 @@ Business Name: "${businessName}"
 ${aboutBusiness ? `About this business: ${aboutBusiness}` : ''}
 Customer Rating: ${rating} out of 5 stars
 
+Settings from Business Owner:
+- Tone: ${aiTone}
+${writingStyle.length > 0 ? `- Writing Style constraints: ${writingStyle.join(", ")}` : ''}
+${additionalInstructions ? `- Target Instructions: ${additionalInstructions}` : ''}
+
 Customer Input / Experience Details:
 ${qnaPairs.map(pair => `- Aspect: ${pair.question}\n  Customer's Experience/Answer: ${pair.answer}`).join('\n')}
 
 CRITICAL INSTRUCTIONS (MUST FOLLOW STRICTLY):
 1. **NO HALLUCINATION**: Use ONLY the information provided by the customer in their answers. Never invent products, services, staff names, prices, locations, emotions, or specific events.
-2. **NO EXAGGERATION**: Do not manufacture praise or exaggerate. If the customer wrote 3 words, write a short review based ONLY on those 3 words.
+2. **NO EXAGGERATION**: Do not manufacture praise or exaggerate.
 3. **PRESERVE TRUE SENTIMENT**: Accurately reflect the customer's true sentiment (positive, neutral, or negative) based solely on their input. Do not force it to be overly positive.
-4. **NATURAL TONE**: The review must sound like a natural expression of a regular customer. Do not polish it so much that it sounds like perfectly grammatical marketing copy.
-5. **AVOID CLICHÉS**: Do not use generic AI phrases like "highly recommend", "truly outstanding", "must-visit", "exceeded expectations", or "top-notch" UNLESS the customer specifically used those exact words.
-6. **YOUR FORMAT**: Output ONLY the raw text requested without quotes or introductory conversational text.
-7. **LANGUAGE**: ${extraLanguage ? `Provide EXACTLY 3 versions of the same review separated by '|||'. Use this exact layout:
-English:
-[English text here]
-|||
-${extraLanguage}:
-[Native script text here]
-|||
-${extraLanguage} (Roman Script):
-[Romanized text here]` : `Write the review in English.`}
-8. **DYNAMIC LENGTH**: ${lengthInstruction}
+4. **STYLE & TONE**: Apply the Tone and Writing Style constraints provided by the business owner above. However, the review must still sound like a natural expression from a real customer.
+5. **YOUR FORMAT**: Output ONLY the raw text requested without quotes or introductory conversational text.
+6. **LANGUAGE**: Write the review in ${extraLanguage ? extraLanguage : 'English'}.
+7. **LENGTH**: ${lengthInstruction}
 `;
 
     let apiKey = process.env.GEMINI_API_KEY;
+    let dbKeyRecord: any = null;
+
     try {
-        const dbKey = await prisma.platformApiKey.findFirst({
+        dbKeyRecord = await prisma.platformApiKey.findFirst({
             where: { provider: { equals: "gemini", mode: "insensitive" }, status: "active" }
         });
-        if (dbKey && dbKey.key) apiKey = dbKey.key;
+        if (dbKeyRecord && dbKeyRecord.key) apiKey = dbKeyRecord.key;
     } catch (e) {
         // Fallback safely if schema isn't fully propagated yet
     }
 
     if (!apiKey) return { text: generateMockReviewOffline(rating, businessName), provider: "offline", model: "mock-offline" };
 
+    const startTime = Date.now();
+    let apiStatus = "FAILED";
+    let errorMsg = "NONE";
+    let tokensUsed = 0;
+    const modelUsed = "gemini-3.6-flash";
+
     try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelUsed}:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         });
+        const duration = Date.now() - startTime;
 
         const data = await res.json();
 
         if (data.error) {
             console.error("Gemini API Error from Server:", data.error.message);
+            errorMsg = data.error.message || "Unknown API Error";
         } else {
             const generatedText = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
             if (generatedText) {
-                return { text: generatedText, provider: "google", model: "gemini-3.6-flash" };
+                apiStatus = "SUCCESS";
+                tokensUsed = data?.usageMetadata?.totalTokenCount || 0;
+
+                if (dbKeyRecord) {
+                    await prisma.platformApiKey.update({
+                        where: { id: dbKeyRecord.id },
+                        data: {
+                            lastUsedAt: new Date(),
+                            lastResponseMs: duration,
+                            lastStatus: apiStatus,
+                            lastTokens: tokensUsed,
+                            lastModel: modelUsed,
+                            lastError: "NONE"
+                        }
+                    }).catch(console.error); // Do not block generation if telemetry fails
+                }
+                return { text: generatedText, provider: "google", model: modelUsed };
             }
         }
-    } catch (e) {
+
+        // Log Failure
+        if (dbKeyRecord) {
+            await prisma.platformApiKey.update({
+                where: { id: dbKeyRecord.id },
+                data: {
+                    lastUsedAt: new Date(),
+                    lastResponseMs: duration,
+                    lastStatus: apiStatus,
+                    lastError: errorMsg
+                }
+            }).catch(console.error);
+        }
+    } catch (e: any) {
         console.error("Gemini API Fetch Catch:", e);
+        if (dbKeyRecord) {
+            await prisma.platformApiKey.update({
+                where: { id: dbKeyRecord.id },
+                data: {
+                    lastUsedAt: new Date(),
+                    lastResponseMs: Date.now() - startTime,
+                    lastStatus: "EXCEPTION",
+                    lastError: e.message || "Network/Fetch Error"
+                }
+            }).catch(console.error);
+        }
     }
 
     return { text: generateMockReviewOffline(rating, businessName), provider: "offline", model: "mock-offline" };

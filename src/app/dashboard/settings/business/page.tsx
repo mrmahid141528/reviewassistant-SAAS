@@ -48,6 +48,25 @@ export default async function BusinessSettingsPage() {
                 if (settings.description) description = settings.description;
                 if (settings.googleReviewUrl) googleReviewUrl = settings.googleReviewUrl;
             }
+
+            // Fallback to Main Location or Campaign if missing
+            if (!googleReviewUrl) {
+                const mainLocation = await prisma.businessLocation.findFirst({
+                    where: { businessId: membership.businessId, isMain: true }
+                });
+                if (mainLocation?.reviewLink) {
+                    googleReviewUrl = mainLocation.reviewLink;
+                } else {
+                    const firstCampaign = await prisma.campaign.findFirst({
+                        where: { businessId: membership.businessId }
+                    });
+                    if (firstCampaign?.settings) {
+                        const campSettings = firstCampaign.settings as any;
+                        if (campSettings.googleReviewUrl) googleReviewUrl = campSettings.googleReviewUrl;
+                    }
+                }
+            }
+
             logoUrl = membership.business.logoUrl;
         }
     }

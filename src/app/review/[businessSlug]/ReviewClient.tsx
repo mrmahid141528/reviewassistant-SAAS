@@ -286,43 +286,21 @@ export default function ReviewClient({ businessName, businessCategory, businessL
                             </div>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto mb-6 space-y-4 pr-1">
-                            {generatedDrafts.map((draft, idx) => {
-                                // Extract the language prefix if it looks like "Language:" or "Language (Roman):" for styling
-                                let textContent = draft;
-                                let tag = "";
-                                if (draft.includes(":\n")) {
-                                    const parts = draft.split(":\n");
-                                    tag = parts[0];
-                                    textContent = parts.slice(1).join(":\n").trim();
-                                }
-
-                                return (
-                                    <div
-                                        key={idx}
-                                        onClick={() => copyAndContinue(textContent)}
-                                        className="relative p-5 bg-white border border-slate-200 rounded-2xl shadow-sm hover:border-[#10B981] hover:ring-1 hover:ring-[#10B981] cursor-pointer transition-all text-left group overflow-hidden"
-                                    >
-                                        {tag && (
-                                            <span className="inline-block px-2.5 py-1 bg-slate-100 text-slate-600 font-bold text-[11px] rounded-md mb-2 uppercase tracking-wider">
-                                                {tag}
-                                            </span>
-                                        )}
-                                        <p className="text-[15px] font-medium text-slate-700 leading-relaxed pr-14 whitespace-pre-wrap">
-                                            {textContent}
-                                        </p>
-                                        <div className="absolute top-1/2 -translate-y-1/2 right-4 flex flex-col items-center gap-1.5 opacity-80 sm:opacity-40 group-hover:opacity-100 group-hover:scale-110 transition-all">
-                                            <div className="bg-[#10B981]/15 p-2.5 rounded-full shadow-sm">
-                                                <Copy className="h-5 w-5 text-[#10B981]" />
-                                            </div>
-                                            <span className="text-[9px] font-bold text-[#10B981] tracking-wide w-full text-center">COPY<br />& GO</span>
-                                        </div>
-                                    </div>
-                                );
-                            })}
+                        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm mb-6 flex-1 flex flex-col">
+                            <Textarea
+                                value={generatedDrafts[0] || ""}
+                                onChange={(e) => setGeneratedDrafts([e.target.value])}
+                                className="w-full flex-1 resize-none bg-slate-50 border-slate-200 p-4 rounded-xl focus-visible:ring-emerald-500 focus-visible:border-emerald-500 text-[15px] font-medium text-slate-700 leading-relaxed min-h-[200px]"
+                            />
                         </div>
 
                         <div className="mt-auto space-y-4 pb-4">
+                            <button
+                                onClick={() => copyAndContinue(generatedDrafts[0] || "")}
+                                className="w-full bg-[#10B981] hover:bg-[#059669] text-white font-bold text-[16px] xl:text-lg rounded-2xl py-[16px] flex items-center justify-center gap-2 shadow-[0_8px_20px_rgba(16,185,129,0.3)] transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                            >
+                                <Copy className="w-5 h-5" /> Copy & Post to Google
+                            </button>
                             <button
                                 onClick={() => handleFinishQuestions(rating)}
                                 className="w-full bg-slate-900 text-white font-bold text-[16px] rounded-2xl py-[16px] flex items-center justify-center gap-2 shadow-[0_10px_25px_rgba(15,23,42,0.3)] transition-transform hover:scale-[1.02] active:scale-[0.98]"

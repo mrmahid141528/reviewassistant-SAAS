@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from "react";
-import { Plus, Trash2, CheckCircle2, XCircle, RefreshCw, AlertCircle, KeyRound, Save } from "lucide-react";
+import { Plus, Trash2, CheckCircle2, XCircle, RefreshCw, AlertCircle, KeyRound, Save, Activity } from "lucide-react";
 import { savePlatformApiKey, testConnectionAction, deletePlatformApiKey } from "./actions";
 
 type ApiKey = {
@@ -11,6 +11,12 @@ type ApiKey = {
     key: string;
     status: string;
     lastTestedAt: Date | null;
+    lastUsedAt?: Date | null;
+    lastResponseMs?: number | null;
+    lastStatus?: string | null;
+    lastModel?: string | null;
+    lastTokens?: number | null;
+    lastError?: string | null;
 }
 
 export default function ApiKeysClient({ initialKeys }: { initialKeys: ApiKey[] }) {
@@ -123,8 +129,8 @@ export default function ApiKeysClient({ initialKeys }: { initialKeys: ApiKey[] }
                     <thead className="text-xs text-slate-500 uppercase bg-slate-50/80 border-b border-slate-200">
                         <tr>
                             <th className="px-6 py-4 font-semibold">Service</th>
-                            <th className="px-6 py-4 font-semibold">Status</th>
-                            <th className="px-6 py-4 font-semibold">Last Tested</th>
+                            <th className="px-6 py-4 font-semibold">Connection</th>
+                            <th className="px-6 py-4 font-semibold">Live Integration Diagnostics</th>
                             <th className="px-6 py-4 font-semibold text-right">Actions</th>
                         </tr>
                     </thead>
@@ -150,31 +156,49 @@ export default function ApiKeysClient({ initialKeys }: { initialKeys: ApiKey[] }
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        {k.status === "active" ? (
-                                            <div className="flex items-center gap-1.5 text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded w-max border border-emerald-100">
-                                                <CheckCircle2 className="w-3.5 h-3.5" />
-                                                <span className="text-[11px] font-bold uppercase tracking-wider">Active</span>
-                                            </div>
-                                        ) : k.status === "testing" ? (
-                                            <div className="flex items-center gap-1.5 text-amber-600 bg-amber-50 px-2.5 py-1 rounded w-max border border-amber-100">
-                                                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                                                <span className="text-[11px] font-bold uppercase tracking-wider">Testing</span>
-                                            </div>
-                                        ) : (
-                                            <div className="flex items-center gap-1.5 text-rose-600 bg-rose-50 px-2.5 py-1 rounded w-max border border-rose-100">
-                                                <XCircle className="w-3.5 h-3.5" />
-                                                <span className="text-[11px] font-bold uppercase tracking-wider">Deactivated</span>
-                                            </div>
-                                        )}
+                                        <div className="mb-2 flex items-center gap-2">
+                                            {k.status === "active" ? (
+                                                <div className="flex items-center gap-1.5 text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
+                                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                                    <span className="text-[10px] font-bold uppercase tracking-wider">Active</span>
+                                                </div>
+                                            ) : k.status === "testing" ? (
+                                                <div className="flex items-center gap-1.5 text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-100">
+                                                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                                                    <span className="text-[10px] font-bold uppercase tracking-wider">Testing</span>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center gap-1.5 text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-100">
+                                                    <XCircle className="w-3.5 h-3.5" />
+                                                    <span className="text-[10px] font-bold uppercase tracking-wider">Deactivated</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="text-[11px] text-slate-400 mt-1">
+                                            Tested: {k.lastTestedAt ? new Date(k.lastTestedAt).toLocaleDateString() : 'Never'}
+                                        </div>
                                     </td>
-                                    <td className="px-6 py-4 text-slate-500">
-                                        {k.lastTestedAt ? (
-                                            <>
-                                                <div>{new Date(k.lastTestedAt).toLocaleDateString()}</div>
-                                                <div className="text-xs mt-0.5">{new Date(k.lastTestedAt).toLocaleTimeString()}</div>
-                                            </>
+                                    <td className="px-6 py-4">
+                                        {k.provider === 'gemini' ? (
+                                            <div className="bg-slate-50/50 border border-slate-200 rounded-lg p-3 text-xs shadow-sm w-[320px]">
+                                                <div className="flex justify-between items-center pb-2 border-b border-slate-200 mb-2">
+                                                    <span className="font-semibold text-slate-800 flex items-center gap-1.5"><Activity className="w-3.5 h-3.5 text-indigo-500" /> AI Generation Telemetry</span>
+                                                    <span className="text-[10px] text-slate-500 font-medium bg-white px-1.5 py-0.5 rounded border border-slate-100 shadow-sm">{k.lastUsedAt ? new Date(k.lastUsedAt).toLocaleTimeString() : 'Pending'}</span>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 text-[11px]">
+                                                    <div className="flex justify-between text-slate-500"><span className="font-medium">Status</span> <span className={k.lastStatus === 'SUCCESS' ? 'text-emerald-600 font-bold' : k.lastStatus ? 'text-rose-600 font-bold' : ''}>{k.lastStatus || 'N/A'}</span></div>
+                                                    <div className="flex justify-between text-slate-500"><span className="font-medium">Tokens</span> <span className="text-slate-700">{k.lastTokens || 0}</span></div>
+                                                    <div className="flex justify-between text-slate-500"><span className="font-medium">Latency</span> <span className="text-slate-700">{k.lastResponseMs ? ((k.lastResponseMs / 1000).toFixed(2) + 's') : 'N/A'}</span></div>
+                                                    <div className="flex justify-between text-slate-500"><span className="font-medium">Model</span> <span className="text-indigo-600 font-mono text-[10px] truncate max-w-[80px]" title={k.lastModel || "N/A"}>{k.lastModel || 'N/A'}</span></div>
+                                                </div>
+                                                {k.lastError && k.lastError !== 'NONE' && (
+                                                    <div className="mt-2.5 text-[10px] text-rose-600 bg-rose-50/80 p-2 rounded border border-rose-100 font-mono break-all max-h-[80px] overflow-y-auto leading-relaxed shadow-inner">
+                                                        <span className="font-bold">ERR:</span> {k.lastError}
+                                                    </div>
+                                                )}
+                                            </div>
                                         ) : (
-                                            <span className="text-slate-400 italic">Never</span>
+                                            <div className="text-xs text-slate-400 italic">Live diagnostics not available for this provider</div>
                                         )}
                                     </td>
                                     <td className="px-6 py-4 text-right">

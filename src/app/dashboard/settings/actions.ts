@@ -123,6 +123,26 @@ export async function updateBusinessGeneral(formData: FormData) {
             }
         })
 
+        if (googleReviewUrl) {
+            // Sync to Main Location to ensure tracker metrics remain valid
+            await prisma.businessLocation.updateMany({
+                where: { businessId: membership.businessId, isMain: true },
+                data: { reviewLink: googleReviewUrl }
+            });
+            // Sync to primary Campaign
+            const firstCampaign = await prisma.campaign.findFirst({
+                where: { businessId: membership.businessId }
+            });
+            if (firstCampaign) {
+                const campSettings = firstCampaign.settings && typeof firstCampaign.settings === 'object' ? { ...(firstCampaign.settings as any) } : {};
+                campSettings.googleReviewUrl = googleReviewUrl;
+                await prisma.campaign.update({
+                    where: { id: firstCampaign.id },
+                    data: { settings: campSettings }
+                });
+            }
+        }
+
         revalidatePath("/dashboard/settings", "layout")
         return { success: true, message: "General Settings saved successfully!" }
     } catch (e: any) {

@@ -12,6 +12,13 @@ import { AlertCircle, Loader2 } from 'lucide-react'
 
 import { Suspense } from 'react'
 
+const Spinner = ({ className = "w-4 h-4 mr-2" }: { className?: string }) => (
+    <div className={`relative flex items-center justify-center ${className}`}>
+        <div className="absolute inset-0 border-[2.5px] border-current opacity-20 rounded-full"></div>
+        <div className="absolute inset-0 border-[2.5px] border-transparent border-t-current rounded-full animate-spin"></div>
+    </div>
+)
+
 function LoginContent() {
     const searchParams = useSearchParams()
     const router = useRouter()
@@ -59,12 +66,12 @@ function LoginContent() {
                 <form action={continueWithGoogle} onSubmit={() => setIsGoogleLoading(true)}>
                     <Button
                         variant="outline"
-                        className="w-full bg-card border-border text-foreground hover:bg-muted hover:text-foreground"
+                        className="w-full bg-card border-border text-foreground hover:bg-muted hover:text-foreground hover:-translate-y-0.5 hover:shadow-md hover:shadow-black/5 dark:hover:shadow-white/5 active:translate-y-0 transition-all duration-300 ease-out"
                         type="submit"
                         disabled={isGoogleLoading || isLoading}
                     >
                         {isGoogleLoading ? (
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            <Spinner />
                         ) : (
                             <svg className="w-4 h-4 mr-2 shrink-0" viewBox="0 0 24 24">
                                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -136,12 +143,12 @@ function LoginContent() {
 
                     <Button
                         type="submit"
-                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground mt-4 h-11"
+                        className="w-full bg-primary text-primary-foreground mt-4 h-11 hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/25 active:translate-y-0 transition-all duration-300 ease-out"
                         disabled={isLoading}
                     >
                         {isLoading ? (
                             <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                <Spinner />
                                 Signing in...
                             </>
                         ) : (
